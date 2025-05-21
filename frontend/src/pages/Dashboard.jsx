@@ -76,7 +76,7 @@ const Dashboard = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <h1 className="text-3xl font-bold">Owner Dashboard</h1>
+      <h1 className="sm:text-6xl text-5xl font-bold sm:mb-10 mb-5">Dashboard</h1>
       <div className="flex flex-col gap-3">
         <input type="text" placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="border p-2" />
         <textarea placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="border p-2" />
@@ -86,25 +86,41 @@ const Dashboard = () => {
         <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-2">Add Ad</button>
       </div>
 
-      <h2 className="text-xl font-semibold">Your Ads</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <h2 className="sm:text-6xl text-5xl font-bold sm:mb-10 mt-10 mb-5">Your Units</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {ads.map((ad) => (
-          <div key={ad._id} className="p-4 shadow rounded border">
-            <h3 className="font-bold text-3xl">{ad.title}</h3>
-            <div className="flex w-full h-62 overflow-x-scroll">
-              {ad.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Ad image ${index + 1}`}
-                  className="h-full object-cover w-full rounded"
-                />
-              ))}
+          <div key={ad._id} className="bg-white rounded-4xl overflow-hidden shadow-xl p-0">
+            <div className="relative">
+              <div className="flex overflow-x-scroll no-scrollbar sm:h-100 h-70">
+                {ad.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Ad image ${index + 1}`}
+                    className="h-full w-full object-cover flex-shrink-0"
+                  />
+                ))}
+              </div>
+              {/* Image slider dots */}
+              <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-2">
+                {ad.images.map((_, index) => (
+                  <span
+                    key={index}
+                    className="w-3 h-3 bg-white rounded-full border border-gray-300"
+                  />
+                ))}
+              </div>
+              {/* Price badge */}
+              <div className="absolute top-3 right-3 bg-red-600 text-white px-4 py-2 rounded-full font-bold text-lg">
+                ৳ {ad.price}
+              </div>
             </div>
 
-            <p className="text-xl">{ad.description}</p>
-            <p className="text-amber-600 text-3xl font-bold"><span className="text-4xl">৳ </span>{ad.price}</p>
-            <button onClick={() => handleDelete(ad._id)} className="text-red-500 border border-red-500 p-3 rounded-2xl hover:bg-red-500 hover:text-white">Delete</button>
+            <div className="p-4">
+              <h3 className="sm:text-4xl text-3xl font-bold mb-1">{ad.title}</h3>
+              <p className="text-gray-600 mb-5 sm:text-2xl text-xl">{ad.description}</p>
+              <button onClick={() => handleDelete(ad._id)} className="text-red-600 border border-red-600 w-full py-2 rounded-3xl hover:bg-red-600 hover:text-white transition">Delete</button>
+            </div>
           </div>
         ))}
       </div>
