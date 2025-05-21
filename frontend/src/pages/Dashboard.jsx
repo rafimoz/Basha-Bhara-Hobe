@@ -24,13 +24,15 @@ const Dashboard = () => {
     setQrCode(res.data.qr);
   };
 
- const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const files = e.target.files;
+    console.log("File recived in the state variable ", files);
+
     if (files.length > 5) {
       alert("You can only upload a maximum of 5 images.");
       return;
     }
-    const readers = [];
+    // const readers = [];
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -38,12 +40,15 @@ const Dashboard = () => {
           ...prev,
           images: [...prev.images, event.target.result],
         }));
+        console.log("LOGGGGGGGGGG", event.target.result);
       };
       reader.readAsDataURL(files[i]);
+      console.log("LOGGGGGGGGGG - 2222", files[i]);
+
     }
   };
 
- const handleSubmit = async () => {
+  const handleSubmit = async () => {
     console.log("Data being sent to backend:", {
       ...form,
       ownerId,
@@ -55,7 +60,7 @@ const Dashboard = () => {
       moveInDate,
     });
     console.log("Response from backend:", res);
-    setForm({ title: "", description: "", price: 0, availability: true, moveInDate: "", images: [] });
+    await setForm({ title: "", description: "", price: 0, availability: true, moveInDate: "", images: [] });
     fetchAds();
   };
 
@@ -73,23 +78,33 @@ const Dashboard = () => {
     <div className="p-4 space-y-4">
       <h1 className="text-3xl font-bold">Owner Dashboard</h1>
       <div className="flex flex-col gap-3">
-        <input type="text" placeholder="Title" value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="border p-2" />
-        <textarea placeholder="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="border p-2" />
-        <input type="number" placeholder="Price" value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="border p-2" />
-        <input type="date" value={form.moveInDate} onChange={e => setForm({...form, moveInDate: e.target.value})} className="border p-2" />
+        <input type="text" placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="border p-2" />
+        <textarea placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="border p-2" />
+        <input type="number" placeholder="Price" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="border p-2" />
+        <input type="date" value={form.moveInDate} onChange={e => setForm({ ...form, moveInDate: e.target.value })} className="border p-2" />
         <input type="file" multiple onChange={handleImageUpload} className="border p-2" />
         <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-2">Add Ad</button>
       </div>
-      
+
       <h2 className="text-xl font-semibold">Your Ads</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {ads.map((ad) => (
           <div key={ad._id} className="p-4 shadow rounded border">
-            <h3 className="font-bold">{ad.title}</h3>
-            <img src={ad.images[0]} className="h-32 object-cover w-full" />
-            <p>{ad.description}</p>
-            <p>৳{ad.price}</p>
-            <button onClick={() => handleDelete(ad._id)} className="text-red-500">Delete</button>
+            <h3 className="font-bold text-3xl">{ad.title}</h3>
+            <div className="flex w-full h-62 overflow-x-scroll">
+              {ad.images.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Ad image ${index + 1}`}
+                  className="h-full object-cover w-full rounded"
+                />
+              ))}
+            </div>
+
+            <p className="text-xl">{ad.description}</p>
+            <p className="text-amber-600 text-3xl font-bold"><span className="text-4xl">৳ </span>{ad.price}</p>
+            <button onClick={() => handleDelete(ad._id)} className="text-red-500 border border-red-500 p-3 rounded-2xl hover:bg-red-500 hover:text-white">Delete</button>
           </div>
         ))}
       </div>
