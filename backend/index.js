@@ -20,6 +20,10 @@ app.use(express.json({ limit: "20mb" }));
 
 app.use("/api", adRoutes);
 
+// app.get('/', (req, res) => {
+//   res.send('Hello from backend API');
+// });
+
 connectCloudinary()
 mongoose
   .connect(process.env.MONGODB_URI)
