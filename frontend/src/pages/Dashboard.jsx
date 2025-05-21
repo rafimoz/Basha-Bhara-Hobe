@@ -15,12 +15,12 @@ const Dashboard = () => {
   const [qrCode, setQrCode] = useState("");
 
   const fetchAds = async () => {
-    const res = await axios.get(`http://localhost:5000/api/ads/${ownerId}`);
+    const res = await axios.get(`http://192.168.0.105:5000/api/ads/${ownerId}`);
     setAds(res.data);
   };
 
   const fetchQRCode = async () => {
-    const res = await axios.get(`http://localhost:5000/api/qrcode/${ownerId}`);
+    const res = await axios.get(`http://192.168.0.105:5000/api/qrcode/${ownerId}`);
     setQrCode(res.data.qr);
   };
 
