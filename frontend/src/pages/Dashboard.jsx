@@ -240,6 +240,9 @@ const Dashboard = () => {
             <div className="p-4">
               <h3 className="sm:text-3xl text-2xl font-bold mb-1">{ad.title}</h3>
               <p className="text-gray-600 sm:text-xl text-sm">{ad.description}</p>
+              <p className="mb-1">
+                Move-in: <span className="font-semibold">{new Date(ad.moveInDate).toDateString()}</span>
+              </p>
               <div className={`border w-fit px-3 py-1 text-sm font-medium text-white rounded-full ${ad.availability ? 'bg-green-500' : 'bg-red-500'}`}>
                 {ad.availability ? <p>Available</p> : <p>Unvailable</p>}
               </div>
