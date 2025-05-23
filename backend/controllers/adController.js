@@ -8,7 +8,15 @@ export const getAdsByOwner = async (req, res) => {
 };
 
 export const createAd = async (req, res) => {
-  const { ownerId, title, description, price, availability, moveInDate, images } = req.body;
+  const {
+    ownerId,
+    title,
+    description,
+    price,
+    availability,
+    moveInDate,
+    images,
+  } = req.body;
 
   let uploadedImages = [];
   try {
@@ -26,13 +34,17 @@ export const createAd = async (req, res) => {
     // uploadedImages = uploadedImages.filter(img => img !== null);
   } catch (error) {
     console.error("Error uploading images:", error);
-    return res.status(500).json({ message: "Failed to upload images", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Failed to upload images", error: error.message });
   }
 
   const parsedPrice = Number(price);
 
   if (isNaN(parsedPrice)) {
-    return res.status(400).json({ message: "Invalid price", error: "Price must be a number" });
+    return res
+      .status(400)
+      .json({ message: "Invalid price", error: "Price must be a number" });
   }
 
   const ad = new Ad({
@@ -50,7 +62,9 @@ export const createAd = async (req, res) => {
     res.json(ad);
   } catch (error) {
     console.error("Error saving ad:", error);
-    res.status(500).json({ message: "Failed to save ad", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to save ad", error: error.message });
   }
 };
 
@@ -65,8 +79,34 @@ export const updateAd = async (req, res) => {
   res.json(ad);
 };
 
+const getPublicIdFromUrl = (url) => {
+  const parts = url.split("/");
+  const filename = parts[parts.length - 1]; // e.g., qxxjugrgqlkwbxmm59nw.jpg
+  const publicIdWithExtension = filename;
+  const publicId = publicIdWithExtension.split(".")[0]; // remove .jpg extension
+  return publicId;
+};
+
 export const deleteAd = async (req, res) => {
   const { id } = req.params;
-  await Ad.findByIdAndDelete(id);
-  res.sendStatus(204);
+  try {
+    const ad = await Ad.findById(id);
+    if (!ad) {
+      console.log("Ad not found");
+      return res.status(404).json({ message: "Ad not found" });
+    }
+    const deleteImagePromises = ad.images.map((imgUrl) => {
+      const publicId = getPublicIdFromUrl(imgUrl);
+      return cloudinary.v2.uploader.destroy(publicId);
+    });
+    await Promise.all(deleteImagePromises);
+    await Ad.findByIdAndDelete(id);
+    console.log("Ad deleted successfully");
+    res.sendStatus(204);
+  } catch (error) {
+    console.error("Error deleting ad:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to delete ad", error: error.message });
+  }
 };

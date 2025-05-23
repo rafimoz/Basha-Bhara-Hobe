@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Plus, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 
 const Dashboard = () => {
@@ -81,98 +82,122 @@ const Dashboard = () => {
     <div className="p-6 space-y-4">
 
       {/*Add Unit Component*/}
-      {addUnit && (
-        <div className="sm:max-w-2xl w-full mx-auto rounded-xl overflow-hidden shadow-lg bg-black text-white space-y-4">
+      <AnimatePresence>
+        {addUnit && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="sm:max-w-2xl w-full mx-auto rounded-xl overflow-hidden shadow-lg bg-black text-white space-y-4 transition-all">
 
-          {/* Image Preview Section */}
-          <div className="relative">
-            {form.images[0] && (
-              <img
-                src={form.images[0]}
-                alt="Main Preview"
-                className="w-full sm:h-82 h-72 object-cover"
-              />
-            )}
-            {/*if this button is clicked the Add Unit Component will close*/}
-            <button onClick={() => setAddUnit(false)} className="absolute top-2 right-2 bg-white text-black rounded-full p-1 shadow">
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+              {/* Image Preview Section */}
+              <div className="relative">
+                {form.images[0] && (
+                  <img
+                    src={form.images[0]}
+                    alt="Main Preview"
+                    className="w-full sm:h-82 h-72 object-cover"
+                  />
+                )}
+                {/*if this button is clicked the Add Unit Component will close*/}
+                <button onClick={() => setAddUnit(false)} className="absolute top-2 right-2 bg-white text-black rounded-full p-1 shadow">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
-          {/* Thumbnail Section */}
-          <div className="flex items-center gap-2 px-4">
-            {form.images.slice(0, 3).map((img, index) => (
-              <img
-                key={index}
-                src={img}
-                className="w-12 h-12 object-cover rounded-md border border-gray-300"
-                alt={`thumb-${index}`}
-              />
-            ))}
-            <label className="w-12 h-12 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer text-white">
-              <Plus className="w-5 h-5" />
-              <input
-                type="file"
-                multiple
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </label>
-          </div>
+              {/* Thumbnail Section */}
+              <div className="flex items-center gap-2 px-4">
+                {form.images.slice(0, 3).map((img, index) => (
+                  <img
+                    key={index}
+                    src={img}
+                    className="w-12 h-12 object-cover rounded-md border border-gray-300"
+                    alt={`thumb-${index}`}
+                  />
+                ))}
+                <label className="w-12 h-12 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer text-white">
+                  <Plus className="w-5 h-5" />
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
 
-          <div className="p-4 space-y-3">
-            {/* Title */}
-            <input
-              type="text"
-              placeholder="Single Room"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-black border border-white rounded-xl p-1.5"
-            />
+              <div className="p-4 space-y-3">
+                {/* Title */}
+                <input
+                  type="text"
+                  placeholder="Single Room"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className="w-full bg-black border border-white rounded-xl p-1.5"
+                />
 
-            {/* Description */}
-            <textarea
-              placeholder="2nd Floor, South faced with open balcony"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-black border border-white rounded-xl p-1.5"
-            />
+                {/* Description */}
+                <textarea
+                  placeholder="2nd Floor, South faced with open balcony"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="w-full bg-black border border-white rounded-xl p-1.5"
+                />
 
-            {/* Move-in Date / Status */}
-            <div className="flex items-center gap-4">
-              <h2 className="text-xl">Date</h2>
-              <input
-                type="date"
-                placeholder="Available (From 1st April)"
-                value={form.moveInDate}
-                onChange={(e) => setForm({ ...form, moveInDate: e.target.value })}
-                className="w-full bg-black border border-white rounded-xl p-1.5"
-              />
+                {/* Move-in Date / Status */}
+                <div className="flex items-center gap-4">
+                  <h2 className="text-xl">Date</h2>
+                  <input
+                    type="date"
+                    placeholder="Available (From 1st April)"
+                    value={form.moveInDate}
+                    onChange={(e) => setForm({ ...form, moveInDate: e.target.value })}
+                    className="w-full bg-black border border-white rounded-xl p-1.5"
+                  />
+                </div>
+
+                {/* Price */}
+                <div className="flex items-center gap-4">
+                  <h2 className="text-xl">Price</h2>
+                  <input
+                    type="number"
+                    placeholder="5000৳"
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: e.target.value })}
+                    className="w-full bg-black border border-white rounded-xl p-1.5"
+                  />
+                </div>
+
+                {/* Status */}
+                <div className="flex items-center gap-4">
+                  <h2 className="text-xl">Status</h2>
+                  <select
+                    value={form.availability ? "available" : "unavailable"}
+                    onChange={(e) =>
+                      setForm({ ...form, availability: e.target.value === "available" })
+                    }
+                    className="w-full bg-black border border-white rounded-xl p-1.5"
+                  >
+                    <option value="available">Available</option>
+                    <option value="unavailable">Unavailable</option>
+                  </select>
+                </div>
+
+                {/* Upload Button */}
+                <button
+                  onClick={handleSubmit}
+                  className="w-full bg-white text-black font-medium py-2 rounded-xl hover:bg-gray-200 transition"
+                >
+                  Upload
+                </button>
+              </div>
             </div>
-
-            {/* Price */}
-            <div className="flex items-center gap-4">
-              <h2 className="text-xl">Price</h2>
-              <input
-                type="number"
-                placeholder="5000৳"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-                className="w-full bg-black border border-white rounded-xl p-1.5"
-              />
-            </div>
-
-            {/* Upload Button */}
-            <button
-              onClick={handleSubmit}
-              className="w-full bg-white text-black font-medium py-2 rounded-xl hover:bg-gray-200 transition"
-            >
-              Upload
-            </button>
-          </div>
-        </div>
-      )}
-
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <h1 className="sm:text-6xl text-5xl font-bold sm:mb-10 mt-5 mb-10">All Units</h1>
       <div className="flex w-full justify-between">
@@ -214,8 +239,11 @@ const Dashboard = () => {
 
             <div className="p-4">
               <h3 className="sm:text-3xl text-2xl font-bold mb-1">{ad.title}</h3>
-              <p className="text-gray-600 mb-4 sm:text-xl text-sm">{ad.description}</p>
-              <div className="flex flex-col gap-2">
+              <p className="text-gray-600 sm:text-xl text-sm">{ad.description}</p>
+              <div className={`border w-fit px-3 py-1 text-sm font-medium text-white rounded-full ${ad.availability ? 'bg-green-500' : 'bg-red-500'}`}>
+                {ad.availability ? <p>Available</p> : <p>Unvailable</p>}
+              </div>
+              <div className="flex flex-col mt-4 gap-2">
                 <button className="text-green-600 border border-green-600 w-full py-2 rounded-3xl hover:bg-green-600 hover:text-white transition">Edit</button>
                 <button onClick={() => handleDelete(ad._id)} className="text-red-600 border border-red-600 w-full py-2 rounded-3xl hover:bg-red-600 hover:text-white transition">Delete</button>
               </div>
