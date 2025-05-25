@@ -23,7 +23,12 @@ export const createAd = async (req, res) => {
     uploadedImages = await Promise.all(
       images.map(async (img) => {
         try {
-          const result = await cloudinary.uploader.upload(img);
+          const result = await cloudinary.uploader.upload(img, {
+            transformation: [
+              { width: 800, height: 600, crop: "limit" },
+              { quality: "auto:eco" },
+            ],
+          });
           return result.secure_url;
         } catch (uploadError) {
           console.error("Error uploading image:", img, uploadError);
@@ -70,13 +75,64 @@ export const createAd = async (req, res) => {
 
 export const updateAd = async (req, res) => {
   const { id } = req.params;
-  const { title, description, price, availability, moveInDate } = req.body;
-  const ad = await Ad.findByIdAndUpdate(
-    id,
-    { title, description, price, availability, moveInDate },
-    { new: true }
-  );
-  res.json(ad);
+  const { title, description, price, availability, moveInDate, images } = req.body;
+
+  try {
+    const ad = await Ad.findById(id);
+
+    if (!ad) {
+      return res.status(404).json({ message: "Ad not found" });
+    }
+
+    // Identify images to delete
+    const imagesToDelete = ad.images.filter((existingImage) => !images.includes(existingImage));
+
+    // Delete removed images from Cloudinary
+    for (const imgUrl of imagesToDelete) {
+      try {
+        const publicId = getPublicIdFromUrl(imgUrl);
+        await cloudinary.uploader.destroy(publicId);
+      } catch (error) {
+        console.error("Error deleting image from Cloudinary:", imgUrl, error);
+      }
+    }
+
+    // Upload new images
+    let uploadedImages = [];
+    if (images && images.length > 0) {
+      uploadedImages = await Promise.all(
+        images.map(async (img) => {
+          try {
+            const result = await cloudinary.uploader.upload(img, {
+              transformation: [
+                { width: 800, height: 600, crop: "limit" },
+                { quality: "auto:eco" },
+              ],
+            });
+            return result.secure_url;
+          } catch (uploadError) {
+            console.error("Error uploading image:", img, uploadError);
+            return null;
+          }
+        })
+      );
+      uploadedImages = uploadedImages.filter(img => img !== null);
+    }
+
+    // Update the ad
+    ad.title = title;
+    ad.description = description;
+    ad.price = price;
+    ad.availability = availability;
+    ad.moveInDate = moveInDate;
+    ad.images = uploadedImages;
+
+    await ad.save();
+    res.json(ad);
+  } catch (error) {
+    console.error("Error updating ad:", error);
+    res.status(500).json({ message: "Failed to update ad", error: error.message });
+  }
 };
 
 const getPublicIdFromUrl = (url) => {

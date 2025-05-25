@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [addUnit, setAddUnit] = useState(false);
   const [qrCode, setQrCode] = useState("");
   const [refreshAds, setRefreshAds] = useState(false);
+  const [selectedAd, setSelectedAd] = useState(null);
 
   const fetchAds = async () => {
     const res = await axios.get(`http://localhost:5000/api/ads/${ownerId}`);
@@ -47,7 +48,16 @@ const Dashboard = () => {
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="fixed inset-0 z-20 backdrop-blur-xs bg-black/10 flex items-center justify-center p-5 "
           >
-            <Add toggleRefreshAds={toggleRefreshAds} setAddUnit={setAddUnit} />
+            <Add
+              toggleRefreshAds={toggleRefreshAds}
+              setAddUnit={(value) => {
+                setAddUnit(value);
+                if (!value) {
+                  setSelectedAd(null);
+                }
+              }}
+              ad={selectedAd}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -64,7 +74,7 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {ads.map((ad) => (
-            <div key={ad._id} className="bg-white rounded-xl overflow-hidden shadow-xl p-0">
+            <div key={ad._id} className="bg-white rounded-xl overflow-hidden shadow-xl border-2 border-black/20 p-0">
               <div className="relative">
                 <div className="flex overflow-x-scroll no-scrollbar sm:h-60 h-70">
                   {ad.images.map((image, index) => (
@@ -101,8 +111,21 @@ const Dashboard = () => {
                   {ad.availability ? <p>Available</p> : <p>Unvailable</p>}
                 </div>
                 <div className="flex flex-col mt-4 gap-2">
-                  <button className="text-green-600 border border-green-600 w-full py-2 rounded-3xl hover:bg-green-600 hover:text-white transition">Edit</button>
-                  <button onClick={() => handleDelete(ad._id)} className="text-red-600 border border-red-600 w-full py-2 rounded-3xl hover:bg-red-600 hover:text-white transition">Delete</button>
+                  <button
+                    onClick={() => {
+                      setSelectedAd(ad);
+                      setAddUnit(true);
+                    }}
+                    className="border-2 border-green-500 text-green-500 w-full py-2 rounded-3xl hover:bg-green-500 hover:text-white transition"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(ad._id)}
+                    className="bg-red-500 text-white w-full py-2 rounded-3xl hover:bg-red-600 hover:text-white transition"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>

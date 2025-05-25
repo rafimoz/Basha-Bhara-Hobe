@@ -2,9 +2,16 @@ import { useState, useEffect } from 'react'
 import axios from "axios";
 import { Plus, X } from "lucide-react";
 
-function Add({ toggleRefreshAds, setAddUnit }) {
+function Add({ toggleRefreshAds, setAddUnit, ad }) {
     const ownerId = "owner123"; // hardcoded for now
-    const [form, setForm] = useState({
+    const [form, setForm] = useState(ad ? {
+        title: ad.title,
+        description: ad.description,
+        price: ad.price,
+        availability: ad.availability,
+        moveInDate: ad.moveInDate,
+        images: ad.images,
+    } : {
         title: "",
         description: "",
         price: 0,
@@ -12,6 +19,19 @@ function Add({ toggleRefreshAds, setAddUnit }) {
         moveInDate: "",
         images: [],
     });
+
+    useEffect(() => {
+        if (ad) {
+            setForm({
+                title: ad.title,
+                description: ad.description,
+                price: ad.price,
+                availability: ad.availability,
+                moveInDate: ad.moveInDate,
+                images: ad.images,
+            });
+        }
+    }, [ad]);
 
     const handleImageUpload = async (e) => {
         const files = e.target.files;
@@ -27,7 +47,7 @@ function Add({ toggleRefreshAds, setAddUnit }) {
             reader.onload = (event) => {
                 setForm((prev) => ({
                     ...prev,
-                    images: [...prev.images, event.target.result],
+                    images: [...(prev.images || []), event.target.result],
                 }));
             };
             reader.readAsDataURL(files[i]);
@@ -40,11 +60,18 @@ function Add({ toggleRefreshAds, setAddUnit }) {
             ownerId,
         });
         const moveInDate = new Date(form.moveInDate);
-        const res = await axios.post("http://localhost:5000/api/ads", {
+        let res;
+        const data = {
             ...form,
             ownerId,
             moveInDate,
-        });
+        };
+        console.log("Data being sent to updateAd:", data);
+        if (ad) {
+            res = await axios.put(`http://localhost:5000/api/ads/${ad._id}`, data);
+        } else {
+            res = await axios.post("http://localhost:5000/api/ads", data);
+        }
         console.log("Response from backend:", res);
         await setForm({ title: "", description: "", price: 0, availability: true, moveInDate: "", images: [] });
         toggleRefreshAds();
@@ -169,7 +196,7 @@ function Add({ toggleRefreshAds, setAddUnit }) {
                         onClick={handleSubmit}
                         className="w-full bg-white text-black font-medium py-2 rounded-xl hover:bg-gray-200 transition"
                     >
-                        Upload
+                        {ad ? "Update" : "Upload"}
                     </button>
                 </div>
             </div>
