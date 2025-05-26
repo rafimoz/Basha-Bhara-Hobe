@@ -1,29 +1,30 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Plus, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Add from "../components/Add";
 
 const Dashboard = () => {
   const ownerId = "owner123"; // hardcoded for now
+  const backendURL = import.meta.env.VITE_BACKEND_URL;
   const [ads, setAds] = useState([]);
   const [addUnit, setAddUnit] = useState(false);
   const [qrCode, setQrCode] = useState("");
   const [refreshAds, setRefreshAds] = useState(false);
   const [selectedAd, setSelectedAd] = useState(null);
 
+
   const fetchAds = async () => {
-    const res = await axios.get(`http://localhost:5000/api/ads/${ownerId}`);
+    const res = await axios.get(backendURL + `/api/ads/${ownerId}`);
     setAds(res.data);
   };
 
   const fetchQRCode = async () => {
-    const res = await axios.get(`http://localhost:5000/api/qrcode/${ownerId}`);
+    const res = await axios.get(backendURL + `/api/qrcode/${ownerId}`);
     setQrCode(res.data.qr);
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:5000/api/ads/${id}`);
+    await axios.delete(backendURL + `/api/ads/${id}`);
     fetchAds();
   };
 

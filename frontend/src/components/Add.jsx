@@ -11,6 +11,7 @@ import { Plus, X } from "lucide-react";
 
 function Add({ toggleRefreshAds, setAddUnit, ad }) {
     const ownerId = "owner123"; // hardcoded for now
+    const backendURL = import.meta.env.VITE_BACKEND_URL;
     const [isLoading, setIsLoading] = useState(false);
     const [form, setForm] = useState(ad ? {
         title: ad.title,
@@ -78,9 +79,9 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
         setIsLoading(true);
         try {
             if (ad) {
-                res = await axios.put(`http://localhost:5000/api/ads/${ad._id}`, data);
+                res = await axios.put(backendURL + `/api/ads/${ad._id}`, data);
             } else {
-                res = await axios.post("http://localhost:5000/api/ads", data);
+                res = await axios.post(backendURL + "/api/ads", data);
             }
             console.log("Response from backend:", res);
             await setForm({ title: "", description: "", price: 0, availability: true, moveInDate: "", images: [] });
