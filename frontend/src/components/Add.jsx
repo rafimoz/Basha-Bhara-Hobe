@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react'
 import axios from "axios";
+import "./LoadingIndicator.css";
+
+const LoadingIndicator = () => (
+  <div className="loading-overlay">
+    <div className="loading-spinner"></div>
+  </div>
+);
 import { Plus, X } from "lucide-react";
 
 function Add({ toggleRefreshAds, setAddUnit, ad }) {
     const ownerId = "owner123"; // hardcoded for now
+    const [isLoading, setIsLoading] = useState(false);
     const [form, setForm] = useState(ad ? {
         title: ad.title,
         description: ad.description,
@@ -67,18 +75,24 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
             moveInDate,
         };
         console.log("Data being sent to updateAd:", data);
-        if (ad) {
-            res = await axios.put(`http://localhost:5000/api/ads/${ad._id}`, data);
-        } else {
-            res = await axios.post("http://localhost:5000/api/ads", data);
+        setIsLoading(true);
+        try {
+            if (ad) {
+                res = await axios.put(`http://localhost:5000/api/ads/${ad._id}`, data);
+            } else {
+                res = await axios.post("http://localhost:5000/api/ads", data);
+            }
+            console.log("Response from backend:", res);
+            await setForm({ title: "", description: "", price: 0, availability: true, moveInDate: "", images: [] });
+            toggleRefreshAds();
+        } finally {
+            setIsLoading(false);
         }
-        console.log("Response from backend:", res);
-        await setForm({ title: "", description: "", price: 0, availability: true, moveInDate: "", images: [] });
-        toggleRefreshAds();
     };
 
     return (
             <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-xl overflow-y-auto shadow-lg bg-black text-white space-y-4 transition-all no-scrollbar">
+                {isLoading && <LoadingIndicator />}
                 {/* Image Preview Section */}
                 <div className="relative">
                     {form.images.length > 0 && (
