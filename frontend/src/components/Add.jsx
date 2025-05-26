@@ -79,21 +79,19 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
 
     return (
             <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-xl overflow-y-auto shadow-lg bg-black text-white space-y-4 transition-all no-scrollbar">
-
                 {/* Image Preview Section */}
                 <div className="relative">
                     {form.images.length > 0 && (
                         <img
                             src={form.images[form.images.length - 1]}
                             alt="Main Preview"
-                            className="w-full sm:max-h-72 max-h-82 object-cover"
+                            className="w-full sm:h-55 h-60 object-cover"
                         />
                     )}
                     <botton onClick={() => setAddUnit(false)} className="absolute z-20 top-4 right-4 bg-white text-black rounded-full p-1 hover:scale-105 transition-all">
                         <X className="w-8 h-8" />
                     </botton>
                 </div>
-
                 {/* Thumbnail Section */}
                 <div className="flex items-center gap-2 px-4">
                     {form.images.slice(0, 3).map((img, index) => (
@@ -133,7 +131,6 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         />
                     </label>
                 </div>
-
                 <div className="p-4 space-y-3">
                     {/* Title */}
                     <input

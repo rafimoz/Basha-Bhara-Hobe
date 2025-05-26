@@ -63,7 +63,7 @@ const Dashboard = () => {
       </AnimatePresence>
 
       <div className="p-6 space-y-4">
-        <h1 className="sm:text-6xl text-5xl font-bold sm:mb-10 mt-5 mb-10">All Units</h1>
+        <h1 className="text-5xl font-bold sm:mb-10 mt-5 mb-10">All Units</h1>
         <div className="flex w-full justify-between">
           <a href={qrCode} download="qr-code.png">
             <button className="border border-black p-1 rounded-full px-3 cursor-pointer">QR Code</button>
@@ -72,7 +72,7 @@ const Dashboard = () => {
           <button onClick={() => setAddUnit(true)} className="border border-black bg-black text-white p-1 rounded-full px-3 cursor-pointer">Add New <span>+</span></button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ads.map((ad) => (
             <div key={ad._id} className="bg-white rounded-xl overflow-hidden shadow-xl border-2 border-black/20 p-0">
               <div className="relative">
