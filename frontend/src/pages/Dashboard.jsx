@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import Add from "../components/Add";
+import SideBar from "../components/SideBar.jsx";
+
 
 const Dashboard = () => {
   const { id: ownerId } = useParams(); 
@@ -40,6 +42,7 @@ const Dashboard = () => {
 
   return (
     <div>
+      <SideBar/>
       {/*Add Unit Component*/}
       <AnimatePresence>
         {addUnit && (
