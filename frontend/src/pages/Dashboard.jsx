@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import Add from "../components/Add";
 
 const Dashboard = () => {
-  const ownerId = "owner123"; // hardcoded for now
+  const { id: ownerId } = useParams(); 
   const backendURL = import.meta.env.VITE_BACKEND_URL;
   const [ads, setAds] = useState([]);
   const [addUnit, setAddUnit] = useState(false);

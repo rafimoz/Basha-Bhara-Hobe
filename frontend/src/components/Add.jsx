@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from "axios";
+import { useParams } from "react-router-dom";
+
 import "./LoadingIndicator.css";
 
 const LoadingIndicator = () => (
@@ -10,7 +12,7 @@ const LoadingIndicator = () => (
 import { Plus, X } from "lucide-react";
 
 function Add({ toggleRefreshAds, setAddUnit, ad }) {
-    const ownerId = "owner123"; // hardcoded for now
+    const { id: ownerId } = useParams(); // 👈 get id from URL
     const backendURL = import.meta.env.VITE_BACKEND_URL;
     const [isLoading, setIsLoading] = useState(false);
     const [form, setForm] = useState(ad ? {
