@@ -6,6 +6,7 @@ import adRoutes from "./routes/adRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import connectCloudinary from "./config/cloudinary.js";
+import cloudinary from "cloudinary";
 import UserModel from "./models/User.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,9 +34,9 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-app.post('/login', (req, res) => {
+app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  UserModel.findOne({ email: email }).then(user => {
+  UserModel.findOne({ email: email }).then((user) => {
     if (user) {
       if (user.password === password) {
         res.json(user._id);
@@ -45,11 +46,53 @@ app.post('/login', (req, res) => {
     } else {
       res.json("No record existed");
     }
-  })
+  });
 });
 
 app.post("/register", (req, res) => {
+  // const { name, email, password, image } = req.body;
+  // let imageUrl;
+  // try {
+  //   const result = cloudinary.uploader.upload(image);
+  //   imageUrl = result.secure_url;
+  // } catch (error) {
+  //   console.error("Error uploading images:", error);
+  //   return res
+  //     .status(500)
+  //     .json({ message: "Failed to profile images", error: error.message });
+  // }
+
+  // const user = new UserModel({
+  //   name: name,
+  //   email: email,
+  //   password: password,
+  //   image: imageUrl,
+  // });
+
+  // try {
+  //   user.save();
+  //   res.json(user);
+  // } catch (error) {
+  //   console.error("Error saving user:", error);
+  //   res
+  //     .status(500)
+  //     .json({ message: "Failed to save user", error: error.message });
+  // }
+
   UserModel.create(req.body)
     .then((user) => res.json(user))
     .catch((err) => res.json(err));
 });
+
+const getUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await UserModel.findOne({ _id: id });
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching user" });
+  }
+};
+
+app.get("/api/user/:id", getUser);

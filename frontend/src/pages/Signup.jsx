@@ -5,13 +5,14 @@ import { useNavigate } from 'react-router-dom'
 function Signup() {
     const [name, setName] = useState()
     const [email, setEmail] = useState()
+    const [image, setImage] = useState()
     const [password, setPassword] = useState()
     const navigate = useNavigate()
     const backendURL = import.meta.env.VITE_BACKEND_URL;
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        axios.post(backendURL + '/register', { name, email, password })
+        axios.post(backendURL + '/register', { name, email, password, image })
             .then(result => {
                 console.log(result)
                 navigate('/login')
@@ -24,6 +25,17 @@ function Signup() {
             <div className='bg-white p-8 rounded-lg w-96'>
                 <h2 className='text-4xl font-bold text-center mb-10 text-black'>Register</h2>
                 <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+                    <div className='w-full flex justify-center'>
+                        <label className="w-35 h-35 border-1 border-black rounded-full flex items-center justify-center cursor-pointer text-black overflow-hidden">
+                            <img src={image} alt="" />
+                            <input
+                                type="file"
+                                multiple
+                                onChange={(e) => setImage(e.target.files[0])}
+                                className="hidden"
+                            />
+                        </label>
+                    </div>
                     <div>
                         <input
                             type="text"
