@@ -68,7 +68,7 @@ function Signup() {
                     <button type='submit' className='w-full bg-black text-white py-3 rounded-full hover:bg-gray-800 transition-colors duration-200'>Register</button>
                     <div className='flex justify-center items-center gap-1'>
                         <p className='text-center text-gray-700'>Already Have an Account</p>
-                        <Link to="/login" className='text-purple-600 hover:underline'>Login</Link>
+                        <Link to="/" className='text-purple-600 hover:underline'>Login</Link>
                     </div>
                 </form>
             </div >
