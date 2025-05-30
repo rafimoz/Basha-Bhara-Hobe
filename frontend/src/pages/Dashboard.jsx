@@ -91,7 +91,6 @@ const Dashboard = () => {
       </AnimatePresence>
 
       {/* Header Section */}
-      {/* Added more structured header with padding and shadow */}
       <header className="bg-white shadow-sm py-4 px-6 flex justify-between items-center sticky top-0 z-10">
         {/* Welcome Text - slightly refined font size and weight */}
         <div className="flex h-full items-center gap-4"> 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
-
+import img from '../assets/image.png'
 import {
     QrCode,
     Home,
@@ -79,6 +79,7 @@ const HomePage = () => {
             <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
+                        <a href="#">
                         <div className="flex items-center gap-2">
                             <div className='w-7 h-fit'>
                                 <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -146,8 +147,9 @@ const HomePage = () => {
                                     <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#424242" />
                                 </svg>
                             </div>
-                            <span className="text-xl font-bold text-subtitle-light dark:text-subtitle-dark">Basha Bhara Hobe</span>
+                            <span className="text-xl font-bold text-subtitle-light dark:text-subtitle-dark">Basha Bhara Hobe</span>              
                         </div>
+                        </a>
 
                         {/* Desktop Navigation Links */}
                         <div className="hidden md:flex items-center space-x-8">
@@ -252,19 +254,8 @@ const HomePage = () => {
                         </div>
                         <div className="relative">
                             <div className="bg-gradient-to-r dark:from-subtitle-dark/30 dark:to-card-dark from-subtitle-dark/90 to-card-dark rounded-3xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                                <div className="bg-title-dark rounded-2xl p-6 transform -rotate-3">
-                                    <div className="flex items-center justify-center h-64">
-                                        <div className="text-center space-y-4">
-                                            <div className="mx-auto w-24 h-24 bg-card-dark/80 rounded-2xl flex items-center justify-center">
-                                                <QrCode className="h-12 w-12 text-title-dark" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <div className="h-3 bg-subtitle-dark rounded w-32 mx-auto"></div>
-                                                <div className="h-3 bg-subtitle-dark rounded w-24 mx-auto"></div>
-                                            </div>
-                                            <div className="w-20 h-8 bg-card-dark/70 rounded mx-auto"></div>
-                                        </div>
-                                    </div>
+                                <div className="bg-title-dark rounded-2xl p-6 transform -rotate-3 overflow-hidden">
+                                    <img className=' object-cover scale-120 hover:scale-140 transform rotate-0 hover:rotate-3 transition-transform duration-300' src={img} alt="" srcset="" />
                                 </div>
                             </div>
                         </div>
