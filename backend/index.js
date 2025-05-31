@@ -20,8 +20,8 @@ app.use(express.json({ limit: "20mb" }));
 
 app.use("/api", adRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Hello from backend API");
+app.get('/', (req, res) => {
+  res.send('Hello World')
 });
 
 connectCloudinary();
