@@ -94,7 +94,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
     };
 
     return (
-            <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-xl overflow-y-auto shadow-lg bg-black text-white space-y-4 transition-all no-scrollbar">
+            <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-4xl overflow-y-auto shadow-lg dark:shadow-subtitle-dark/20 shadow-subtitle-light/20 dark:bg-card-dark dark:text-title-dark bg-card-light text-title-light space-y-4 transition-all no-scrollbar">
                 {isLoading && <LoadingIndicator />}
                 {/* Image Preview Section */}
                 <div className="relative">
@@ -105,7 +105,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                             className="w-full sm:h-55 h-60 object-cover"
                         />
                     )}
-                    <botton onClick={() => setAddUnit(false)} className="absolute z-20 top-4 right-4 bg-white text-black rounded-full p-1 hover:scale-105 transition-all">
+                    <botton onClick={() => setAddUnit(false)} className="absolute z-20 top-4 right-4 dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light rounded-full p-1 hover:scale-105 transition-all">
                         <X className="w-8 h-8" />
                     </botton>
                 </div>
@@ -114,7 +114,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                     {form.images.slice(0, 3).map((img, index) => (
                         <div
                             key={index}
-                            className="relative group w-12 h-12 rounded-md overflow-hidden border border-gray-300"
+                            className="relative group w-12 h-12 rounded-md overflow-hidden border dark:border-subtitle-dark border-subtitle-light"
                         >
                             <img
                                 src={img}
@@ -138,7 +138,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                     ))}
 
                     {/* Upload New Image Button */}
-                    <label className="w-12 h-12 border border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer text-white">
+                    <label className="w-12 h-12 border border-dashed dark:border-subtitle-dark border-subtitle-light rounded-md flex items-center justify-center cursor-pointer dark:text-subtitle-dark text-subtitle-light">
                         <Plus className="w-5 h-5" />
                         <input
                             type="file"
@@ -155,7 +155,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         placeholder="Single Room"
                         value={form.title}
                         onChange={(e) => setForm({ ...form, title: e.target.value })}
-                        className="w-full bg-black border border-white rounded-xl p-1.5"
+                        className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
                     />
 
                     {/* Description */}
@@ -163,7 +163,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         placeholder="2nd Floor, South faced with open balcony"
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
-                        className="w-full bg-black border border-white rounded-xl p-1.5"
+                        className="w-full h-25 border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
                     />
 
                     {/* Move-in Date / Status */}
@@ -174,7 +174,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                             placeholder="Available (From 1st April)"
                             value={form.moveInDate}
                             onChange={(e) => setForm({ ...form, moveInDate: e.target.value })}
-                            className="w-full bg-black border border-white rounded-xl p-1.5"
+                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
                         />
                     </div>
 
@@ -186,7 +186,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                             placeholder="5000৳"
                             value={form.price}
                             onChange={(e) => setForm({ ...form, price: e.target.value })}
-                            className="w-full bg-black border border-white rounded-xl p-1.5"
+                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
                         />
                     </div>
 
@@ -198,7 +198,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                             onChange={(e) =>
                                 setForm({ ...form, availability: e.target.value === "available" })
                             }
-                            className="w-full bg-black border border-white rounded-xl p-1.5"
+                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
                         >
                             <option value="available">Available</option>
                             <option value="unavailable">Unavailable</option>
@@ -208,7 +208,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                     {/* Upload Button */}
                     <button
                         onClick={handleSubmit}
-                        className="w-full bg-white text-black font-medium py-2 rounded-xl hover:bg-gray-200 transition"
+                        className="w-full dark:bg-subtitle-dark bg-subtitle-light dark:text-card-dark text-card-light font-medium py-2 rounded-3xl dark:hover:bg-description-dark hover:bg-title-light transition"
                     >
                         {ad ? "Update" : "Upload"}
                     </button>
