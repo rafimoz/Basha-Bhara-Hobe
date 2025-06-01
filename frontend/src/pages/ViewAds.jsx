@@ -125,8 +125,9 @@ const ViewAds = () => {
             return (
               ad.availability && (
                 <div key={ad._id} className="dark:bg-card-dark bg-card-light h-fit rounded-xl overflow-hidden shadow-xl relative transition-all duration-300">
+                  {/*Banner*/}
                   <div className="relative" onClick={() => toggleVisibility(ad._id)}>
-                    <div className="flex overflow-x-scroll no-scrollbar sm:h-60 h-70">
+                    <div className="flex overflow-x-scroll no-scrollbar sm:h-55 h-70">
                       {ad.images.map((image, index) => (
                         <img
                           key={index}
@@ -154,7 +155,7 @@ const ViewAds = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="flex items-center gap-2 px-4 pt-4"
+                      className="flex items-center gap-2 px-3 pt-3"
                     >
                       {ad.images.slice(0, 3).map((img, index) => (
                         <div
@@ -167,9 +168,9 @@ const ViewAds = () => {
                       ))}
                     </motion.div>
                   )}
-                  <div className="p-4">
+                  <div className="p-3">
                     <div className="flex items-center justify-between">
-                      <h2 className="sm:text-3xl text-2xl font-bold mb-1 dark:text-subtitle-dark text-subtitle-light">{ad.title}</h2>
+                      <h2 className="sm:text-3xl text-2xl font-bold dark:text-subtitle-dark text-subtitle-light">{ad.title}</h2>
                       <div
                         className="text-white w-15 h-15 flex justify-center items-center rounded-full font-bold sm:text-xs text-sm"
                         style={{
@@ -183,11 +184,11 @@ const ViewAds = () => {
                       </div>
                     </div>
 
-                    <p className={`dark:text-subtitle-dark mb-4 text-sm mt-2 ${!isVisible ? "truncate" : ""}`}>
+                    <p className={`dark:text-subtitle-dark mb-1 text-sm mt-1 ${!isVisible ? "truncate" : ""}`}>
                       {ad.description}
                     </p>
 
-                    {isVisible && (
+                    {isVisible ? (
                       <>
                         <motion.p
                           initial={{ opacity: 0 }}
@@ -206,7 +207,14 @@ const ViewAds = () => {
                           Contact
                         </motion.button>
                       </>
-                    )}
+                    )
+                      : (
+                        <div className="w-full text-center mt-2">
+                          <button onClick={() => toggleVisibility(ad._id)} className="px-3 py-1 rounded-full dark:text-card-dark text-card-light dark:bg-subtitle-dark bg-subtitle-light cursor-pointer">more</button>
+                        </div>
+                      )
+
+                    }
                   </div>
                 </div>
               )

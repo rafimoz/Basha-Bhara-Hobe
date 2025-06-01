@@ -5,9 +5,9 @@ import { useParams } from "react-router-dom";
 import "./LoadingIndicator.css";
 
 const LoadingIndicator = () => (
-  <div className="loading-overlay">
-    <div className="loading-spinner"></div>
-  </div>
+    <div className="loading-overlay">
+        <div className="loading-spinner"></div>
+    </div>
 );
 import { Plus, X } from "lucide-react";
 
@@ -94,80 +94,81 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
     };
 
     return (
-            <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-4xl overflow-y-auto shadow-lg dark:shadow-subtitle-dark/20 shadow-subtitle-light/20 dark:bg-card-dark dark:text-title-dark bg-card-light text-title-light space-y-4 transition-all no-scrollbar">
-                {isLoading && <LoadingIndicator />}
-                {/* Image Preview Section */}
-                <div className="relative">
-                    {form.images.length > 0 && (
+        <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-4xl overflow-y-auto shadow-lg dark:shadow-subtitle-dark/20 shadow-subtitle-light/20 dark:bg-card-dark dark:text-title-dark bg-card-light text-title-light space-y-4 transition-all no-scrollbar">
+            {isLoading && <LoadingIndicator />}
+            {/* Image Preview Section */}
+            <div className="relative">
+                {form.images.length > 0 && (
+                    <img
+                        src={form.images[form.images.length - 1]}
+                        alt="Main Preview"
+                        className="w-full sm:h-65 h-70 object-cover"
+                    />
+                )}
+                <botton onClick={() => setAddUnit(false)} className="absolute z-20 top-4 right-4 dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light rounded-full p-1 hover:scale-105 transition-all">
+                    <X className="w-8 h-8" />
+                </botton>
+            </div>
+            {/* Thumbnail Section */}
+            <div className="flex items-center gap-2 px-4">
+                {form.images.slice(0, 3).map((img, index) => (
+                    <div
+                        key={index}
+                        className="relative group w-12 h-12 rounded-md overflow-hidden border dark:border-subtitle-dark border-subtitle-light"
+                    >
                         <img
-                            src={form.images[form.images.length - 1]}
-                            alt="Main Preview"
-                            className="w-full sm:h-55 h-60 object-cover"
+                            src={img}
+                            alt={`thumb-${index}`}
+                            className="w-full h-full object-cover"
                         />
-                    )}
-                    <botton onClick={() => setAddUnit(false)} className="absolute z-20 top-4 right-4 dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light rounded-full p-1 hover:scale-105 transition-all">
-                        <X className="w-8 h-8" />
-                    </botton>
-                </div>
-                {/* Thumbnail Section */}
-                <div className="flex items-center gap-2 px-4">
-                    {form.images.slice(0, 3).map((img, index) => (
-                        <div
-                            key={index}
-                            className="relative group w-12 h-12 rounded-md overflow-hidden border dark:border-subtitle-dark border-subtitle-light"
+                        {/* Delete icon */}
+                        <button
+                            onClick={() => {
+                                setForm((prev) => ({
+                                    ...prev,
+                                    images: prev.images.filter((_, i) => i !== index),
+                                }));
+                            }}
+                            className="absolute top-0 right-0 p-0.5 bg-black bg-opacity-60 text-white rounded-bl-md opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Remove image"
                         >
-                            <img
-                                src={img}
-                                alt={`thumb-${index}`}
-                                className="w-full h-full object-cover"
-                            />
-                            {/* Delete icon */}
-                            <button
-                                onClick={() => {
-                                    setForm((prev) => ({
-                                        ...prev,
-                                        images: prev.images.filter((_, i) => i !== index),
-                                    }));
-                                }}
-                                className="absolute top-0 right-0 p-0.5 bg-black bg-opacity-60 text-white rounded-bl-md opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="Remove image"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                    ))}
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                ))}
 
-                    {/* Upload New Image Button */}
-                    <label className="w-12 h-12 border border-dashed dark:border-subtitle-dark border-subtitle-light rounded-md flex items-center justify-center cursor-pointer dark:text-subtitle-dark text-subtitle-light">
-                        <Plus className="w-5 h-5" />
-                        <input
-                            type="file"
-                            multiple
-                            onChange={handleImageUpload}
-                            className="hidden"
-                        />
-                    </label>
-                </div>
-                <div className="p-4 space-y-3">
-                    {/* Title */}
+                {/* Upload New Image Button */}
+                <label className="w-12 h-12 border border-dashed dark:border-subtitle-dark border-subtitle-light rounded-md flex items-center justify-center cursor-pointer dark:text-subtitle-dark text-subtitle-light">
+                    <Plus className="w-5 h-5" />
                     <input
-                        type="text"
-                        placeholder="Single Room"
-                        value={form.title}
-                        onChange={(e) => setForm({ ...form, title: e.target.value })}
-                        className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
+                        type="file"
+                        multiple
+                        onChange={handleImageUpload}
+                        className="hidden"
                     />
+                </label>
+            </div>
+            <div className="p-4 space-y-2">
+                {/* Title */}
+                <input
+                    type="text"
+                    placeholder="Single Room"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
+                />
 
-                    {/* Description */}
-                    <textarea
-                        placeholder="2nd Floor, South faced with open balcony"
-                        value={form.description}
-                        onChange={(e) => setForm({ ...form, description: e.target.value })}
-                        className="w-full h-25 border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
-                    />
+                {/* Description */}
+                <textarea
+                    placeholder="2nd Floor, South faced with open balcony"
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    className="w-full h-15 border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
+                />
 
+                <div className='flex sm:flex-row flex-col justify-between gap-2 w-full'>
                     {/* Move-in Date / Status */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         <h2 className="text-xl">Date</h2>
                         <input
                             type="date"
@@ -177,9 +178,8 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                             className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
                         />
                     </div>
-
                     {/* Price */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         <h2 className="text-xl">Price</h2>
                         <input
                             type="number"
@@ -189,31 +189,32 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                             className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
                         />
                     </div>
-
-                    {/* Status */}
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-xl">Status</h2>
-                        <select
-                            value={form.availability ? "available" : "unavailable"}
-                            onChange={(e) =>
-                                setForm({ ...form, availability: e.target.value === "available" })
-                            }
-                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
-                        >
-                            <option value="available">Available</option>
-                            <option value="unavailable">Unavailable</option>
-                        </select>
-                    </div>
-
-                    {/* Upload Button */}
-                    <button
-                        onClick={handleSubmit}
-                        className="w-full dark:bg-subtitle-dark bg-subtitle-light dark:text-card-dark text-card-light font-medium py-2 rounded-3xl dark:hover:bg-description-dark hover:bg-title-light transition"
-                    >
-                        {ad ? "Update" : "Upload"}
-                    </button>
                 </div>
+
+                {/* Status */}
+                <div className="flex items-center gap-3">
+                    <h2 className="text-xl">Status</h2>
+                    <select
+                        value={form.availability ? "available" : "unavailable"}
+                        onChange={(e) =>
+                            setForm({ ...form, availability: e.target.value === "available" })
+                        }
+                        className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
+                    >
+                        <option value="available">Available</option>
+                        <option value="unavailable">Unavailable</option>
+                    </select>
+                </div>
+
+                {/* Upload Button */}
+                <button
+                    onClick={handleSubmit}
+                    className="w-full dark:bg-subtitle-dark bg-subtitle-light dark:text-card-dark text-card-light font-medium py-2 rounded-3xl dark:hover:bg-description-dark hover:bg-title-light transition"
+                >
+                    {ad ? "Update" : "Upload"}
+                </button>
             </div>
+        </div>
     )
 }
 
