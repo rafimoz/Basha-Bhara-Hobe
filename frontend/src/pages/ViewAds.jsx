@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom'
@@ -8,10 +8,13 @@ const ViewAds = () => {
   const { ownerId } = useParams();
   const backendURL = import.meta.env.VITE_BACKEND_URL;
   const [ads, setAds] = useState([]);
-  const [user, setUser] = useState({}); // Initialize as object for safety
+  const [user, setUser] = useState({});
   const [visibleAds, setVisibleAds] = useState({});
-  const [selectedImages, setSelectedImages] = useState({});
-  const navigate = useNavigate()
+  const [currentIndices, setCurrentIndices] = useState({});
+  const navigate = useNavigate();
+  const bannerRefs = useRef({});
+  const scrollTimeouts = useRef({});
+  const currentIndicesRef = useRef({});
 
   const fetchUser = async () => {
     try {
@@ -25,16 +28,70 @@ const ViewAds = () => {
   useEffect(() => {
     axios.get(backendURL + `/api/ads/${ownerId}`).then((res) => {
       setAds(res.data);
+      // Initialize current indices to 0 for each ad
+      const initialIndices = {};
+      res.data.forEach(ad => {
+        initialIndices[ad._id] = 0;
+      });
+      setCurrentIndices(initialIndices);
+      currentIndicesRef.current = initialIndices;
     });
-    fetchUser()
+    fetchUser();
   }, [ownerId]);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    currentIndicesRef.current = currentIndices;
+  }, [currentIndices]);
+
+  // Clean up timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(scrollTimeouts.current).forEach(timeout => {
+        clearTimeout(timeout);
+      });
+    };
+  }, []);
 
   const toggleVisibility = (adId) => {
     setVisibleAds((prev) => ({ ...prev, [adId]: !prev[adId] }));
   };
 
-  const handleThumbnailClick = (adId, image) => {
-    setSelectedImages((prev) => ({ ...prev, [adId]: image }));
+  // Scroll to image in banner section
+  const scrollToImage = (adId, index) => {
+    const element = document.getElementById(`banner-${adId}-${index}`);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+    // Update current index immediately
+    setCurrentIndices(prev => ({ ...prev, [adId]: index }));
+  };
+
+  // Handle scroll events with debounce
+  const handleScroll = (adId) => {
+    // Clear any existing timeout for this ad
+    if (scrollTimeouts.current[adId]) {
+      clearTimeout(scrollTimeouts.current[adId]);
+    }
+
+    // Set a new timeout to update index after scrolling stops
+    scrollTimeouts.current[adId] = setTimeout(() => {
+      const container = bannerRefs.current[adId];
+      if (container) {
+        const scrollPosition = container.scrollLeft;
+        const containerWidth = container.clientWidth;
+        const currentIndex = Math.round(scrollPosition / containerWidth);
+
+        // Only update if index changed
+        if (currentIndicesRef.current[adId] !== currentIndex) {
+          setCurrentIndices(prev => ({ ...prev, [adId]: currentIndex }));
+        }
+      }
+    }, 150); // 150ms delay after scrolling stops
   };
 
   return (
@@ -44,6 +101,7 @@ const ViewAds = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div onClick={() => { navigate("/") }} className="flex items-center gap-2 cursor-pointer">
+              {/*SVG*/}
               <div className='w-7 h-fit'>
                 <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M267.997 60.793L265.006 319H169.662V6.34766L267.997 60.793Z" fill="#B0B0B0" stroke="#B0B0B0" />
@@ -120,35 +178,50 @@ const ViewAds = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ads.map((ad) => {
             const isVisible = visibleAds[ad._id] || false;
-            const selectedImg = selectedImages[ad._id] || "";
+            const currentIndex = currentIndices[ad._id] || 0;
 
             return (
               ad.availability && (
-                <div key={ad._id} className="dark:bg-card-dark bg-card-light h-fit rounded-xl overflow-hidden shadow-xl relative transition-all duration-300">
-                  {/*Banner*/}
+                <div key={ad._id} className="dark:bg-card-dark bg-card-light h-fit rounded-3xl overflow-hidden shadow-xl relative transition-all duration-300">
+                  {/* Banner Section */}
                   <div className="relative" onClick={() => toggleVisibility(ad._id)}>
-                    <div className="flex overflow-x-scroll no-scrollbar sm:h-55 h-70">
+                    <div
+                      ref={el => bannerRefs.current[ad._id] = el}
+                      onScroll={() => handleScroll(ad._id)}
+                      className="flex overflow-x-scroll no-scrollbar sm:h-55 h-70"
+                    >
                       {ad.images.map((image, index) => (
                         <img
                           key={index}
-                          src={selectedImg || image}
+                          id={`banner-${ad._id}-${index}`}
+                          src={image}
                           alt={`Ad image ${index + 1}`}
-                          className="h-full w-full object-cover flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-105"
+                          className="h-full w-full object-cover flex-shrink-0"
                         />
                       ))}
                     </div>
 
-                    {/* Dots */}
+                    {/* Dots with active tracking and transition */}
                     <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-2">
                       {ad.images.map((_, index) => (
-                        <span
+                        <motion.span
                           key={index}
-                          className="w-3 h-3 dark:bg-card-dark bg-card-light rounded-full border dark:border-white border-black"
+                          className="w-3 h-3 rounded-full border"
+                          initial={{
+                            backgroundColor: index === currentIndex ? '#ffffff' : 'transparent',
+                            borderColor: index === currentIndex ? 'transparent' : 'currentColor'
+                          }}
+                          animate={{
+                            backgroundColor: index === currentIndex ? '#ffffff' : 'transparent',
+                            borderColor: index === currentIndex ? 'transparent' : 'currentColor'
+                          }}
+                          transition={{ duration: 0.2 }}
                         />
                       ))}
                     </div>
                   </div>
-                  {/* Thumbnails with smooth fade */}
+
+                  {/* Thumbnails */}
                   {isVisible && (
                     <motion.div
                       initial={{ opacity: 0, y: -20 }}
@@ -158,16 +231,23 @@ const ViewAds = () => {
                       className="flex items-center gap-2 px-3 pt-3"
                     >
                       {ad.images.slice(0, 3).map((img, index) => (
-                        <div
+                        <motion.div
                           key={index}
-                          className="w-12 h-12 rounded-xl overflow-hidden hover:border cursor-pointer"
-                          onClick={() => handleThumbnailClick(ad._id, img)}
+                          className={`w-12 h-12 rounded-xl overflow-hidden cursor-pointer ${index === currentIndex ? 'border-2 border-blue-500' : 'border border-transparent'
+                            }`}
+                          whileHover={{ scale: 1.05 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            scrollToImage(ad._id, index);
+                          }}
                         >
                           <img src={img} alt={`thumb-${index}`} className="w-full h-full object-cover" />
-                        </div>
+                        </motion.div>
                       ))}
                     </motion.div>
                   )}
+
+                  {/* Ad Details */}
                   <div className="p-3">
                     <div className="flex items-center justify-between">
                       <h2 className="sm:text-3xl text-2xl font-bold dark:text-subtitle-dark text-subtitle-light">{ad.title}</h2>
@@ -207,14 +287,20 @@ const ViewAds = () => {
                           Contact
                         </motion.button>
                       </>
-                    )
-                      : (
-                        <div className="w-full text-center mt-2">
-                          <button onClick={() => toggleVisibility(ad._id)} className="px-3 py-1 rounded-full dark:text-card-dark text-card-light dark:bg-subtitle-dark bg-subtitle-light cursor-pointer">more</button>
-                        </div>
-                      )
-
-                    }
+                    ) : (
+                      <div className="w-full text-center mt-2">
+                        <button onClick={() => toggleVisibility(ad._id)} className="w-full flex justify-center items-center py-2 rounded-full cursor-pointer">
+                          <svg className="dark:block hidden" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.8335 7.3999L18 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
+                            <path d="M9.8335 7.3999L1.66701 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
+                          </svg>
+                          <svg className="dark:hidden block" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.8335 7.3999L18 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
+                            <path d="M9.8335 7.3999L1.66701 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )
@@ -223,7 +309,6 @@ const ViewAds = () => {
         </div>
       </div>
     </div>
-
   );
 };
 

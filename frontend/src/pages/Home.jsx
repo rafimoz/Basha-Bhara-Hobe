@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
-import img from '../assets/image.png'
+import img from '../assets/images.png'
 import {
     QrCode,
     Home,
@@ -255,7 +255,7 @@ const HomePage = () => {
                         <div className="relative">
                             <div className="bg-gradient-to-r dark:from-subtitle-dark/30 dark:to-card-dark from-subtitle-dark/90 to-card-dark rounded-3xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-300">
                                 <div className="bg-title-dark rounded-2xl p-6 transform -rotate-3 overflow-hidden">
-                                    <img className=' object-cover scale-120 hover:scale-140 transform rotate-0 hover:rotate-3 transition-transform duration-300' src={img} alt="" srcset="" />
+                                    <img className=' object-cover hover:scale-120 transform rotate-0 hover:rotate-3 transition-transform duration-300' src={img} alt="" srcset="" />
                                 </div>
                             </div>
                         </div>

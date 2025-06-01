@@ -94,7 +94,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
     };
 
     return (
-        <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-4xl overflow-y-auto shadow-lg dark:shadow-subtitle-dark/20 shadow-subtitle-light/20 dark:bg-card-dark dark:text-title-dark bg-card-light text-title-light space-y-4 transition-all no-scrollbar">
+        <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-3xl overflow-y-auto shadow-lg dark:shadow-subtitle-dark/20 shadow-subtitle-light/20 dark:bg-card-dark dark:text-title-dark bg-card-light text-title-light space-y-4 transition-all no-scrollbar">
             {isLoading && <LoadingIndicator />}
             {/* Image Preview Section */}
             <div className="relative">
@@ -102,7 +102,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                     <img
                         src={form.images[form.images.length - 1]}
                         alt="Main Preview"
-                        className="w-full sm:h-65 h-70 object-cover"
+                        className="w-full sm:h-65 h-60 object-cover"
                     />
                 )}
                 <botton onClick={() => setAddUnit(false)} className="absolute z-20 top-4 right-4 dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light rounded-full p-1 hover:scale-105 transition-all">
@@ -114,7 +114,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                 {form.images.slice(0, 3).map((img, index) => (
                     <div
                         key={index}
-                        className="relative group w-12 h-12 rounded-md overflow-hidden border dark:border-subtitle-dark border-subtitle-light"
+                        className="relative group w-12 h-12 rounded-xl overflow-hidden border dark:border-subtitle-dark border-subtitle-light"
                     >
                         <img
                             src={img}
@@ -136,9 +136,8 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         </button>
                     </div>
                 ))}
-
                 {/* Upload New Image Button */}
-                <label className="w-12 h-12 border border-dashed dark:border-subtitle-dark border-subtitle-light rounded-md flex items-center justify-center cursor-pointer dark:text-subtitle-dark text-subtitle-light">
+                <label className="w-12 h-12 border border-dashed dark:border-subtitle-dark border-subtitle-light rounded-xl flex items-center justify-center cursor-pointer dark:text-subtitle-dark text-subtitle-light">
                     <Plus className="w-5 h-5" />
                     <input
                         type="file"
@@ -148,68 +147,64 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                     />
                 </label>
             </div>
-            <div className="p-4 space-y-2">
+            <div className="px-4 pb-4 space-y-2 sm:text-lg text-sm">
                 {/* Title */}
                 <input
                     type="text"
                     placeholder="Single Room"
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
+                    className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
                 />
-
                 {/* Description */}
                 <textarea
                     placeholder="2nd Floor, South faced with open balcony"
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    className="w-full h-15 border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
+                    className="w-full h-fit border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
                 />
-
-                <div className='flex sm:flex-row flex-col justify-between gap-2 w-full'>
+                <div className='flex sm:flex-row flex-col justify-between gap-2 mt-0 w-full'>
                     {/* Move-in Date / Status */}
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-xl">Date</h2>
+                    <div className="flex items-center gap-2">
+                        <h2>Date</h2>
                         <input
                             type="date"
                             placeholder="Available (From 1st April)"
                             value={form.moveInDate}
                             onChange={(e) => setForm({ ...form, moveInDate: e.target.value })}
-                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
+                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
                         />
                     </div>
                     {/* Price */}
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-xl">Price</h2>
+                    <div className="flex items-center gap-2">
+                        <h2>Price</h2>
                         <input
                             type="number"
                             placeholder="5000৳"
                             value={form.price}
                             onChange={(e) => setForm({ ...form, price: e.target.value })}
-                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
+                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
                         />
                     </div>
                 </div>
-
                 {/* Status */}
-                <div className="flex items-center gap-3">
-                    <h2 className="text-xl">Status</h2>
+                <div className="flex items-center gap-2">
+                    <h2>Status</h2>
                     <select
                         value={form.availability ? "available" : "unavailable"}
                         onChange={(e) =>
                             setForm({ ...form, availability: e.target.value === "available" })
                         }
-                        className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-3xl p-2"
+                        className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
                     >
                         <option value="available">Available</option>
                         <option value="unavailable">Unavailable</option>
                     </select>
                 </div>
-
                 {/* Upload Button */}
                 <button
                     onClick={handleSubmit}
-                    className="w-full dark:bg-subtitle-dark bg-subtitle-light dark:text-card-dark text-card-light font-medium py-2 rounded-3xl dark:hover:bg-description-dark hover:bg-title-light transition"
+                    className="w-full dark:bg-subtitle-dark bg-subtitle-light dark:text-card-dark text-card-light font-medium mt-1 py-2 rounded-3xl dark:hover:bg-description-dark hover:bg-title-light transition"
                 >
                     {ad ? "Update" : "Upload"}
                 </button>

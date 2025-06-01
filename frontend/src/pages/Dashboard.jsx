@@ -74,7 +74,7 @@ const Dashboard = () => {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
             // Adjusted backdrop for a softer look
-            className="fixed inset-0 z-20 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+            className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
           >
             <Add
               toggleRefreshAds={toggleRefreshAds}
@@ -205,7 +205,7 @@ const Dashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
                 // Card Styling - softer shadow, more rounded
-                className="dark:bg-card-dark bg-card-light rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+                className="dark:bg-card-dark bg-card-light rounded-3xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="relative">
                   {/* Image display - kept as is for scroll functionality */}
@@ -226,7 +226,7 @@ const Dashboard = () => {
                     )}
                   </div>
                   {/* Price badge - PRESERVED ORIGINAL STYLING */}
-                  <div className="absolute top-3 right-3 dark:bg-price-dark bg-price-light text-white px-4 py-2 rounded-full font-bold sm:text-sm text-lg">
+                  <div className="absolute top-2 right-2 dark:bg-price-dark bg-price-light text-white px-4 py-2 rounded-full font-bold sm:text-sm text-lg">
                     ৳ {ad.price}
                   </div>
                   {/* Image slider dots - PRESERVED ORIGINAL STYLING */}
@@ -247,7 +247,7 @@ const Dashboard = () => {
                   <p className="dark:text-description-dark text-description-light text-base mb-1 line-clamp-3">{ad.description}</p>
                   {/* Move-in Date */}
                   <p className="dark:text-description-dark text-description-light text-sm mb-1 flex items-center gap-1">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    {/* <div className="w-2 h-2 bg-green-400 rounded-full"></div> */}
                     Move-in: <span className="font-semibold underline">{new Date(ad.moveInDate).toLocaleDateString()}</span>
                   </p>
                   {/* Availability Badge - Modernized subtle style */}
@@ -262,7 +262,7 @@ const Dashboard = () => {
                         setSelectedAd(ad);
                         setAddUnit(true);
                       }}
-                      className="bg-green-500 w-full h-10 p-3 rounded-full hover:bg-green-600 hover:text-white transition"
+                      className="bg-green-500 w-full h-10 p-3 rounded-2xl hover:bg-green-600 hover:text-white transition"
                     >
                       <svg width="full" height="full" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M16.6432 0.106781L3.03644 13.7136L0.118958 22.881L9.28644 19.9636L22.8932 6.35678C22.8932 6.35678 22.789 4.16824 20.8099 2.19012C18.8307 0.210948 16.6432 0.106781 16.6432 0.106781ZM17.0338 1.79949C18.1505 2.01199 19.0395 2.48502 19.7255 3.18905C20.4114 3.89308 20.8943 4.82814 21.2005 5.96616L19.3125 7.85418L15.1458 3.68751L16.6432 2.19012L17.0338 1.79949ZM4.18594 14.7573C4.19825 14.7604 5.43848 15.0739 6.68227 16.3177C8.03644 17.5677 8.24477 18.7144 8.24477 18.7144L8.28953 18.7673L4.59283 19.9575L3.03441 18.399L4.18594 14.7573Z" fill="white" />
@@ -271,7 +271,7 @@ const Dashboard = () => {
                     {/* Delete Button - PRESERVED ORIGINAL STYLING */}
                     <button
                       onClick={() => handleDelete(ad._id)}
-                      className="bg-red-500 text-white w-full h-10 p-3 rounded-full hover:bg-red-600 hover:text-white transition"
+                      className="bg-red-500 text-white w-full h-10 p-3 rounded-2xl hover:bg-red-600 hover:text-white transition"
                     >
                       <svg width="full" height="full" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9.48594 0.237689C8.98957 0.245447 8.5932 0.653615 8.6 1.14999V1.59999H3.65C3.40919 1.59672 3.17712 1.6901 3.00567 1.85924C2.83422 2.02837 2.7377 2.25916 2.7377 2.49999H1.40001C1.07543 2.4954 0.773533 2.66593 0.609904 2.94627C0.446275 3.22662 0.446275 3.57336 0.609904 3.8537C0.773533 4.13405 1.07543 4.30457 1.40001 4.29998H17.6C17.9246 4.30457 18.2265 4.13404 18.3901 3.8537C18.5537 3.57335 18.5537 3.22662 18.3901 2.94627C18.2265 2.66592 17.9246 2.4954 17.6 2.49999H16.2623C16.2623 2.25916 16.1658 2.02836 15.9943 1.85924C15.8229 1.6901 15.5908 1.59672 15.35 1.59999H10.4V1.14999C10.4033 0.906722 10.308 0.672461 10.1358 0.500597C9.96365 0.328724 9.72921 0.233891 9.48594 0.237689ZM1.4 6.09999L3.01367 19.8109C3.11987 20.7172 3.887 21.4 4.79961 21.4H14.2004C15.113 21.4 15.8792 20.7172 15.9863 19.8109L17.6 6.10001L1.4 6.09999Z" fill="white" />
