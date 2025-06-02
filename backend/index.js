@@ -49,39 +49,32 @@ app.post("/login", (req, res) => {
   });
 });
 
-app.post("/register", (req, res) => {
-  // const { name, email, password, image } = req.body;
-  // let imageUrl;
-  // try {
-  //   const result = cloudinary.uploader.upload(image);
-  //   imageUrl = result.secure_url;
-  // } catch (error) {
-  //   console.error("Error uploading images:", error);
-  //   return res
-  //     .status(500)
-  //     .json({ message: "Failed to profile images", error: error.message });
-  // }
+app.post("/register", async (req, res) => {
+  const { name, email, password, image } = req.body;
 
-  // const user = new UserModel({
-  //   name: name,
-  //   email: email,
-  //   password: password,
-  //   image: imageUrl,
-  // });
+  try {
+    // Check if required fields are present
+    if (!name || !email || !password || !image) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
-  // try {
-  //   user.save();
-  //   res.json(user);
-  // } catch (error) {
-  //   console.error("Error saving user:", error);
-  //   res
-  //     .status(500)
-  //     .json({ message: "Failed to save user", error: error.message });
-  // }
+    // Upload base64 image string to Cloudinary
+    const result = await cloudinary.uploader.upload(image, {
+      folder: "user_profiles",
+    });
 
-  UserModel.create(req.body)
-    .then((user) => res.json(user))
-    .catch((err) => res.json(err));
+    const newUser = await UserModel.create({
+      name,
+      email,
+      password, // Not hashed (as per your request)
+      image: result.secure_url,
+    });
+
+    res.status(201).json({ message: "User registered successfully", user: newUser });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
 });
 
 const getUser = async (req, res) => {

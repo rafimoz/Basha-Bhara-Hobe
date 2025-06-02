@@ -10,6 +10,17 @@ function Signup() {
     const navigate = useNavigate()
     const backendURL = import.meta.env.VITE_BACKEND_URL;
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0]; // Only handle the first file
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            setImage(event.target.result); // Set a single image
+        };
+        reader.readAsDataURL(file);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault()
         axios.post(backendURL + '/register', { name, email, password, image })
@@ -26,7 +37,7 @@ function Signup() {
             <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
-                        <div onClick={()=>{navigate("/")}} className="flex items-center gap-2 cursor-pointer">
+                        <div onClick={() => { navigate("/") }} className="flex items-center gap-2 cursor-pointer">
                             <div className='w-7 h-fit'>
                                 <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M267.997 60.793L265.006 319H169.662V6.34766L267.997 60.793Z" fill="#B0B0B0" stroke="#B0B0B0" />
@@ -106,7 +117,7 @@ function Signup() {
                             <img src={image} alt="" />
                             <input
                                 type="file"
-                                onChange={(e) => setImage(e.target.files[0])}
+                                onChange={handleImageUpload}
                                 className="hidden"
                             />
                         </label>
