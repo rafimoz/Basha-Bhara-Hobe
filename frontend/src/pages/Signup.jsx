@@ -113,8 +113,8 @@ function Signup() {
                 <h2 className='text-4xl font-bold text-center mb-10 dark:text-title-dark text-title-light'>Register</h2>
                 <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
                     <div className='w-full flex justify-center'>
-                        <label className="w-35 h-35 border-2 dark:border-description-dark border-description-light dark:text-subtitle-dark text-subtitle-light rounded-full flex items-center justify-center cursor-pointer overflow-hidden">
-                            <img src={image} alt="" />
+                        <label className="w-35 h-35 border-2 hover:border-4 transition-all dark:border-description-dark border-description-light dark:text-subtitle-dark text-subtitle-light rounded-full flex items-center justify-center cursor-pointer overflow-hidden">
+                            <img className='h-full w-full object-cover' src={image} alt="" />
                             <input
                                 type="file"
                                 onChange={handleImageUpload}
