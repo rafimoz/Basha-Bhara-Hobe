@@ -16,7 +16,7 @@ function Login() {
             .then(result => {
                 console.log(result)
                 if (result.data.success) {
-                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('token', result.data.token);
                     navigate(`/dashboard/${result.data.id}`)
                 } else {
                     toast.error("Incorrect Password!")
