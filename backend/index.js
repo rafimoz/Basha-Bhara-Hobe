@@ -2,6 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 import adRoutes from "./routes/adRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -34,20 +36,23 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-  UserModel.findOne({ email: email }).then((user) => {
-    if (user) {
-      if (user.password === password) {
-        let id = user._id;
-        res.json({ success: true, id });
-      } else {
-        res.json("the password is incorrect");
-      }
-    } else {
-      res.json("No record existed");
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "No record found" });
     }
-  });
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.json({ success: false, message: "Incorrect password" });
+    }
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.json({ success: true, id: user._id, token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
 });
 
 app.post("/register", async (req, res) => {
@@ -57,22 +62,22 @@ app.post("/register", async (req, res) => {
     if (!name || !email || !password || !image) {
       return res.json({ success: false, message: 'Missing Fields' });
     }
-
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email already registered' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
     // Upload base64 image string to Cloudinary
     const result = await cloudinary.uploader.upload(image, {
       folder: "user_profiles",
     });
-
-    const newUser = await UserModel.create({
+    await UserModel.create({
       name,
       email,
-      password, // Not hashed (as per your request)
+      password: hashedPassword, // Not hashed (as per your request)
       image: result.secure_url,
     });
-
-    res
-      .status(201)
-      .json({ message: "User registered successfully", user: newUser });
+    res.send({ message: 'User created' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error", error: err.message });

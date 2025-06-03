@@ -16,12 +16,16 @@ function Login() {
             .then(result => {
                 console.log(result)
                 if (result.data.success) {
+                    localStorage.setItem('token', data.token);
                     navigate(`/dashboard/${result.data.id}`)
                 } else {
                     toast.error("Incorrect Password!")
                 }
             })
-            .catch(err => console.log(err))
+            .catch(err => {
+                console.error("Login error:", err);
+                toast.error("Something went wrong. Try again.");
+            })
     }
 
     return (
