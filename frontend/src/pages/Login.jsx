@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { ToastContainer, toast } from 'react-toastify';
 
 function Login() {
     const [email, setEmail] = useState('') // Initialize with empty string
@@ -14,8 +15,10 @@ function Login() {
         axios.post(backendURL + '/login', { email, password })
             .then(result => {
                 console.log(result)
-                if (result.data) {
-                    navigate(`/dashboard/${result.data}`)
+                if (result.data.success) {
+                    navigate(`/dashboard/${result.data.id}`)
+                } else {
+                    toast.error("Incorrect Password!")
                 }
             })
             .catch(err => console.log(err))
@@ -23,6 +26,7 @@ function Login() {
 
     return (
         <div className='flex justify-center items-center h-screen dark:bg-bg-dark bg-bg-light'>
+            <ToastContainer />
             {/* Nav Section */}
             <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -100,7 +104,7 @@ function Login() {
                 </div>
             </nav>
             <div className='p-8 rounded-lg w-96'> {/* Content wrapper */}
-                <h2 className='text-4xl font-bold text-center mb-10 dark:text-title-dark text-title-light'>Login</h2> {/* Login title */}
+                <h2 className='text-4xl font-bold text-center mb-5 dark:text-title-dark text-title-light'>Login</h2> {/* Login title */}
                 <form onSubmit={handleSubmit} className='flex flex-col gap-4'> {/* Form container */}
                     <div>
                         {/* <label htmlFor="email" className='sr-only'>Email</label> */} {/* Hidden label for accessibility */}

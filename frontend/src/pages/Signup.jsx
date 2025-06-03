@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { ToastContainer, toast } from 'react-toastify';
+
 function Signup() {
     const [name, setName] = useState()
     const [email, setEmail] = useState()
     const [image, setImage] = useState()
     const [password, setPassword] = useState()
+    const [isLoading, setIsLoading] = useState(false) // Add loading state
     const navigate = useNavigate()
     const backendURL = import.meta.env.VITE_BACKEND_URL;
 
@@ -23,16 +26,24 @@ function Signup() {
 
     const handleSubmit = (e) => {
         e.preventDefault()
+        setIsLoading(true) // Start loading animation
+
         axios.post(backendURL + '/register', { name, email, password, image })
             .then(result => {
                 console.log(result)
                 navigate('/login')
             })
-            .catch(err => console.log(err))
+            .catch(error => {
+                toast.error("Registration Unsuccessful")
+            })
+            .finally(() => {
+                setIsLoading(false) // Stop loading animation
+            })
     }
 
     return (
         <div className='flex justify-center items-center h-screen dark:bg-bg-dark bg-bg-light'>
+            <ToastContainer />
             {/* Nav Section */}
             <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -110,11 +121,11 @@ function Signup() {
                 </div>
             </nav>
             <div className='p-8 rounded-lg w-96'>
-                <h2 className='text-4xl font-bold text-center mb-10 dark:text-title-dark text-title-light'>Register</h2>
+                <h2 className='text-4xl font-bold text-center mb-5 dark:text-title-dark text-title-light'>Register</h2>
                 <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
                     <div className='w-full flex justify-center'>
                         <label className="w-35 h-35 border-2 hover:border-4 transition-all dark:border-description-dark border-description-light dark:text-subtitle-dark text-subtitle-light rounded-full flex items-center justify-center cursor-pointer overflow-hidden">
-                            <img className='h-full w-full object-cover' src={image} alt="" />
+                            <img className='h-full w-full scale-105 object-cover' src={image} alt="" />
                             <input
                                 type="file"
                                 onChange={handleImageUpload}
@@ -151,7 +162,23 @@ function Signup() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    <button type='submit' className='w-full dark:bg-subtitle-dark dark:text-bg-dark bg-subtitle-light text-bg-light py-3 rounded-full dark:hover:bg-subtitle-dark/60 hover:bg-subtitle-light/60 transition-colors duration-200'>Register</button>
+                    <button
+                        type='submit'
+                        disabled={isLoading}
+                        className={`w-full dark:bg-subtitle-dark dark:text-bg-dark bg-subtitle-light text-bg-light py-3 rounded-full transition-colors duration-200 flex justify-center items-center 
+                            ${isLoading
+                            ? 'dark:bg-subtitle-dark bg-subtitle-light cursor-not-allowed'
+                            : 'dark:hover:bg-subtitle-dark/60 hover:bg-subtitle-light/60'
+                            }`}
+                    >
+                        {isLoading ? (
+                            // Loading spinner SVG
+                            <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        ) : 'Register'}
+                    </button>
                     <div className='flex justify-center items-center gap-1'>
                         <p className='text-center dark:text-subtitle-dark text-subtitle-light'>Already Have an Account</p>
                         <Link to="/login" className='text-blue-500 hover:underline'>Login</Link>

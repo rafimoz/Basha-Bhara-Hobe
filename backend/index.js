@@ -20,8 +20,8 @@ app.use(express.json({ limit: "20mb" }));
 
 app.use("/api", adRoutes);
 
-app.get('/', (req, res) => {
-  res.send('Hello World')
+app.get("/", (req, res) => {
+  res.send("Hello World");
 });
 
 connectCloudinary();
@@ -39,7 +39,8 @@ app.post("/login", (req, res) => {
   UserModel.findOne({ email: email }).then((user) => {
     if (user) {
       if (user.password === password) {
-        res.json(user._id);
+        let id = user._id;
+        res.json({ success: true, id });
       } else {
         res.json("the password is incorrect");
       }
@@ -50,12 +51,11 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { name, email, password, image } = req.body;
-
   try {
+    const { name, email, password, image } = req.body;
     // Check if required fields are present
     if (!name || !email || !password || !image) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.json({ success: false, message: 'Missing Fields' });
     }
 
     // Upload base64 image string to Cloudinary
@@ -70,7 +70,9 @@ app.post("/register", async (req, res) => {
       image: result.secure_url,
     });
 
-    res.status(201).json({ message: "User registered successfully", user: newUser });
+    res
+      .status(201)
+      .json({ message: "User registered successfully", user: newUser });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error", error: err.message });

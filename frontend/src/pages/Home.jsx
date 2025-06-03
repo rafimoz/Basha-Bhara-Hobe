@@ -494,7 +494,7 @@ const HomePage = () => {
             {/* Footer */}
             <footer className="dark:bg-bg-dark bg-bg-light dark:text-title-dark text-title-light py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-4 gap-8">
+                    <div className="grid md:grid-cols-3 gap-8">
                         <div className="space-y-4">
                             <div className="flex items-center space-x-2">
                                 <div className='w-7 h-fit'>
@@ -571,10 +571,9 @@ const HomePage = () => {
                         <div>
                             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
                             <div className="space-y-2">
-                                <a href="#" className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">About</a>
-                                <a href="#" className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">Contact</a>
-                                <a href="#" className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">Privacy Policy</a>
-                                <a href="#" className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">Terms of Service</a>
+                                <a href="#about" className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">About</a>
+                                <a className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">Privacy Policy</a>
+                                <a className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">Terms of Service</a>
                             </div>
                         </div>
                         <div>
@@ -586,7 +585,7 @@ const HomePage = () => {
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        {/* <div>
                             <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
                             <div className="flex space-x-4">
                                 {['Facebook', 'Twitter', 'Instagram'].map((social) => (
@@ -599,7 +598,7 @@ const HomePage = () => {
                                     </a>
                                 ))}
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                     <div className="border-t dark:border-description-dark border-description-light mt-10 pt-8 text-center dark:text-description-dark text-description-light">
                         <p>&copy; 2025 Basha Bhara Hobe. All rights reserved.</p>
