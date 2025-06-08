@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
 import img from '../assets/images.png'
-import Spline from '@splinetool/react-spline';
 
 import {
     QrCode,
@@ -245,7 +244,7 @@ const HomePage = () => {
                                 </p>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <button onClick={() => { navigate("/register") }} className="dark:bg-cta-dark bg-subtitle-light text-white px-8 py-4 rounded-lg text-lg font-semibold dark:hover:bg-cta-dark/50 hover:bg-subtitle-light/80 transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
+                                <button onClick={() => { navigate("/register") }} className="dark:bg-cta-dark bg-subtitle-light text-white px-8 py-4 rounded-lg text-lg font-semibold dark:hover:bg-cta-dark/50 hover:bg-subtitle-light/80 transform hover:scale-105 transition-all duration-200 flex items-center justify-center cursor-pointer">
                                     Post Your Property
                                     <ArrowRight className="ml-2 h-5 w-5" />
                                 </button>
@@ -254,12 +253,12 @@ const HomePage = () => {
                 </button> */}
                             </div>
                         </div>
-                        <div className="relative rounded-3xl h-130">
-                            <svg className='absolute w-full h-full' viewBox="0 0 1447 1392" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <div className="relative rounded-3xl">
+                            <img className='w-full h-full object-cover absolute transform hover:scale-110 transition-transform duration-500' src={img} alt="" srcset="" />
+                            <svg className='w-full h-full' viewBox="0 0 1447 1392" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M981.501 112C540.975 183.15 748.508 -37.5995 227.785 6.82222C-55.3564 34.68 381 419 63.0007 419C-63.5637 419 13.4986 740.5 200.999 740.5C484.049 740.5 165.659 1315 463.861 1377.12C762.063 1439.23 1054.32 1292.7 1130 1048C1205.68 803.304 1336.42 990.845 1434 740.5C1483.5 613.5 1370.86 659.739 1282 468.5C1193.14 277.261 1422.03 40.8498 981.501 112Z" fill="#424242" />
                                 <path d="M635.501 1013C1013.37 934.474 656.828 1359.7 1107.2 1321.3C1352.09 1297.22 903.767 1021.94 1239.5 864.5C1473 755 1042 645.795 1239.5 490C1526 264.001 950 405 1049 133C1139.11 -114.558 534.854 86.3022 469.398 297.824C403.942 509.346 222 83.5 222 398C222 475.771 279.646 529.687 356.5 695C433.354 860.313 -43 1154 635.501 1013Z" fill="#2C2C2C" />
                             </svg>
-                            <Spline className='absolute' scene="https://prod.spline.design/tYDcMi1BsrjMGwgf/scene.splinecode" />
                         </div>
                     </div>
                 </div>
