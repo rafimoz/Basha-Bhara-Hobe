@@ -162,7 +162,7 @@ const Dashboard = () => {
                   <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#424242" />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Welcome, <span>{user.name}☺️</span></span>
+              <span className="sm:text-xl text-sm font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Welcome, <span>{user.name}☺️</span></span>
             </div>
             <div className="w-10 h-10 rounded-full bg-subtitle-dark dark:bg-subtitle-light overflow-hidden">
               <img className="object-cover" src={user.image} alt="" srcset="" />
