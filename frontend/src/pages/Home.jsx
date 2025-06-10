@@ -384,7 +384,7 @@ const HomePage = () => {
                             {showVideo ? (
                                 // Video Element
                                 <div className="relative h-full">
-                                    <iframe src="https://app.supademo.com/embed/cmbqplgxrbvigsn1r9o70w2m8?embed_v=2" loading="lazy" title="Basha Bhara Demo" allow="clipboard-write" frameborder="0" webkitallowfullscreen="true" mozallowfullscreen="true" allowFullScreen className='w-full h-full object-cover'></iframe>
+                                    <iframe className='w-full h-full' src="https://app.supademo.com/embed/cmbqy1wxn02f3y60i0dvw97gb?embed_v=2" loading="lazy" title="New Demo" allow="clipboard-write" frameborder="0" webkitallowfullscreen="true" mozallowfullscreen="true" allowfullscreen ></iframe>
                                 </div>
                             ) : (
                                 // Demo Preview Section (Image Carousel)
