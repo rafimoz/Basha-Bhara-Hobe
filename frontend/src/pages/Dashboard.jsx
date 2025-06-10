@@ -164,7 +164,6 @@ const Dashboard = () => {
               </div>
               <span className="text-xl font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Welcome, <span>{user.name}☺️</span></span>
             </div>
-
             <div className="w-10 h-10 rounded-full bg-subtitle-dark dark:bg-subtitle-light overflow-hidden">
               <img className="object-cover" src={user.image} alt="" srcset="" />
             </div>
