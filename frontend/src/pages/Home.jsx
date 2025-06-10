@@ -575,7 +575,7 @@ const HomePage = () => {
                             <div className="space-y-3">
                                 <div className="flex items-center space-x-3">
                                     <Mail className="h-5 w-5 dark:text-subtitle-dark text-subtitle-light" />
-                                    <span className="dark:text-subtitle-dark text-subtitle-light">mozumder.rafi1@gmail.com</span>
+                                    <span className="dark:text-subtitle-dark text-subtitle-light">bashabharahobe@gmail.com</span>
                                 </div>
                             </div>
                         </div>
