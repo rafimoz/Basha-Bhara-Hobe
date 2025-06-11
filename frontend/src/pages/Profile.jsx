@@ -1,42 +1,45 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
-import { ToastContainer, toast } from 'react-toastify';
+import { lazy, useEffect, useState } from 'react'
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-function Login() {
-    const [email, setEmail] = useState('') // Initialize with empty string
-    const [password, setPassword] = useState('') // Initialize with empty string
-    const navigate = useNavigate()
+const Profile = () => {
     const backendURL = import.meta.env.VITE_BACKEND_URL;
+    const { id: ownerId } = useParams();
+    const [user, setUser] = useState({});
+    const navigate = useNavigate();
+    const [isOpen, setIsOpen] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        axios.post(backendURL + '/login', { email, password })
-            .then(result => {
-                console.log(result)
-                if (result.data.success) {
-                    localStorage.setItem('authToken', result.data.token);
-                    localStorage.setItem('userId', result.data.id);
-                    navigate(`/dashboard/${result.data.id}`)
-                } else {
-                    toast.error("Incorrect Password!")
-                }
-            })
-            .catch(err => {
-                console.error("Login error:", err);
-                toast.error("Something went wrong. Try again.");
-            })
-    }
 
+    useEffect(() => {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+            navigate("/login");
+            return;
+        }
+        const userId = localStorage.getItem("userId");
+        if (userId !== ownerId) {
+            navigate("/login");
+            return;
+        }
+        fetchUser();
+    }, [ownerId, navigate]);
+
+    const fetchUser = async () => {
+        try {
+            const res = await axios.get(backendURL + `/api/user/${ownerId}`);
+            setUser(res.data);
+        } catch (error) {
+            console.error("Error fetching user:", error);
+        }
+    };
     return (
-        <div className='flex justify-center items-center h-screen dark:bg-bg-dark bg-bg-light'>
-            <ToastContainer />
+        <div className="min-h-screen dark:bg-bg-dark bg-bg-light font-sans">
             {/* Nav Section */}
-            <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">
+            <nav className="sticky top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
-                        <div onClick={()=>{navigate("/")}} className="flex items-center gap-2 cursor-pointer">
+                        {/*Logo*/}
+                        <div className="flex items-center gap-2 cursor-default">
                             <div className='w-7 h-fit'>
                                 <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M267.997 60.793L265.006 319H169.662V6.34766L267.997 60.793Z" fill="#B0B0B0" stroke="#B0B0B0" />
@@ -103,44 +106,99 @@ function Login() {
                                     <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#424242" />
                                 </svg>
                             </div>
-                            <span className="text-xl font-bold text-subtitle-light dark:text-subtitle-dark">Basha Bhara Hobe</span>
+                            <span className="sm:text-xl text-sm font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Welcome, <span>{user.name}☺️</span></span>
+                        </div>
+
+                        {/*PFP and Logout Button*/}
+                        <div className="hidden md:flex items-center gap-3">
+                            <button 
+                                onClick={()=>navigate(`/dashboard/${ownerId}`)}
+                                className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
+                                Dashboard
+                            </button>
+                            <button onClick={() => {
+                                localStorage.removeItem("authToken");
+                                localStorage.removeItem("userId");
+                                navigate("/login");
+                            }} className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
+                                Logout
+                            </button>
+                        </div>
+
+                        {/* Mobile Burger Menu Button */}
+                        <div className="md:hidden flex items-center">
+                            <button
+                                onClick={() => setIsOpen(!isOpen)}
+                                className="dark:text-subtitle-dark dark:hover:text-subtitle-dark/50 text-subtitle-light hover:text-subtitle-light/50 focus:outline-none focus:text-subtitle-dark"
+                            >
+                                <svg
+                                    className="h-6 w-6"
+                                    stroke="currentColor"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    {isOpen ? (
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    ) : (
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M4 6h16M4 12h16M4 18h16"
+                                        />
+                                    )}
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile Menu */}
+                <div
+                    className={`${isOpen ? 'block' : 'hidden'} md:hidden`}
+                >
+                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                        <a
+                            href={`/dashboard/${ownerId}`}
+                            className="block px-3 py-2 rounded-md text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20"
+                            onClick={() => setIsOpen(false)} // Close menu on link click
+                        >
+                            Dashboard
+                        </a>
+                        <button onClick={() => {
+                            localStorage.removeItem("authToken");
+                            localStorage.removeItem("userId");
+                            navigate("/login");
+                        }} className="w-full text-left dark:bg-subtitle-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 rounded-md text-base font-medium transition-colors mt-2">
+                            Logout</button>
+                    </div>
+                </div>
             </nav>
-            <div className='p-8 rounded-lg w-96'> {/* Content wrapper */}
-                <h2 className='text-4xl font-bold text-center mb-5 dark:text-title-dark text-title-light'>Login</h2> {/* Login title */}
-                <form onSubmit={handleSubmit} className='flex flex-col gap-4'> {/* Form container */}
-                    <div>
-                        {/* <label htmlFor="email" className='sr-only'>Email</label> */} {/* Hidden label for accessibility */}
-                        <input
-                            type="email"
-                            placeholder='Email'
-                            autoComplete='off'
-                            name='email'
-                            className='w-full px-4 py-3 border-2 dark:border-description-dark border-description-light dark:text-subtitle-dark text-subtitle-light rounded-full focus:outline-none focus:ring-2 dark:focus:ring-subtitle-dark focus:ring-subtitle-light'
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
+
+            {/*Main section*/}
+            <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8">
+                <h2 className="text-4xl font-bold mb-8 dark:text-title-dark text-title-light">Profile</h2>
+                <div className='grid sm:grid-cols-[1fr_2fr] grid-cols-1 items-center gap-4 p-4 bg-card-dark/20 rounded-4xl shadow-2xl'>
+                    <div className='w-full flex justify-center'>
+                        <img className='sm:w-70 sm:h-70 w-40 h-40 rounded-full overflow-hidden object-cover shadow-sm shadow-white/90' src={user.image} alt="" srcset="" />
                     </div>
-                    <div>
-                        {/* <label htmlFor="password" className='sr-only'>Password</label> */} {/* Hidden label for accessibility */}
-                        <input
-                            type="password"
-                            placeholder='Password'
-                            name='password'
-                            className='w-full px-4 py-3 border-2 dark:border-description-dark border-description-light dark:text-subtitle-dark text-subtitle-light rounded-full focus:outline-none focus:ring-2 dark:focus:ring-subtitle-dark focus:ring-subtitle-light'
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                    <div className='bg-card-dark text-subtitle-dark rounded-3xl p-4 flex flex-col gap-3 w-full h-full'>
+                        <p className='border-2 uppercase border-subtitle-dark p-2 rounded-2xl'>{user.name}</p>
+                        <p className='border-2 border-subtitle-dark p-2 rounded-2xl'>{user.email}</p>
+                        <div className='flex justify-between items-end h-full gap-3'>
+                            <button className='p-2 border w-full dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark rounded-full px-3 cursor-pointer'>Edit</button>
+                            <button onClick={()=>navigate(`/dashboard/${ownerId}`)} className='p-2 border w-full dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark rounded-full px-3 cursor-pointer'>cancel</button>
+                        </div>                   
                     </div>
-                    <button type='submit' className='w-full dark:bg-subtitle-dark dark:text-bg-dark bg-subtitle-light text-bg-light py-3 rounded-full dark:hover:bg-subtitle-dark/60 hover:bg-subtitle-light/60 transition-colors duration-200'>Login</button>
-                    <div className='flex justify-center items-center gap-1'>
-                        <p className='text-center dark:text-subtitle-dark text-subtitle-light'>Don't Have an Account?</p>
-                        <Link to="/register" className='text-blue-500 hover:underline'>Register</Link>
-                    </div>
-                </form>
-            </div>
+                </div>
+            </main>
         </div>
     )
 }
 
-export default Login
+export default Profile

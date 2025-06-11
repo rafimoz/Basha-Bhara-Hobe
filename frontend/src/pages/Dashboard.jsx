@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import Add from "../components/Add";
@@ -8,11 +8,33 @@ const Dashboard = () => {
   const { id: ownerId } = useParams();
   const backendURL = import.meta.env.VITE_BACKEND_URL;
   const [ads, setAds] = useState([]);
-  const [user, setUser] = useState({}); // Initialize as object for safety
+  const [user, setUser] = useState({});
   const [addUnit, setAddUnit] = useState(false);
   const [qrCode, setQrCode] = useState("");
   const [refreshAds, setRefreshAds] = useState(false);
   const [selectedAd, setSelectedAd] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const authToken = localStorage.getItem("authToken");
+
+    if (!authToken) {
+      navigate("/login");
+      return;
+    }
+
+    const userId = localStorage.getItem("userId");
+    if (userId !== ownerId) {
+      navigate("/login");
+      return;
+    }
+
+    fetchAds();
+    fetchQRCode();
+    fetchUser();
+  }, [refreshAds, ownerId, navigate]);
 
   const fetchAds = async () => {
     try {
@@ -56,12 +78,6 @@ const Dashboard = () => {
     setRefreshAds((prev) => !prev);
   };
 
-  useEffect(() => {
-    fetchAds();
-    fetchQRCode();
-    fetchUser();
-  }, [refreshAds, ownerId]); // Added ownerId to dependencies
-
   return (
     // Applied a light background and a modern sans-serif font
     <div className="min-h-screen dark:bg-bg-dark bg-bg-light font-sans">
@@ -90,11 +106,11 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
-      {/* Header Section */}
       {/* Nav Section */}
       <nav className="sticky top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+            {/*Logo*/}
             <div className="flex items-center gap-2 cursor-default">
               <div className='w-7 h-fit'>
                 <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -164,9 +180,71 @@ const Dashboard = () => {
               </div>
               <span className="sm:text-xl text-sm font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Welcome, <span>{user.name}☺️</span></span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-subtitle-dark dark:bg-subtitle-light overflow-hidden">
-              <img className="object-cover" src={user.image} alt="" srcset="" />
+
+            {/*PFP and Logout Button*/}
+            <div className="hidden md:flex items-center gap-3">
+              <button onClick={() => {
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userId");
+                navigate("/login");
+              }} className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
+                Logout</button>
+              <div onClick={()=>navigate(`/profile/${ownerId}`)} className="w-10 h-10 rounded-full bg-subtitle-dark dark:bg-subtitle-light overflow-hidden cursor-pointer hover:border-2 dark:border-subtitle-dark border-subtitle-light">
+                <img className="object-cover" src={user.image} alt="" srcset="" />
+              </div>
             </div>
+
+            {/* Mobile Burger Menu Button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="dark:text-subtitle-dark dark:hover:text-subtitle-dark/50 text-subtitle-light hover:text-subtitle-light/50 focus:outline-none focus:text-subtitle-dark"
+              >
+                <svg
+                  className="h-6 w-6"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  {isOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div
+          className={`${isOpen ? 'block' : 'hidden'} md:hidden`}
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a
+              href={`/profile/${ownerId}`}
+              className="block px-3 py-2 rounded-md text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20"
+              onClick={() => setIsOpen(false)} // Close menu on link click
+            >
+              Profile
+            </a>
+            <button onClick={() => {
+              localStorage.removeItem("authToken");
+              localStorage.removeItem("userId");
+              navigate("/login");
+            }} className="w-full text-left dark:bg-subtitle-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 rounded-md text-base font-medium transition-colors mt-2">
+              Logout</button>
           </div>
         </div>
       </nav>

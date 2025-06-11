@@ -87,7 +87,10 @@ app.post("/register", async (req, res) => {
 const getUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await UserModel.findOne({ _id: id });
+    const user = await UserModel.findOne({ _id: id }).select('-password'); // Exclude the 'password' field
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
     res.json(user);
   } catch (error) {
     console.error(error);
