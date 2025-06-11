@@ -1,4 +1,4 @@
-import { lazy, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -8,7 +8,54 @@ const Profile = () => {
     const [user, setUser] = useState({});
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
+    const [isEdit, setIsEdit] = useState(false)
+    const [isLoading, setIsLoading] = useState(false) // Add loading state
 
+
+    const [form, setForm] = useState({
+        name: '',
+        image: '',
+    });
+
+    const updateProfile = async () => {
+        setIsLoading(true) // Start loading animation
+
+        try {
+            const res = await axios.put(`${backendURL}/api/user/update/${ownerId}`, {
+                name: form.name,
+                image: form.image,
+            });
+
+            if (res.data.success) {
+                await fetchUser();
+                setIsEdit(false);
+                setIsLoading(false) // Stop loading animation
+            }
+        } catch (error) {
+            console.error("Update error:", error);
+        }
+    };
+
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setForm((prev) => ({ ...prev, image: reader.result }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    useEffect(() => {
+        if (user) {
+            setForm({
+                name: user.name || '',
+                image: user.image || '',
+            });
+        }
+    }, [user]);
 
     useEffect(() => {
         const authToken = localStorage.getItem("authToken");
@@ -111,8 +158,8 @@ const Profile = () => {
 
                         {/*PFP and Logout Button*/}
                         <div className="hidden md:flex items-center gap-3">
-                            <button 
-                                onClick={()=>navigate(`/dashboard/${ownerId}`)}
+                            <button
+                                onClick={() => navigate(`/dashboard/${ownerId}`)}
                                 className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
                                 Dashboard
                             </button>
@@ -183,18 +230,66 @@ const Profile = () => {
             {/*Main section*/}
             <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8">
                 <h2 className="text-4xl font-bold mb-8 dark:text-title-dark text-title-light">Profile</h2>
-                <div className='grid sm:grid-cols-[1fr_2fr] grid-cols-1 items-center gap-4 p-4 bg-card-dark/20 rounded-4xl shadow-2xl'>
+                <div className='relative grid sm:grid-cols-[1fr_2fr] grid-cols-1 items-center gap-4 p-4 bg-card-dark/20 rounded-4xl shadow-2xl overflow-hidden'>
                     <div className='w-full flex justify-center'>
-                        <img className='sm:w-70 sm:h-70 w-40 h-40 rounded-full overflow-hidden object-cover shadow-sm shadow-white/90' src={user.image} alt="" srcset="" />
+                        {isEdit ? (
+                            <label htmlFor='image' className='rounded-full'>
+                                <div className='cursor-pointer relative'>
+                                    <img
+                                        className='sm:w-70 sm:h-70 w-40 h-40 border-2 border-title-dark rounded-full object-cover opacity-25'
+                                        src={form.image}
+                                        alt="preview"
+                                    />
+                                    <svg width="30" height="30" className='absolute top-[50%] left-[50%] transform -translate-x-[50%] -translate-y-[50%]' viewBox="0 0 23 23">
+                                        <path d="..." fill="white" />
+                                    </svg>
+                                </div>
+                                <input onChange={handleImageChange} type="file" id='image' hidden />
+                            </label>
+                        ) : (
+                            <img
+                                className='sm:w-70 sm:h-70 w-40 h-40 border-2 border-title-dark rounded-full object-cover'
+                                src={user.image}
+                                alt="profile"
+                            />
+                        )}
+
                     </div>
-                    <div className='bg-card-dark text-subtitle-dark rounded-3xl p-4 flex flex-col gap-3 w-full h-full'>
-                        <p className='border-2 uppercase border-subtitle-dark p-2 rounded-2xl'>{user.name}</p>
-                        <p className='border-2 border-subtitle-dark p-2 rounded-2xl'>{user.email}</p>
+                    <div className='bg-card-dark text-subtitle-dark rounded-3xl p-4 flex flex-col gap-2 w-full h-full'>
+                        <div className='flex items-center gap-2'>
+                            <p className='font-bold'>Name:</p>
+                            <label htmlFor="name">
+                                {
+                                    isEdit
+                                        ? <input type="text" value={form.name} onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))} className='border-2 uppercase border-subtitle-dark p-2 rounded-2xl w-full' />
+                                        : <p className='uppercase p-2 rounded-2xl'>{user.name}</p>
+                                }
+                            </label>
+                        </div>
+                        <div className='flex items-center gap-2'>
+                            <p className='font-bold'>Email:</p>
+                            <p className='p-2 rounded-2xl'>{user.email}</p>
+                        </div>
                         <div className='flex justify-between items-end h-full gap-3'>
-                            <button className='p-2 border w-full dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark rounded-full px-3 cursor-pointer'>Edit</button>
-                            <button onClick={()=>navigate(`/dashboard/${ownerId}`)} className='p-2 border w-full dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark rounded-full px-3 cursor-pointer'>cancel</button>
-                        </div>                   
+                            {
+                                isEdit
+                                    ? <button onClick={updateProfile} className={`cursor-pointer p-2 border dark:border-subtitle-dark border-subtitle-light w-full dark:bg-subtitle-dark bg-subtitle-light dark:text-title-light text-subtitle-light dark:hover:bg-title-dark hover:bg-title-light rounded-full px-3`}>
+                                        Update Profile
+                                    </button>
+                                    : <button onClick={() => setIsEdit(true)} className='p-2 border w-full dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark rounded-full px-3 cursor-pointer'>Edit</button>
+                            }
+                            <button onClick={() => navigate(`/dashboard/${ownerId}`)} className='p-2 border w-full dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark rounded-full px-3 cursor-pointer'>Cancel</button>
+                        </div>
                     </div>
+
+                    {isLoading && (
+                        <div className='w-full h-full absolute flex justify-center items-center z-10 bg-white/10 backdrop-blur-xs'>
+                            <svg className="animate-spin h-10 w-10 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="#FFFF" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    )}
                 </div>
             </main>
         </div>
