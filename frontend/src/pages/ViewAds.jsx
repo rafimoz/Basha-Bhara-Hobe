@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, ChevronRight } from "react-feather";
 
 const ViewAds = () => {
   const { ownerId } = useParams();
@@ -61,11 +62,16 @@ const ViewAds = () => {
   const scrollToImage = (adId, index) => {
     const element = document.getElementById(`banner-${adId}-${index}`);
     if (element) {
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center'
-      });
+      // Get the parent container
+      const container = bannerRefs.current[adId];
+      if (container) {
+        // Calculate the scrollLeft position
+        const scrollLeft = index * container.clientWidth;
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: 'smooth'
+        });
+      }
     }
     // Update current index immediately
     setCurrentIndices(prev => ({ ...prev, [adId]: index }));
@@ -94,8 +100,25 @@ const ViewAds = () => {
     }, 150); // 150ms delay after scrolling stops
   };
 
+  // Fixed prev and next functions
+  const goToPrevImage = (adId, totalImages) => {
+    setCurrentIndices(prev => {
+      const newIndex = (prev[adId] === 0) ? totalImages - 1 : prev[adId] - 1;
+      scrollToImage(adId, newIndex); // Scroll to the new image
+      return { ...prev, [adId]: newIndex };
+    });
+  };
+
+  const goToNextImage = (adId, totalImages) => {
+    setCurrentIndices(prev => {
+      const newIndex = (prev[adId] === totalImages - 1) ? 0 : prev[adId] + 1;
+      scrollToImage(adId, newIndex); // Scroll to the new image
+      return { ...prev, [adId]: newIndex };
+    });
+  };
+
   return (
-    <div className="min-h-screen dark:bg-bg-dark bg-bg-light">
+    <div className="min-h-screen dark:bg-bg-dark bg-bg-light relative">          
       {/* Nav Section */}
       <nav className="sticky top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -179,16 +202,15 @@ const ViewAds = () => {
           {ads.map((ad) => {
             const isVisible = visibleAds[ad._id] || false;
             const currentIndex = currentIndices[ad._id] || 0;
-
             return (
               ad.availability && (
                 <div key={ad._id} className="dark:bg-card-dark bg-card-light h-fit rounded-3xl overflow-hidden shadow-xl relative transition-all duration-300">
                   {/* Banner Section */}
-                  <div className="relative" onClick={() => toggleVisibility(ad._id)}>
+                  <div className="relative">
                     <div
                       ref={el => bannerRefs.current[ad._id] = el}
                       onScroll={() => handleScroll(ad._id)}
-                      className="flex overflow-x-scroll no-scrollbar sm:h-55 h-70"
+                      className="flex overflow-x-scroll no-scrollbar sm:h-55 h-70 snap-x snap-mandatory" // Changed overflow-x-hidden to overflow-x-scroll and added snap properties
                     >
                       {ad.images.map((image, index) => (
                         <img
@@ -196,28 +218,33 @@ const ViewAds = () => {
                           id={`banner-${ad._id}-${index}`}
                           src={image}
                           alt={`Ad image ${index + 1}`}
-                          className="h-full w-full object-cover flex-shrink-0"
+                          className="h-full w-full object-cover flex-shrink-0 snap-center" // Added snap-center
                         />
                       ))}
                     </div>
 
                     {/* Dots with active tracking and transition */}
-                    <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-2">
+                    <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-1">
                       {ad.images.map((_, index) => (
-                        <motion.span
+                        <span
                           key={index}
-                          className="w-3 h-3 rounded-full border"
-                          initial={{
-                            backgroundColor: index === currentIndex ? '#ffffff' : 'transparent',
-                            borderColor: index === currentIndex ? 'transparent' : 'currentColor'
-                          }}
-                          animate={{
-                            backgroundColor: index === currentIndex ? '#ffffff' : 'transparent',
-                            borderColor: index === currentIndex ? 'transparent' : 'currentColor'
-                          }}
-                          transition={{ duration: 0.2 }}
+                          className={`
+                            w-3 h-3 rounded-full
+                            transition-all bg-white
+                            ${currentIndex === index ? "p-2" : "bg-white/50"}
+                            `}
                         />
                       ))}
+                    </div>
+
+                    {/* Next and Previous button */}
+                    <div className=" absolute inset-0 flex items-center justify-between p-4">
+                      <button onClick={() => goToPrevImage(ad._id, ad.images.length)} className="p-1 rounded-full shadow bg-white/50 text-gray-800 hover:bg-white">
+                        <ChevronLeft size={30} />
+                      </button>
+                      <button onClick={() => goToNextImage(ad._id, ad.images.length)} className="p-1 rounded-full shadow bg-white/50 text-gray-800 hover:bg-white">
+                        <ChevronRight size={30} />
+                      </button>
                     </div>
                   </div>
 
@@ -230,10 +257,10 @@ const ViewAds = () => {
                       transition={{ duration: 0.3, ease: "easeOut" }}
                       className="flex items-center gap-2 px-3 pt-3"
                     >
-                      {ad.images.slice(0, 3).map((img, index) => (
+                      {ad.images.slice(0, ad.images.length).map((img, index) => (
                         <motion.div
                           key={index}
-                          className={`w-12 h-12 rounded-xl overflow-hidden cursor-pointer ${index === currentIndex ? 'border-2 border-blue-500' : 'border border-transparent'
+                          className={`w-12 h-12 rounded-xl overflow-hidden cursor-pointer ${index === currentIndex ? 'border-2 dark:border-white border-black' : 'border border-transparent'
                             }`}
                           whileHover={{ scale: 1.05 }}
                           onClick={(e) => {
@@ -248,7 +275,7 @@ const ViewAds = () => {
                   )}
 
                   {/* Ad Details */}
-                  <div className="p-3">
+                  <div className="p-4 pb-0 transition-all duration-300 ease-in">
                     <div className="flex items-center justify-between">
                       <h2 className="sm:text-3xl text-2xl font-bold dark:text-subtitle-dark text-subtitle-light">{ad.title}</h2>
                       <div
@@ -268,7 +295,7 @@ const ViewAds = () => {
                       {ad.description}
                     </p>
 
-                    {isVisible ? (
+                    {isVisible && (
                       <>
                         <motion.p
                           initial={{ opacity: 0 }}
@@ -282,25 +309,24 @@ const ViewAds = () => {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.25 }}
-                          className="dark:text-black text-white font-semibold dark:bg-subtitle-dark bg-subtitle-light w-full mt-3 py-2 rounded-3xl dark:hover:bg-subtitle-dark/80 hover:bg-subtitle-light/80  transition"
+                          className="dark:text-black text-white font-semibold dark:bg-subtitle-dark bg-subtitle-light w-full mt-3 py-2 rounded-3xl dark:hover:bg-subtitle-dark/80 hover:bg-subtitle-light/80  transition"
                         >
                           Contact
                         </motion.button>
                       </>
-                    ) : (
-                      <div className="w-full text-center mt-2">
-                        <button onClick={() => toggleVisibility(ad._id)} className="w-full flex justify-center items-center py-2 rounded-full cursor-pointer">
-                          <svg className="dark:block hidden" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9.8335 7.3999L18 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
-                            <path d="M9.8335 7.3999L1.66701 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
-                          </svg>
-                          <svg className="dark:hidden block" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9.8335 7.3999L18 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
-                            <path d="M9.8335 7.3999L1.66701 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
-                          </svg>
-                        </button>
-                      </div>
                     )}
+                    <div className="w-full text-center my-1">
+                      <button onClick={() => toggleVisibility(ad._id)} className={`${isVisible ? "rotate-x-180" : ""} transition-transform duration-300 ease-in w-full flex justify-center items-center py-2 rounded-full cursor-pointer`}>
+                        <svg className="dark:block hidden" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9.8335 7.3999L18 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
+                          <path d="M9.8335 7.3999L1.66701 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
+                        </svg>
+                        <svg className="dark:hidden block" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9.8335 7.3999L18 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
+                          <path d="M9.8335 7.3999L1.66701 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )

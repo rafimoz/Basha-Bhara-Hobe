@@ -111,7 +111,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
             </div>
             {/* Thumbnail Section */}
             <div className="flex items-center gap-2 px-4">
-                {form.images.slice(0, 3).map((img, index) => (
+                {form.images.slice(0, form.images.length).map((img, index) => (
                     <div
                         key={index}
                         className="relative group w-12 h-12 rounded-xl overflow-hidden border dark:border-subtitle-dark border-subtitle-light"
