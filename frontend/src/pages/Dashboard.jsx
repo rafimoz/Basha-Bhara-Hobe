@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import Add from "../components/Add";
+import QrCode from "../components/QrCode";
 
 const Dashboard = () => {
   const { id: ownerId } = useParams();
@@ -11,6 +12,7 @@ const Dashboard = () => {
   const [user, setUser] = useState({});
   const [addUnit, setAddUnit] = useState(false);
   const [qrCode, setQrCode] = useState("");
+  const [seeQrCode, setSeeQrCode] = useState(false);
   const [refreshAds, setRefreshAds] = useState(false);
   const [selectedAd, setSelectedAd] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -102,6 +104,22 @@ const Dashboard = () => {
               }}
               ad={selectedAd}
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {seeQrCode && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            // Adjusted backdrop for a softer look
+            className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+          >
+            {/*Qr Code Pop Up*/}
+            <QrCode qrImage={qrCode} seeQrCode={setSeeQrCode} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -255,9 +273,7 @@ const Dashboard = () => {
         <h2 className="text-4xl font-bold mb-8 dark:text-title-dark text-title-light">All Units</h2>
         <div className="flex justify-between mb-5"> {/* Spaced out buttons */}
           {/* QR Code Button - PRESERVED ORIGINAL STYLING */}
-          <a href={qrCode} download="qr-code.png">
-            <button className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">QR Code</button>
-          </a>
+          <button onClick={() => setSeeQrCode(true)} className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">QR Code</button>
           {/* Add New Unit Button - PRESERVED ORIGINAL STYLING */}
           <button onClick={() => setAddUnit(true)} className="border dark:border-subtitle-dark border-subtitle-light dark:bg-subtitle-dark bg-subtitle-light dark:text-title-light text-title-dark p-1.5 rounded-full px-3 cursor-pointer">Add New</button>
         </div>
@@ -371,6 +387,7 @@ const Dashboard = () => {
           </div>
         )}
       </main>
+
     </div>
   );
 };
