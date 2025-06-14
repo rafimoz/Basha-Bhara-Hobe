@@ -68,9 +68,9 @@ const QrCode = ({ qrImage, seeQrCode }) => {
         }
     };
     return (
-        <div className='flex justify-center items-center'>
+        <div className='flex justify-center items-center sm:relative'>
             <div>
-                <botton onClick={() => seeQrCode(false)} className="absolute z-20 top-4 right-4 dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light rounded-full p-1 hover:scale-105 transition-all">
+                <botton onClick={() => seeQrCode(false)} className="absolute z-20 sm:-top-12 sm:-right-12 top-4 right-4 dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light rounded-full p-1 hover:scale-105 transition-all">
                     <X className="w-8 h-8" />
                 </botton>
             </div>
@@ -140,7 +140,7 @@ const QrCode = ({ qrImage, seeQrCode }) => {
                         </svg>
                     </div>
                 </div>
-                <div className='flex gap-2'>
+                <div className='flex gap-2 text-sm'>
                     <button onClick={handleDownloadImage} className='p-2 dark:bg-subtitle-dark bg-subtitle-light dark:text-card-dark text-card-light font-medium py-2 rounded-2xl dark:hover:bg-description-dark hover:bg-title-light transition cursor-pointer'>
                         Download Image
                     </button>

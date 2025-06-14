@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { Plus, X } from "lucide-react";
 
 import "./LoadingIndicator.css";
 
@@ -9,12 +10,56 @@ const LoadingIndicator = () => (
         <div className="loading-spinner"></div>
     </div>
 );
-import { Plus, X } from "lucide-react";
+
+// ✅ Compress image utility
+const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+        if (!file.type.startsWith('image/')) {
+            reject(new Error("File is not an image."));
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                const maxWidth = 800;
+                const quality = 0.7;
+
+                let newWidth = img.width;
+                let newHeight = img.height;
+
+                if (newWidth > maxWidth) {
+                    newHeight = Math.floor(newHeight * (maxWidth / newWidth));
+                    newWidth = maxWidth;
+                }
+
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+                ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedDataUrl);
+            };
+
+            img.onerror = () => reject(new Error("Failed to load image for compression."));
+        };
+
+        reader.onerror = () => reject(new Error("Failed to read file for compression."));
+        reader.readAsDataURL(file);
+    });
+};
 
 function Add({ toggleRefreshAds, setAddUnit, ad }) {
-    const { id: ownerId } = useParams(); // 👈 get id from URL
+    const { id: ownerId } = useParams();
     const backendURL = import.meta.env.VITE_BACKEND_URL;
     const [isLoading, setIsLoading] = useState(false);
+
     const [form, setForm] = useState(ad ? {
         title: ad.title,
         description: ad.description,
@@ -44,25 +89,31 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
         }
     }, [ad]);
 
+    // ✅ UPDATED: Compress and directly set base64
     const handleImageUpload = async (e) => {
         const files = e.target.files;
-        console.log("File recived in the state variable ", files);
 
         if (files.length > 5) {
             alert("You can only upload a maximum of 5 images.");
             return;
         }
-        // const readers = [];
+
+        const compressedImages = [];
+        setIsLoading(true)
         for (let i = 0; i < files.length; i++) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setForm((prev) => ({
-                    ...prev,
-                    images: [...(prev.images || []), event.target.result],
-                }));
-            };
-            reader.readAsDataURL(files[i]);
+            try {
+                const compressedDataUrl = await compressImage(files[i]);
+                compressedImages.push(compressedDataUrl);
+            } catch (error) {
+                console.error("Error compressing image:", files[i].name, error);
+            }
         }
+
+        setForm((prev) => ({
+            ...prev,
+            images: [...(prev.images || []), ...compressedImages],
+        }));
+        setIsLoading(false)
     };
 
     const handleSubmit = async () => {
@@ -70,23 +121,29 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
             ...form,
             ownerId,
         });
+
         const moveInDate = new Date(form.moveInDate);
-        let res;
         const data = {
             ...form,
             ownerId,
             moveInDate,
         };
-        console.log("Data being sent to updateAd:", data);
+
         setIsLoading(true);
         try {
-            if (ad) {
-                res = await axios.put(backendURL + `/api/ads/${ad._id}`, data);
-            } else {
-                res = await axios.post(backendURL + "/api/ads", data);
-            }
+            const res = ad
+                ? await axios.put(backendURL + `/api/ads/${ad._id}`, data)
+                : await axios.post(backendURL + "/api/ads", data);
+
             console.log("Response from backend:", res);
-            await setForm({ title: "", description: "", price: 0, availability: true, moveInDate: "", images: [] });
+            setForm({
+                title: "",
+                description: "",
+                price: 0,
+                availability: true,
+                moveInDate: "",
+                images: [],
+            });
             toggleRefreshAds();
         } finally {
             setIsLoading(false);
@@ -96,7 +153,8 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
     return (
         <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-3xl overflow-y-auto shadow-lg dark:shadow-subtitle-dark/20 shadow-subtitle-light/20 dark:bg-card-dark dark:text-title-dark bg-card-light text-title-light space-y-4 transition-all no-scrollbar">
             {isLoading && <LoadingIndicator />}
-            {/* Image Preview Section */}
+
+            {/* Preview Main Image */}
             <div className="relative">
                 {form.images.length > 0 && (
                     <img
@@ -105,23 +163,16 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         className="w-full sm:h-65 h-60 object-cover"
                     />
                 )}
-                <botton onClick={() => setAddUnit(false)} className="absolute z-20 top-4 right-4 dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light rounded-full p-1 hover:scale-105 transition-all">
+                <button onClick={() => setAddUnit(false)} className="absolute z-20 top-4 right-4 dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light rounded-full p-1 hover:scale-105 transition-all">
                     <X className="w-8 h-8" />
-                </botton>
+                </button>
             </div>
-            {/* Thumbnail Section */}
+
+            {/* Thumbnails */}
             <div className="flex items-center gap-2 px-4">
-                {form.images.slice(0, form.images.length).map((img, index) => (
-                    <div
-                        key={index}
-                        className="relative group w-12 h-12 rounded-xl overflow-hidden border dark:border-subtitle-dark border-subtitle-light"
-                    >
-                        <img
-                            src={img}
-                            alt={`thumb-${index}`}
-                            className="w-full h-full object-cover"
-                        />
-                        {/* Delete icon */}
+                {form.images.map((img, index) => (
+                    <div key={index} className="relative group w-12 h-12 rounded-xl overflow-hidden border dark:border-subtitle-dark border-subtitle-light">
+                        <img src={img} alt={`thumb-${index}`} className="w-full h-full object-cover" />
                         <button
                             onClick={() => {
                                 setForm((prev) => ({
@@ -136,7 +187,8 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         </button>
                     </div>
                 ))}
-                {/* Upload New Image Button */}
+
+                {/* Upload Button */}
                 <label className="w-12 h-12 border border-dashed dark:border-subtitle-dark border-subtitle-light rounded-xl flex items-center justify-center cursor-pointer dark:text-subtitle-dark text-subtitle-light">
                     <Plus className="w-5 h-5" />
                     <input
@@ -144,11 +196,13 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         multiple
                         onChange={handleImageUpload}
                         className="hidden"
+                        accept="image/*"
                     />
                 </label>
             </div>
+
+            {/* Form Fields */}
             <div className="px-4 pb-4 space-y-2 sm:text-lg text-sm">
-                {/* Title */}
                 <input
                     type="text"
                     placeholder="Single Room"
@@ -156,7 +210,6 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
                     className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
                 />
-                {/* Description */}
                 <textarea
                     placeholder="2nd Floor, South faced with open balcony"
                     value={form.description}
@@ -164,18 +217,15 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                     className="w-full h-fit border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
                 />
                 <div className='flex sm:flex-row flex-col justify-between gap-2 mt-0 w-full'>
-                    {/* Move-in Date / Status */}
                     <div className="flex items-center gap-2">
                         <h2>Date</h2>
                         <input
                             type="date"
-                            placeholder="Available (From 1st April)"
                             value={form.moveInDate}
                             onChange={(e) => setForm({ ...form, moveInDate: e.target.value })}
                             className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
                         />
                     </div>
-                    {/* Price */}
                     <div className="flex items-center gap-2">
                         <h2>Price</h2>
                         <input
@@ -187,7 +237,6 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         />
                     </div>
                 </div>
-                {/* Status */}
                 <div className="flex items-center gap-2">
                     <h2>Status</h2>
                     <select
@@ -201,7 +250,6 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         <option value="unavailable">Unavailable</option>
                     </select>
                 </div>
-                {/* Upload Button */}
                 <button
                     onClick={handleSubmit}
                     className="w-full dark:bg-subtitle-dark bg-subtitle-light dark:text-card-dark text-card-light font-medium mt-1 py-2 rounded-3xl dark:hover:bg-description-dark hover:bg-title-light transition"
@@ -210,7 +258,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                 </button>
             </div>
         </div>
-    )
+    );
 }
 
-export default Add
+export default Add;

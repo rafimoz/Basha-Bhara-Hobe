@@ -2,6 +2,50 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// ✅ Compress image utility
+const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+        if (!file.type.startsWith('image/')) {
+            reject(new Error("File is not an image."));
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                const maxWidth = 800;
+                const quality = 0.7;
+
+                let newWidth = img.width;
+                let newHeight = img.height;
+
+                if (newWidth > maxWidth) {
+                    newHeight = Math.floor(newHeight * (maxWidth / newWidth));
+                    newWidth = maxWidth;
+                }
+
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+                ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedDataUrl);
+            };
+
+            img.onerror = () => reject(new Error("Failed to load image for compression."));
+        };
+
+        reader.onerror = () => reject(new Error("Failed to read file for compression."));
+        reader.readAsDataURL(file);
+    });
+};
+
 const Profile = () => {
     const backendURL = import.meta.env.VITE_BACKEND_URL;
     const { id: ownerId } = useParams();
@@ -37,14 +81,17 @@ const Profile = () => {
     };
 
 
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         const file = e.target.files[0];
+        let compressedImage;
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setForm((prev) => ({ ...prev, image: reader.result }));
-            };
-            reader.readAsDataURL(file);
+            try {
+                const compressedDataUrl = await compressImage(file);
+                compressedImage = compressedDataUrl;
+            } catch (error) {
+                console.error("Error compressing image:", file.name, error);
+            }
+            setForm((prev) => ({ ...prev, image: compressedImage }));
         }
     };
 

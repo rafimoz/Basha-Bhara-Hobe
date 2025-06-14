@@ -344,18 +344,20 @@ const Dashboard = () => {
                 </div>
                 {/* Details and CTA */}
                 <div className="p-4">
-                  {/* Title */}
-                  <h3 className="text-2xl font-bold mb-2 dark:text-subtitle-dark text-subtitle-light">{ad.title}</h3>
-                  {/* Description - Added line-clamp for consistency if plugin is used */}
-                  <p className="dark:text-description-dark text-description-light text-base mb-1 line-clamp-3">{ad.description}</p>
-                  {/* Move-in Date */}
-                  <p className="dark:text-description-dark text-description-light text-sm mb-1 flex items-center gap-1">
-                    {/* <div className="w-2 h-2 bg-green-400 rounded-full"></div> */}
-                    Move-in: <span className="font-semibold underline">{new Date(ad.moveInDate).toLocaleDateString()}</span>
-                  </p>
-                  {/* Availability Badge - Modernized subtle style */}
-                  <div className={`inline-block px-2 py-1 text-xs font-medium rounded-full text-white ${ad.availability ? 'bg-green-500' : 'bg-red-500'}`}>
-                    {ad.availability ? "Available" : "Unavailable"}
+                  <div>
+                    {/* Title */}
+                    <h3 className="text-2xl font-bold mb-2 dark:text-subtitle-dark text-subtitle-light">{ad.title}</h3>
+                    {/* Description - Added line-clamp for consistency if plugin is used */}
+                    <p className="dark:text-description-dark text-description-light text-base mb-1 line-clamp-3">{ad.description}</p>
+                    {/* Move-in Date */}
+                    <p className="dark:text-description-dark text-description-light text-sm mb-1 flex items-center gap-1">
+                      {/* <div className="w-2 h-2 bg-green-400 rounded-full"></div> */}
+                      Move-in: <span className="font-semibold underline">{new Date(ad.moveInDate).toLocaleDateString()}</span>
+                    </p>
+                    {/* Availability Badge - Modernized subtle style */}
+                    <div className={`inline-block px-2 py-1 text-xs font-medium rounded-full text-white ${ad.availability ? 'bg-green-500' : 'bg-red-500'}`}>
+                      {ad.availability ? "Available" : "Unavailable"}
+                    </div>
                   </div>
 
                   <div className="flex flex-row justify-center mt-4 gap-2"> {/* Increased gap for buttons */}
