@@ -8,10 +8,12 @@ function Login() {
     const [email, setEmail] = useState('') // Initialize with empty string
     const [password, setPassword] = useState('') // Initialize with empty string
     const navigate = useNavigate()
+    const [isLoading, setIsLoading] = useState(false) 
     const backendURL = import.meta.env.VITE_BACKEND_URL;
 
     const handleSubmit = (e) => {
         e.preventDefault()
+        setIsLoading(true) 
         axios.post(backendURL + '/login', { email, password })
             .then(result => {
                 console.log(result)
@@ -19,6 +21,7 @@ function Login() {
                     localStorage.setItem('authToken', result.data.token);
                     localStorage.setItem('userId', result.data.id);
                     navigate(`/dashboard/${result.data.id}`)
+                    setIsLoading(false)
                 } else {
                     toast.error("Incorrect Password!")
                 }
@@ -36,7 +39,7 @@ function Login() {
             <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
-                        <div onClick={()=>{navigate("/")}} className="flex items-center gap-2 cursor-pointer">
+                        <div onClick={() => { navigate("/") }} className="flex items-center gap-2 cursor-pointer">
                             <div className='w-7 h-fit'>
                                 <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M267.997 60.793L265.006 319H169.662V6.34766L267.997 60.793Z" fill="#B0B0B0" stroke="#B0B0B0" />
@@ -132,7 +135,20 @@ function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    <button type='submit' className='w-full dark:bg-subtitle-dark dark:text-bg-dark bg-subtitle-light text-bg-light py-3 rounded-full dark:hover:bg-subtitle-dark/60 hover:bg-subtitle-light/60 transition-colors duration-200'>Login</button>
+                    <button type='submit' disabled={isLoading}
+                        className={`w-full dark:bg-subtitle-dark dark:text-bg-dark bg-subtitle-light text-bg-light py-3 rounded-full transition-colors duration-200 flex justify-center items-center 
+                            ${isLoading
+                                ? 'dark:bg-subtitle-dark bg-subtitle-light cursor-not-allowed'
+                                : 'dark:hover:bg-subtitle-dark/60 hover:bg-subtitle-light/60'
+                            }`}>
+                        {isLoading ? (
+                            // Loading spinner SVG
+                            <svg className="animate-spin h-6 w-6 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        ) : 'Login'}
+                    </button>
                     <div className='flex justify-center items-center gap-1'>
                         <p className='text-center dark:text-subtitle-dark text-subtitle-light'>Don't Have an Account?</p>
                         <Link to="/register" className='text-blue-500 hover:underline'>Register</Link>

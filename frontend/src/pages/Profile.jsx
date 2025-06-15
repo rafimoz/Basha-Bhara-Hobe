@@ -281,11 +281,11 @@ const Profile = () => {
                     <div className='w-full flex justify-center'>
                         {isEdit ? (
                             <label htmlFor='image' className='rounded-full'>
-                                <div className='cursor-pointer relative'>
+                                <div className='cursor-pointer relative sm:w-70 sm:h-70 w-40 h-40 border-1 dark:border-title-dark border-title-light rounded-full overflow-hidden'>
                                     <img
-                                        className='sm:w-70 sm:h-70 w-40 h-40 border-1 dark:border-title-dark border-title-light rounded-full object-cover opacity-50'
+                                        className='object-cover opacity-50'
                                         src={form.image}
-                                        alt="preview"
+                                        alt="edit"
                                     />
                                     <svg width="30" height="30" className='absolute  top-[50%] left-[50%] transform -translate-x-[50%] -translate-y-[50%]' viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M16.6432 0.106781L3.03644 13.7136L0.118958 22.881L9.28644 19.9636L22.8932 6.35678C22.8932 6.35678 22.789 4.16824 20.8099 2.19012C18.8307 0.210948 16.6432 0.106781 16.6432 0.106781ZM17.0338 1.79949C18.1505 2.01199 19.0395 2.48502 19.7255 3.18905C20.4114 3.89308 20.8943 4.82814 21.2005 5.96616L19.3125 7.85418L15.1458 3.68751L16.6432 2.19012L17.0338 1.79949ZM4.18594 14.7573C4.19825 14.7604 5.43848 15.0739 6.68227 16.3177C8.03644 17.5677 8.24477 18.7144 8.24477 18.7144L8.28953 18.7673L4.59283 19.9575L3.03441 18.399L4.18594 14.7573Z" fill="#FFFF" />
@@ -294,11 +294,13 @@ const Profile = () => {
                                 <input onChange={handleImageChange} type="file" id='image' hidden />
                             </label>
                         ) : (
-                            <img
-                                className='sm:w-70 sm:h-70 w-40 h-40 border-1 dark:border-title-dark border-title-light rounded-full object-cover'
-                                src={user.image}
-                                alt="profile"
-                            />
+                            <div className='sm:w-70 sm:h-70 w-40 h-40 border-1 dark:border-title-dark border-title-light rounded-full overflow-hidden'>
+                                <img
+                                    className='object-cover'
+                                    src={user.image}
+                                    alt="profile"
+                                />
+                            </div>
                         )}
 
                     </div>

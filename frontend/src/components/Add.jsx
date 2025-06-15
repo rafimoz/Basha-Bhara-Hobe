@@ -147,6 +147,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
             toggleRefreshAds();
         } finally {
             setIsLoading(false);
+            setAddUnit(false);
         }
     };
 
