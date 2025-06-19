@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from 'react-toastify';
 
 // ✅ Compress image utility
 const compressImage = (file) => {
@@ -55,25 +56,26 @@ const Profile = () => {
     const [isEdit, setIsEdit] = useState(false)
     const [isLoading, setIsLoading] = useState(false) // Add loading state
 
-
     const [form, setForm] = useState({
         name: '',
         image: '',
+        phone: '',
     });
 
     const updateProfile = async () => {
         setIsLoading(true) // Start loading animation
-
         try {
             const res = await axios.put(`${backendURL}/api/user/update/${ownerId}`, {
                 name: form.name,
                 image: form.image,
+                phone: form.phone,
             });
 
             if (res.data.success) {
                 await fetchUser();
                 setIsEdit(false);
                 setIsLoading(false) // Stop loading animation
+                toast.success("Profile Updated Successfully")
             }
         } catch (error) {
             console.error("Update error:", error);
@@ -100,6 +102,7 @@ const Profile = () => {
             setForm({
                 name: user.name || '',
                 image: user.image || '',
+                phone: user.phone || '',
             });
         }
     }, [user]);
@@ -128,6 +131,7 @@ const Profile = () => {
     };
     return (
         <div className="min-h-screen dark:bg-bg-dark bg-bg-light font-sans">
+            <ToastContainer />
             {/* Nav Section */}
             <nav className="sticky top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -207,14 +211,14 @@ const Profile = () => {
                         <div className="hidden md:flex items-center gap-3">
                             <button
                                 onClick={() => navigate(`/dashboard/${ownerId}`)}
-                                className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
+                                className="border-2 dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
                                 Dashboard
                             </button>
                             <button onClick={() => {
                                 localStorage.removeItem("authToken");
                                 localStorage.removeItem("userId");
                                 navigate("/login");
-                            }} className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
+                            }} className="border-2 dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
                                 Logout
                             </button>
                         </div>
@@ -254,7 +258,7 @@ const Profile = () => {
 
                 {/* Mobile Menu */}
                 <div
-                    className={`${isOpen ? 'block' : 'hidden'} md:hidden`}
+                    className={`${isOpen ? 'block' : 'hidden'} md:hidden border-t-1 dark:border-subtitle-dark/30 border-subtitle-light/30`}
                 >
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                         <a
@@ -268,7 +272,7 @@ const Profile = () => {
                             localStorage.removeItem("authToken");
                             localStorage.removeItem("userId");
                             navigate("/login");
-                        }} className="w-full text-left dark:bg-subtitle-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 rounded-md text-base font-medium transition-colors mt-2">
+                        }} className="w-full text-left dark:bg-description-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 rounded-md text-base font-medium transition-colors mt-2">
                             Logout</button>
                     </div>
                 </div>
@@ -276,12 +280,12 @@ const Profile = () => {
 
             {/*Main section*/}
             <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8">
-                <h2 className="text-4xl font-bold mb-8 dark:text-title-dark text-title-light">Profile</h2>
+                <h2 className="text-4xl font-bold sm:mb-5 mt-5 mb-8 dark:text-title-dark text-title-light">Profile</h2>
                 <div className='relative grid sm:grid-cols-[1fr_2fr] grid-cols-1 items-center gap-4 p-4 dark:bg-card-dark/20 bg-card-light/20 rounded-4xl shadow-xl overflow-hidden'>
                     <div className='w-full flex justify-center'>
                         {isEdit ? (
                             <label htmlFor='image' className='rounded-full'>
-                                <div className='cursor-pointer relative sm:w-70 sm:h-70 w-40 h-40 border-1 dark:border-title-dark border-title-light rounded-full overflow-hidden'>
+                                <div className='cursor-pointer relative sm:w-70 sm:h-70 w-40 h-40 rounded-full overflow-hidden'>
                                     <img
                                         className='object-cover opacity-50'
                                         src={form.image}
@@ -294,7 +298,7 @@ const Profile = () => {
                                 <input onChange={handleImageChange} type="file" id='image' hidden />
                             </label>
                         ) : (
-                            <div className='sm:w-70 sm:h-70 w-40 h-40 border-1 dark:border-title-dark border-title-light rounded-full overflow-hidden'>
+                            <div className='sm:w-70 sm:h-70 w-40 h-40 rounded-full overflow-hidden'>
                                 <img
                                     className='object-cover'
                                     src={user.image}
@@ -310,8 +314,18 @@ const Profile = () => {
                             <label htmlFor="name">
                                 {
                                     isEdit
-                                        ? <input type="text" value={form.name} onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))} className='border-1 uppercase border-subtitle-dark p-2 rounded-2xl w-full' />
+                                        ? <input type="text" value={form.name} onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))} className='uppercase bg-subtitle-dark/10 p-2 rounded-2xl w-full' />
                                         : <p className='uppercase p-2 rounded-2xl'>{user.name}</p>
+                                }
+                            </label>
+                        </div>
+                        <div className='flex items-center gap-2'>
+                            <p className='font-bold'>Phone:</p>
+                            <label htmlFor="name">
+                                {
+                                    isEdit
+                                        ? <input type="text" value={form.phone} onChange={e => setForm(prev => ({ ...prev, phone: e.target.value }))} className='uppercase bg-subtitle-dark/10 p-2 rounded-2xl w-full' />
+                                        : <p className='uppercase p-2 rounded-2xl'>{user.phone}</p>
                                 }
                             </label>
                         </div>
@@ -319,18 +333,17 @@ const Profile = () => {
                             <p className='font-bold'>Email:</p>
                             <p className='p-2 rounded-2xl'>{user.email}</p>
                         </div>
-                        <div className='flex justify-between items-end h-full gap-3'>
+                        <div className='flex justify-between items-end h-full mt-2 gap-2'>
                             {
                                 isEdit
-                                    ? <button onClick={updateProfile} className={`cursor-pointer p-2 w-full dark:bg-title-dark bg-title-light dark:text-title-light text-title-dark dark:hover:bg-title-dark/90 hover:bg-title-light/90 rounded-full px-3`}>
-                                        Update Profile
+                                    ? <button onClick={updateProfile} className={`cursor-pointer p-2 w-full dark:text-title-light text-title-dark dark:hover:bg-subtitle-dark dark:bg-subtitle-dark bg-subtitle-light rounded-full px-3`}>
+                                        Update
                                     </button>
-                                    : <button onClick={() => setIsEdit(true)} className='p-2 w-full dark:text-title-light text-subtitle-dark dark:hover:bg-subtitle-dark dark:bg-subtitle-dark bg-subtitle-light rounded-full px-3 cursor-pointer'>Edit</button>
+                                    : <button onClick={() => setIsEdit(true)} className='p-2 w-full dark:text-title-light text-title-dark dark:hover:bg-subtitle-dark dark:bg-subtitle-dark bg-subtitle-light rounded-full px-3 cursor-pointer'>Edit</button>
                             }
                             <button onClick={() => setIsEdit(false)} className={`${isEdit ? "block" : "hidden"} p-2 w-full bg-red-400 hover:bg-red-500 text-white rounded-full px-3 cursor-pointer`}>Cancel</button>
                         </div>
                     </div>
-
                     {isLoading && (
                         <div className='w-full h-full absolute flex justify-center items-center z-10 bg-white/10 backdrop-blur-xs'>
                             <svg className="animate-spin h-10 w-10 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

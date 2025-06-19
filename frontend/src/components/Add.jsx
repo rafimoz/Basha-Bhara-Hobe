@@ -11,7 +11,7 @@ const LoadingIndicator = () => (
     </div>
 );
 
-// ✅ Compress image utility
+// Compress image utility
 const compressImage = (file) => {
     return new Promise((resolve, reject) => {
         if (!file.type.startsWith('image/')) {
@@ -55,7 +55,7 @@ const compressImage = (file) => {
     });
 };
 
-function Add({ toggleRefreshAds, setAddUnit, ad }) {
+function Add({ toggleRefreshAds, setAddUnit, ad, toast }) {
     const { id: ownerId } = useParams();
     const backendURL = import.meta.env.VITE_BACKEND_URL;
     const [isLoading, setIsLoading] = useState(false);
@@ -92,12 +92,10 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
     // ✅ UPDATED: Compress and directly set base64
     const handleImageUpload = async (e) => {
         const files = e.target.files;
-
-        if (files.length > 5) {
-            alert("You can only upload a maximum of 5 images.");
+        if (files.length > 7) {
+            toast.error("Maximum of 7 images")
             return;
         }
-
         const compressedImages = [];
         setIsLoading(true)
         for (let i = 0; i < files.length; i++) {
@@ -108,7 +106,6 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                 console.error("Error compressing image:", files[i].name, error);
             }
         }
-
         setForm((prev) => ({
             ...prev,
             images: [...(prev.images || []), ...compressedImages],
@@ -117,25 +114,17 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
     };
 
     const handleSubmit = async () => {
-        console.log("Data being sent to backend:", {
-            ...form,
-            ownerId,
-        });
-
         const moveInDate = new Date(form.moveInDate);
         const data = {
             ...form,
             ownerId,
             moveInDate,
         };
-
         setIsLoading(true);
         try {
             const res = ad
                 ? await axios.put(backendURL + `/api/ads/${ad._id}`, data)
                 : await axios.post(backendURL + "/api/ads", data);
-
-            console.log("Response from backend:", res);
             setForm({
                 title: "",
                 description: "",
@@ -145,14 +134,17 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                 images: [],
             });
             toggleRefreshAds();
+        } catch (error) {
+            toast.error(`Unit ${ad ? "Updated" : "Uploaded"} Unsuccessfully`)
         } finally {
             setIsLoading(false);
             setAddUnit(false);
+            toast.success(`Unit ${ad ? "Updated" : "Uploaded"} Successfully`)
         }
     };
 
     return (
-        <div className="sm:max-w-2xl h-fit w-full flex flex-col justify-center rounded-3xl overflow-y-auto shadow-lg dark:shadow-subtitle-dark/20 shadow-subtitle-light/20 dark:bg-card-dark dark:text-title-dark bg-card-light text-title-light space-y-4 transition-all no-scrollbar">
+        <div className="sm:max-w-lg h-fit w-full flex flex-col justify-center rounded-3xl overflow-y-auto shadow-lg dark:shadow-subtitle-dark/20 shadow-subtitle-light/20 dark:bg-card-dark dark:text-title-dark bg-card-light text-title-light space-y-4 transition-all no-scrollbar">
             {isLoading && <LoadingIndicator />}
 
             {/* Preview Main Image */}
@@ -161,7 +153,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                     <img
                         src={form.images[form.images.length - 1]}
                         alt="Main Preview"
-                        className="w-full sm:h-65 h-60 object-cover"
+                        className="w-full sm:h-60 h-70 object-cover"
                     />
                 )}
                 <button onClick={() => setAddUnit(false)} className="absolute z-20 top-4 right-4 dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light rounded-full p-1 hover:scale-105 transition-all">
@@ -172,7 +164,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
             {/* Thumbnails */}
             <div className="flex items-center gap-2 px-4">
                 {form.images.map((img, index) => (
-                    <div key={index} className="relative group w-12 h-12 rounded-xl overflow-hidden border dark:border-subtitle-dark border-subtitle-light">
+                    <div key={index} className="relative group w-10 h-10 rounded-xl overflow-hidden border dark:border-subtitle-dark border-subtitle-light">
                         <img src={img} alt={`thumb-${index}`} className="w-full h-full object-cover" />
                         <button
                             onClick={() => {
@@ -181,7 +173,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                                     images: prev.images.filter((_, i) => i !== index),
                                 }));
                             }}
-                            className="absolute top-0 right-0 p-0.5 bg-black bg-opacity-60 text-white rounded-bl-md opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute w-full h-full flex justify-center items-center top-[50%] left-[50%] transform -translate-x-[50%] -translate-y-[50%] p-0.5 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"
                             title="Remove image"
                         >
                             <X className="w-4 h-4" />
@@ -190,7 +182,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                 ))}
 
                 {/* Upload Button */}
-                <label className="w-12 h-12 border border-dashed dark:border-subtitle-dark border-subtitle-light rounded-xl flex items-center justify-center cursor-pointer dark:text-subtitle-dark text-subtitle-light">
+                <label className="w-10 h-10 border border-dashed dark:border-subtitle-dark border-subtitle-light rounded-xl flex items-center justify-center cursor-pointer dark:text-subtitle-dark text-subtitle-light">
                     <Plus className="w-5 h-5" />
                     <input
                         type="file"
@@ -209,13 +201,13 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                     placeholder="Single Room"
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
+                    className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
                 />
                 <textarea
                     placeholder="2nd Floor, South faced with open balcony"
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    className="w-full h-fit border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
+                    className="w-full h-fit border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
                 />
                 <div className='flex sm:flex-row flex-col justify-between gap-2 mt-0 w-full'>
                     <div className="flex items-center gap-2">
@@ -224,7 +216,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                             type="date"
                             value={form.moveInDate}
                             onChange={(e) => setForm({ ...form, moveInDate: e.target.value })}
-                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
+                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
                         />
                     </div>
                     <div className="flex items-center gap-2">
@@ -234,7 +226,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                             placeholder="5000৳"
                             value={form.price}
                             onChange={(e) => setForm({ ...form, price: e.target.value })}
-                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
+                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
                         />
                     </div>
                 </div>
@@ -245,7 +237,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                         onChange={(e) =>
                             setForm({ ...form, availability: e.target.value === "available" })
                         }
-                        className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-2xl sm:p-2 p-1 px-2"
+                        className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
                     >
                         <option value="available">Available</option>
                         <option value="unavailable">Unavailable</option>
@@ -253,7 +245,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad }) {
                 </div>
                 <button
                     onClick={handleSubmit}
-                    className="w-full dark:bg-subtitle-dark bg-subtitle-light dark:text-card-dark text-card-light font-medium mt-1 py-2 rounded-3xl dark:hover:bg-description-dark hover:bg-title-light transition"
+                    className="w-full dark:bg-subtitle-dark bg-subtitle-light dark:text-card-dark text-card-light font-medium mt-1 py-2 rounded-xl text-sm dark:hover:bg-description-dark hover:bg-title-light transition"
                 >
                     {ad ? "Update" : "Upload"}
                 </button>

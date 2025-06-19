@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import Add from "../components/Add";
 import QrCode from "../components/QrCode";
+import { ToastContainer, toast } from 'react-toastify';
 
 const Dashboard = () => {
   const { id: ownerId } = useParams();
@@ -16,8 +17,12 @@ const Dashboard = () => {
   const [refreshAds, setRefreshAds] = useState(false);
   const [selectedAd, setSelectedAd] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-
   const navigate = useNavigate();
+
+  const [currentIndices, setCurrentIndices] = useState({});
+  const bannerRefs = useRef({});
+  const scrollTimeouts = useRef({});
+  const currentIndicesRef = useRef({});
 
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
@@ -38,10 +43,28 @@ const Dashboard = () => {
     fetchUser();
   }, [refreshAds, ownerId, navigate]);
 
+  useEffect(() => {
+    if (seeQrCode || addUnit) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [seeQrCode, addUnit]); // Re-run effect when isPopupOpen changes
+
   const fetchAds = async () => {
     try {
       const res = await axios.get(backendURL + `/api/ads/${ownerId}`);
       setAds(res.data);
+      // Initialize current indices to 0 for each ad
+      const initialIndices = {};
+      ads.data.forEach(ad => {
+        initialIndices[ad._id] = 0;
+      });
+      setCurrentIndices(initialIndices);
+      currentIndicesRef.current = initialIndices;
     } catch (error) {
       console.error("Error fetching ads:", error);
     }
@@ -66,11 +89,13 @@ const Dashboard = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this unit?")) { // Good practice for confirmation
+    if (window.confirm("Are you sure you want to delete this Ad?")) { // Good practice for confirmation
       try {
         await axios.delete(backendURL + `/api/ads/${id}`);
         fetchAds();
+        toast.success("Unit Deleted Successfully")
       } catch (error) {
+        toast.error("Unit Deleted Unsuccessfully")
         console.error("Error deleting ad:", error);
       }
     }
@@ -80,9 +105,58 @@ const Dashboard = () => {
     setRefreshAds((prev) => !prev);
   };
 
+  // Keep ref in sync with state
+  useEffect(() => {
+    currentIndicesRef.current = currentIndices;
+  }, [currentIndices]);
+
+  // Scroll to image in banner section
+  const scrollToImage = (adId, index) => {
+    const element = document.getElementById(`banner-${adId}-${index}`);
+    if (element) {
+      // Get the parent container
+      const container = bannerRefs.current[adId];
+      if (container) {
+        // Calculate the scrollLeft position
+        const scrollLeft = index * container.clientWidth;
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: 'smooth'
+        });
+      }
+    }
+    // Update current index immediately
+    setCurrentIndices(prev => ({ ...prev, [adId]: index }));
+  };
+
+  // Handle scroll events with debounce
+  const handleScroll = (adId) => {
+    // Clear any existing timeout for this ad
+    if (scrollTimeouts.current[adId]) {
+      clearTimeout(scrollTimeouts.current[adId]);
+    }
+
+    // Set a new timeout to update index after scrolling stops
+    scrollTimeouts.current[adId] = setTimeout(() => {
+      const container = bannerRefs.current[adId];
+      if (container) {
+        const scrollPosition = container.scrollLeft;
+        const containerWidth = container.clientWidth;
+        const currentIndex = Math.round(scrollPosition / containerWidth);
+
+        // Only update if index changed
+        if (currentIndicesRef.current[adId] !== currentIndex) {
+          setCurrentIndices(prev => ({ ...prev, [adId]: currentIndex }));
+        }
+      }
+    }, 100); // 150ms delay after scrolling stops
+  };
+
+
   return (
     // Applied a light background and a modern sans-serif font
-    <div className="min-h-screen dark:bg-bg-dark bg-bg-light font-sans">
+    <div className={`${(seeQrCode || isOpen) ? "overflow-y-hidden" : ""} min-h-screen dark:bg-bg-dark bg-bg-light`}>
+      <ToastContainer />
       {/* Add Unit Component Overlay (Subtle blur and opacity) */}
       <AnimatePresence>
         {addUnit && (
@@ -103,6 +177,7 @@ const Dashboard = () => {
                 }
               }}
               ad={selectedAd}
+              toast={toast}
             />
           </motion.div>
         )}
@@ -196,7 +271,7 @@ const Dashboard = () => {
                   <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#424242" />
                 </svg>
               </div>
-              <span className="sm:text-xl text-sm font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Welcome, <span>{user.name}☺️</span></span>
+              <span className="sm:text-xl text-sm font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Hello, <span>{user.name}👋</span></span>
             </div>
 
             {/*PFP and Logout Button*/}
@@ -205,7 +280,7 @@ const Dashboard = () => {
                 localStorage.removeItem("authToken");
                 localStorage.removeItem("userId");
                 navigate("/login");
-              }} className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
+              }} className="border-2 dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
                 Logout</button>
               <div onClick={() => navigate(`/profile/${ownerId}`)} className="w-10 h-10 rounded-full bg-subtitle-dark dark:bg-subtitle-light overflow-hidden cursor-pointer hover:border-2 dark:border-subtitle-dark border-subtitle-light">
                 <img className="object-cover" src={user.image} alt="" srcset="" />
@@ -247,7 +322,7 @@ const Dashboard = () => {
 
         {/* Mobile Menu */}
         <div
-          className={`${isOpen ? 'block' : 'hidden'} md:hidden`}
+          className={`${isOpen ? 'block' : 'hidden'} md:hidden border-t-1 dark:border-subtitle-dark/30 border-subtitle-light/30`}
         >
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <a
@@ -261,7 +336,7 @@ const Dashboard = () => {
               localStorage.removeItem("authToken");
               localStorage.removeItem("userId");
               navigate("/login");
-            }} className="w-full text-left dark:bg-subtitle-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 rounded-md text-base font-medium transition-colors mt-2">
+            }} className="w-full text-left dark:bg-description-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 rounded-md text-base font-medium transition-colors mt-2">
               Logout</button>
           </div>
         </div>
@@ -270,12 +345,12 @@ const Dashboard = () => {
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8"> {/* Increased overall padding */}
         {/* "All Units" Title - Slightly larger and more defined */}
-        <h2 className="text-4xl font-bold mb-8 dark:text-title-dark text-title-light">All Units</h2>
+        <h2 className="text-4xl font-bold sm:mb-5 mt-5 mb-8 dark:text-title-dark text-title-light">All Units</h2>
         <div className="flex justify-between mb-5"> {/* Spaced out buttons */}
           {/* QR Code Button - PRESERVED ORIGINAL STYLING */}
-          <button onClick={() => setSeeQrCode(true)} className="border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">QR Code</button>
+          <button onClick={() => setSeeQrCode(true)} className="border-2 dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">QR Code</button>
           {/* Add New Unit Button - PRESERVED ORIGINAL STYLING */}
-          <button onClick={() => setAddUnit(true)} className="border dark:border-subtitle-dark border-subtitle-light dark:bg-subtitle-dark bg-subtitle-light dark:text-title-light text-title-dark p-1.5 rounded-full px-3 cursor-pointer">Add New</button>
+          <button onClick={() => setAddUnit(true)} className="border-2 dark:border-subtitle-dark border-subtitle-light dark:bg-subtitle-dark bg-subtitle-light dark:text-title-light text-title-dark p-1.5 rounded-full px-3 cursor-pointer">Add New</button>
         </div>
 
         {/* Conditional rendering for no units */}
@@ -291,105 +366,117 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"> {/* Increased gap */}
-            {ads.map((ad) => (
-              <motion.div
-                key={ad._id}
-                initial={{ opacity: 0, y: 20 }} // Animation for card entry
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                // Card Styling - softer shadow, more rounded
-                className="dark:bg-card-dark bg-card-light rounded-3xl overflow-hidden shadow-xl"
-              >
-                <div className="relative">
-                  {/* Image display - kept as is for scroll functionality */}
-                  <div className="flex overflow-x-scroll no-scrollbar sm:h-55 h-70">
-                    {ad.images.length > 0 ? (
-                      ad.images.map((image, index) => (
+            {ads.map((ad) => {
+              const currentIndex = currentIndices[ad._id] || 0;
+              return (
+                <motion.div
+                  key={ad._id}
+                  initial={{ opacity: 0, y: 20 }} // Animation for card entry
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  // Card Styling - softer shadow, more rounded
+                  className="dark:bg-card-dark bg-card-light rounded-3xl overflow-hidden shadow-xl"
+                >
+                  {/* Banner Section */}
+                  <div className="relative">
+                    <div
+                      ref={el => bannerRefs.current[ad._id] = el}
+                      onScroll={() => handleScroll(ad._id)}
+                      className="flex overflow-x-scroll no-scrollbar sm:h-55 h-70 snap-x snap-mandatory" // Changed overflow-x-hidden to overflow-x-scroll and added snap properties
+                    >
+                      {ad.images.map((image, index) => (
                         <img
                           key={index}
+                          id={`banner-${ad._id}-${index}`}
                           src={image}
                           alt={`Ad image ${index + 1}`}
-                          className="h-full w-full object-cover flex-shrink-0"
+                          className="h-full w-full object-cover flex-shrink-0 snap-center" // Added snap-center
                         />
-                      ))
-                    ) : (
-                      <div className="w-full h-full dark:bg-description-dark/50 bg-description-light/50 flex items-center justify-center text-gray-500">
-                        No Image Available
-                      </div>
-                    )}
-                  </div>
-                  {/* Price badge - PRESERVED ORIGINAL STYLING */}
-                  <div
-                    className="absolute top-4 right-4 text-white w-15 h-15 flex justify-center items-center rounded-full font-bold sm:text-xs text-sm"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 53 53'><path d='M26.5 0L30.6682 4.20224L36.0729 1.78949L38.4416 7.21367L44.3529 6.91626L44.6022 12.8298L50.2218 14.6879L48.3181 20.2922L52.887 24.0549L49.0872 28.593L51.9884 33.7521L46.8059 36.6111L47.6475 42.4698L41.7821 43.2637L40.4505 49.0308L34.6944 47.6522L31.3694 52.5488L26.5 49.184L21.6306 52.5488L18.3056 47.6522L12.5495 49.0308L11.2179 43.2637L5.35254 42.4698L6.19412 36.6111L1.01162 33.7521L3.91277 28.593L0.113045 24.0549L4.68195 20.2922L2.77817 14.6879L8.39778 12.8298L8.64707 6.91626L14.5584 7.21367L16.9271 1.78949L22.3318 4.20224L26.5 0Z' fill='%23F34141'/></svg>")`,
-                      backgroundSize: "cover",
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "center",
-                    }}
-                  >
-                    <p>৳ {ad.price}</p>
-                  </div>
-                  {/* Dots with active tracking and transition */}
-                  <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-1">
-                    {ad.images.map((_, index) => (
-                      <span
-                        key={index}
-                        className={`
-                            w-3 h-3 rounded-full
-                            transition-all bg-white`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                {/* Details and CTA */}
-                <div className="p-4">
-                  <div>
-                    {/* Title */}
-                    <h3 className="text-2xl font-bold mb-2 dark:text-subtitle-dark text-subtitle-light">{ad.title}</h3>
-                    {/* Description - Added line-clamp for consistency if plugin is used */}
-                    <p className="dark:text-description-dark text-description-light text-base mb-1 line-clamp-3">{ad.description}</p>
-                    {/* Move-in Date */}
-                    <p className="dark:text-description-dark text-description-light text-sm mb-1 flex items-center gap-1">
-                      {/* <div className="w-2 h-2 bg-green-400 rounded-full"></div> */}
-                      Move-in: <span className="font-semibold underline">{new Date(ad.moveInDate).toLocaleDateString()}</span>
-                    </p>
-                    {/* Availability Badge - Modernized subtle style */}
-                    <div className={`inline-block px-2 py-1 text-xs font-medium rounded-full text-white ${ad.availability ? 'bg-green-500' : 'bg-red-500'}`}>
-                      {ad.availability ? "Available" : "Unavailable"}
+                      ))}
                     </div>
+
+                    {/* Dots with active tracking and transition */}
+                    <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-1">
+                      {ad.images.map((_, index) => (
+                        <span
+                          key={index}
+                          className={`
+                            w-3 h-3 rounded-full
+                            transition-all bg-white
+                            ${currentIndex === index ? "p-2" : "bg-white/50"}
+                            `}
+                        />
+                      ))}
+                    </div>
+
                   </div>
 
-                  <div className="flex flex-row justify-center mt-4 gap-2"> {/* Increased gap for buttons */}
-                    {/* Edit Button - PRESERVED ORIGINAL STYLING */}
-                    <button
-                      onClick={() => {
-                        setSelectedAd(ad);
-                        setAddUnit(true);
-                      }}
-                      className="bg-green-500 w-full h-10 p-3 rounded-xl hover:bg-green-600 hover:text-white transition"
-                    >
-                      <svg width="full" height="full" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M16.6432 0.106781L3.03644 13.7136L0.118958 22.881L9.28644 19.9636L22.8932 6.35678C22.8932 6.35678 22.789 4.16824 20.8099 2.19012C18.8307 0.210948 16.6432 0.106781 16.6432 0.106781ZM17.0338 1.79949C18.1505 2.01199 19.0395 2.48502 19.7255 3.18905C20.4114 3.89308 20.8943 4.82814 21.2005 5.96616L19.3125 7.85418L15.1458 3.68751L16.6432 2.19012L17.0338 1.79949ZM4.18594 14.7573C4.19825 14.7604 5.43848 15.0739 6.68227 16.3177C8.03644 17.5677 8.24477 18.7144 8.24477 18.7144L8.28953 18.7673L4.59283 19.9575L3.03441 18.399L4.18594 14.7573Z" fill="white" />
-                      </svg>
-                    </button>
-                    {/* Delete Button - PRESERVED ORIGINAL STYLING */}
-                    <button
-                      onClick={() => handleDelete(ad._id)}
-                      className="bg-red-500 text-white w-full h-10 p-3 rounded-xl hover:bg-red-600 hover:text-white transition"
-                    >
-                      <svg width="full" height="full" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9.48594 0.237689C8.98957 0.245447 8.5932 0.653615 8.6 1.14999V1.59999H3.65C3.40919 1.59672 3.17712 1.6901 3.00567 1.85924C2.83422 2.02837 2.7377 2.25916 2.7377 2.49999H1.40001C1.07543 2.4954 0.773533 2.66593 0.609904 2.94627C0.446275 3.22662 0.446275 3.57336 0.609904 3.8537C0.773533 4.13405 1.07543 4.30457 1.40001 4.29998H17.6C17.9246 4.30457 18.2265 4.13404 18.3901 3.8537C18.5537 3.57335 18.5537 3.22662 18.3901 2.94627C18.2265 2.66592 17.9246 2.4954 17.6 2.49999H16.2623C16.2623 2.25916 16.1658 2.02836 15.9943 1.85924C15.8229 1.6901 15.5908 1.59672 15.35 1.59999H10.4V1.14999C10.4033 0.906722 10.308 0.672461 10.1358 0.500597C9.96365 0.328724 9.72921 0.233891 9.48594 0.237689ZM1.4 6.09999L3.01367 19.8109C3.11987 20.7172 3.887 21.4 4.79961 21.4H14.2004C15.113 21.4 15.8792 20.7172 15.9863 19.8109L17.6 6.10001L1.4 6.09999Z" fill="white" />
-                      </svg>
-                    </button>
+                  {/* Thumbnails */}
+                  <div className="flex items-center gap-2 px-4 pt-2">
+                    {ad.images.slice(0, ad.images.length).map((img, index) => (
+                      <motion.div
+                        key={index}
+                        className={`w-12 h-12 rounded-xl overflow-hidden cursor-pointer ${index === currentIndex ? 'border-2 dark:border-white border-black' : 'border border-transparent'
+                          }`}
+                        whileHover={{ scale: 1.05 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          scrollToImage(ad._id, index);
+                        }}
+                      >
+                        <img src={img} alt={`thumb-${index}`} className="w-full h-full object-cover" />
+                      </motion.div>
+                    ))}
                   </div>
-                </div>
-              </motion.div>
-            ))}
+
+                  {/* Details and CTA */}
+                  <div className="p-4 pt-2">
+                    <div>
+                      {/* Title */}
+                      <h3 className="text-2xl font-bold mb-1 dark:text-subtitle-dark text-subtitle-light">{ad.title}</h3>
+                      {/* Description - Added line-clamp for consistency if plugin is used */}
+                      <p className="dark:text-description-dark text-description-light text-base mb-1 line-clamp-3">{ad.description}</p>
+                      {/* Move-in Date */}
+                      <p className="dark:text-description-dark text-description-light text-sm mb-1 flex items-center gap-1">
+                        {/* <div className="w-2 h-2 bg-green-400 rounded-full"></div> */}
+                        Move-in: <span className="font-semibold underline">{new Date(ad.moveInDate).toLocaleDateString()}</span>
+                      </p>
+                      {/* Availability Badge - Modernized subtle style */}
+                      <div className={`inline-block px-2 py-1 mt-1 cursor-default text-xs font-medium rounded-full text-white ${ad.availability ? 'bg-green-500' : 'bg-red-500'}`}>
+                        {ad.availability ? "Available" : "Unavailable"}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row justify-center mt-4 gap-2"> {/* Increased gap for buttons */}
+                      {/* Edit Button - PRESERVED ORIGINAL STYLING */}
+                      <button
+                        onClick={() => {
+                          setSelectedAd(ad);
+                          setAddUnit(true);
+                        }}
+                        className="bg-green-500 w-full h-10 p-3 rounded-xl hover:bg-green-600 hover:text-white transition"
+                      >
+                        <svg width="full" height="full" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M16.6432 0.106781L3.03644 13.7136L0.118958 22.881L9.28644 19.9636L22.8932 6.35678C22.8932 6.35678 22.789 4.16824 20.8099 2.19012C18.8307 0.210948 16.6432 0.106781 16.6432 0.106781ZM17.0338 1.79949C18.1505 2.01199 19.0395 2.48502 19.7255 3.18905C20.4114 3.89308 20.8943 4.82814 21.2005 5.96616L19.3125 7.85418L15.1458 3.68751L16.6432 2.19012L17.0338 1.79949ZM4.18594 14.7573C4.19825 14.7604 5.43848 15.0739 6.68227 16.3177C8.03644 17.5677 8.24477 18.7144 8.24477 18.7144L8.28953 18.7673L4.59283 19.9575L3.03441 18.399L4.18594 14.7573Z" fill="white" />
+                        </svg>
+                      </button>
+                      {/* Delete Button - PRESERVED ORIGINAL STYLING */}
+                      <button
+                        onClick={() => handleDelete(ad._id)}
+                        className="bg-red-500 text-white w-full h-10 p-3 rounded-xl hover:bg-red-600 hover:text-white transition"
+                      >
+                        <svg width="full" height="full" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9.48594 0.237689C8.98957 0.245447 8.5932 0.653615 8.6 1.14999V1.59999H3.65C3.40919 1.59672 3.17712 1.6901 3.00567 1.85924C2.83422 2.02837 2.7377 2.25916 2.7377 2.49999H1.40001C1.07543 2.4954 0.773533 2.66593 0.609904 2.94627C0.446275 3.22662 0.446275 3.57336 0.609904 3.8537C0.773533 4.13405 1.07543 4.30457 1.40001 4.29998H17.6C17.9246 4.30457 18.2265 4.13404 18.3901 3.8537C18.5537 3.57335 18.5537 3.22662 18.3901 2.94627C18.2265 2.66592 17.9246 2.4954 17.6 2.49999H16.2623C16.2623 2.25916 16.1658 2.02836 15.9943 1.85924C15.8229 1.6901 15.5908 1.59672 15.35 1.59999H10.4V1.14999C10.4033 0.906722 10.308 0.672461 10.1358 0.500597C9.96365 0.328724 9.72921 0.233891 9.48594 0.237689ZM1.4 6.09999L3.01367 19.8109C3.11987 20.7172 3.887 21.4 4.79961 21.4H14.2004C15.113 21.4 15.8792 20.7172 15.9863 19.8109L17.6 6.10001L1.4 6.09999Z" fill="white" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            })}
           </div>
         )}
       </main>
-
     </div>
   );
 };

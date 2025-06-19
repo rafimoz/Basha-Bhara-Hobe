@@ -17,6 +17,18 @@ const ViewAds = () => {
   const scrollTimeouts = useRef({});
   const currentIndicesRef = useRef({});
 
+  const [phoneNumber, setPhoneNumber] = useState("+8801882681449")
+  const handleCall = () => {
+    // Check if the phoneNumber is available
+    if (phoneNumber) {
+      window.location.href = `tel:${phoneNumber}`;
+    } else {
+      console.warn("Phone number not provided.");
+      // Optionally, show a user-friendly message
+      alert("Phone number is not available to call.");
+    }
+  };
+
   const fetchUser = async () => {
     try {
       const res = await axios.get(backendURL + `/api/user/${ownerId}`);
@@ -306,6 +318,7 @@ const ViewAds = () => {
                           Move-in: <span className="font-semibold underline">{new Date(ad.moveInDate).toDateString()}</span>
                         </motion.p>
                         <motion.button
+                          onClick={handleCall} 
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.25 }}

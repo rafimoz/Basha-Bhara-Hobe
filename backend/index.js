@@ -114,10 +114,10 @@ const getPublicIdFromUrl = (url) => {
 app.put("/api/user/update/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, image } = req.body;
+    const { name, image, phone } = req.body;
 
     const user = await UserModel.findById(id);
-    const updateData = { name };
+    const updateData = { name, phone };
 
     if (image && image.startsWith("data:image")) {
       // Delete previous image if it exists
