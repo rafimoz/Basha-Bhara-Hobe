@@ -17,11 +17,10 @@ const ViewAds = () => {
   const scrollTimeouts = useRef({});
   const currentIndicesRef = useRef({});
 
-  const [phoneNumber, setPhoneNumber] = useState("+8801882681449")
   const handleCall = () => {
     // Check if the phoneNumber is available
-    if (phoneNumber) {
-      window.location.href = `tel:${phoneNumber}`;
+    if (user.phone) {
+      window.location.href = `tel:${user.phone}`;
     } else {
       console.warn("Phone number not provided.");
       // Optionally, show a user-friendly message
