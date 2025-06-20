@@ -1,47 +1,34 @@
-import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { AnimatePresence, motion } from "framer-motion";
-import Add from "../components/Add";
-import QrCode from "../components/QrCode";
-import { ToastContainer, toast } from 'react-toastify';
+import { useOutletContext } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import Add from '../components/Add';
+import QrCode from '../components/QrCode';
 
 const Dashboard = () => {
-  const { id: ownerId } = useParams();
-  const backendURL = import.meta.env.VITE_BACKEND_URL;
-  const [ads, setAds] = useState([]);
-  const [user, setUser] = useState({});
-  const [addUnit, setAddUnit] = useState(false);
-  const [qrCode, setQrCode] = useState("");
-  const [seeQrCode, setSeeQrCode] = useState(false);
-  const [refreshAds, setRefreshAds] = useState(false);
-  const [selectedAd, setSelectedAd] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
+  const {
+    ads,
+    qrCode,
+    backendURL,
+    toggleRefreshAds,
+    toast,
+  } = useOutletContext();
 
+  const [addUnit, setAddUnit] = useState(false);
+  const [seeQrCode, setSeeQrCode] = useState(false);
+  const [selectedAd, setSelectedAd] = useState(null);
   const [currentIndices, setCurrentIndices] = useState({});
   const bannerRefs = useRef({});
   const scrollTimeouts = useRef({});
   const currentIndicesRef = useRef({});
 
   useEffect(() => {
-    const authToken = localStorage.getItem("authToken");
-
-    if (!authToken) {
-      navigate("/login");
-      return;
-    }
-
-    const userId = localStorage.getItem("userId");
-    if (userId !== ownerId) {
-      navigate("/login");
-      return;
-    }
-
-    fetchAds();
-    fetchQRCode();
-    fetchUser();
-  }, [refreshAds, ownerId, navigate]);
+    const initialIndices = {};
+    ads.forEach(ad => {
+      initialIndices[ad._id] = 0;
+    });
+    setCurrentIndices(initialIndices);
+    currentIndicesRef.current = initialIndices;
+  }, [ads]);
 
   useEffect(() => {
     if (seeQrCode || addUnit) {
@@ -49,303 +36,68 @@ const Dashboard = () => {
     } else {
       document.body.classList.remove('overflow-hidden');
     }
-    return () => {
-      document.body.classList.remove('overflow-hidden');
-    };
-  }, [seeQrCode, addUnit]); // Re-run effect when isPopupOpen changes
-
-  const fetchAds = async () => {
-    try {
-      const res = await axios.get(backendURL + `/api/ads/${ownerId}`);
-      setAds(res.data);
-      // Initialize current indices to 0 for each ad
-      const initialIndices = {};
-      ads.data.forEach(ad => {
-        initialIndices[ad._id] = 0;
-      });
-      setCurrentIndices(initialIndices);
-      currentIndicesRef.current = initialIndices;
-    } catch (error) {
-      console.error("Error fetching ads:", error);
-    }
-  };
-
-  const fetchUser = async () => {
-    try {
-      const res = await axios.get(backendURL + `/api/user/${ownerId}`);
-      setUser(res.data);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-    }
-  };
-
-  const fetchQRCode = async () => {
-    try {
-      const res = await axios.get(backendURL + `/api/qrcode/${ownerId}`);
-      setQrCode(res.data.qr);
-    } catch (error) {
-      console.error("Error fetching QR code:", error);
-    }
-  };
+    return () => document.body.classList.remove('overflow-hidden');
+  }, [seeQrCode, addUnit]);
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this Ad?")) { // Good practice for confirmation
+    if (window.confirm("Are you sure you want to delete this Ad?")) {
       try {
-        await axios.delete(backendURL + `/api/ads/${id}`);
-        fetchAds();
-        toast.success("Unit Deleted Successfully")
+        await fetch(`${backendURL}/api/ads/${id}`, { method: 'DELETE' });
+        toggleRefreshAds();
+        toast.success("Unit Deleted Successfully");
       } catch (error) {
-        toast.error("Unit Deleted Unsuccessfully")
-        console.error("Error deleting ad:", error);
+        toast.error("Unit Deleted Unsuccessfully");
       }
     }
   };
 
-  const toggleRefreshAds = () => {
-    setRefreshAds((prev) => !prev);
-  };
-
-  // Keep ref in sync with state
-  useEffect(() => {
-    currentIndicesRef.current = currentIndices;
-  }, [currentIndices]);
-
-  // Scroll to image in banner section
   const scrollToImage = (adId, index) => {
-    const element = document.getElementById(`banner-${adId}-${index}`);
-    if (element) {
-      // Get the parent container
-      const container = bannerRefs.current[adId];
-      if (container) {
-        // Calculate the scrollLeft position
-        const scrollLeft = index * container.clientWidth;
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: 'smooth'
-        });
-      }
+    const container = bannerRefs.current[adId];
+    if (container) {
+      const scrollLeft = index * container.clientWidth;
+      container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
     }
-    // Update current index immediately
     setCurrentIndices(prev => ({ ...prev, [adId]: index }));
   };
 
-  // Handle scroll events with debounce
   const handleScroll = (adId) => {
-    // Clear any existing timeout for this ad
-    if (scrollTimeouts.current[adId]) {
-      clearTimeout(scrollTimeouts.current[adId]);
-    }
+    if (scrollTimeouts.current[adId]) clearTimeout(scrollTimeouts.current[adId]);
 
-    // Set a new timeout to update index after scrolling stops
     scrollTimeouts.current[adId] = setTimeout(() => {
       const container = bannerRefs.current[adId];
       if (container) {
         const scrollPosition = container.scrollLeft;
         const containerWidth = container.clientWidth;
         const currentIndex = Math.round(scrollPosition / containerWidth);
-
-        // Only update if index changed
         if (currentIndicesRef.current[adId] !== currentIndex) {
           setCurrentIndices(prev => ({ ...prev, [adId]: currentIndex }));
         }
       }
-    }, 100); // 150ms delay after scrolling stops
+    }, 100);
   };
 
-
-  return (
-    // Applied a light background and a modern sans-serif font
-    <div className={`${(seeQrCode || isOpen) ? "overflow-y-hidden" : ""} min-h-screen dark:bg-bg-dark bg-bg-light`}>
-      <ToastContainer />
-      {/* Add Unit Component Overlay (Subtle blur and opacity) */}
+  return ads && (
+    <div className={`${(seeQrCode || addUnit) ? "overflow-y-hidden" : ""} min-h-screen dark:bg-bg-dark bg-bg-light`}>
       <AnimatePresence>
         {addUnit && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            // Adjusted backdrop for a softer look
-            className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
-          >
-            <Add
-              toggleRefreshAds={toggleRefreshAds}
-              setAddUnit={(value) => {
-                setAddUnit(value);
-                if (!value) {
-                  setSelectedAd(null);
-                }
-              }}
-              ad={selectedAd}
-              toast={toast}
-            />
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex items-center justify-center p-4">
+            <Add toggleRefreshAds={toggleRefreshAds} setAddUnit={(value) => { setAddUnit(value); if (!value) setSelectedAd(null); }} ad={selectedAd} toast={toast} />
           </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {seeQrCode && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            // Adjusted backdrop for a softer look
-            className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
-          >
-            {/*Qr Code Pop Up*/}
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex items-center justify-center p-4">
             <QrCode qrImage={qrCode} seeQrCode={setSeeQrCode} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Nav Section */}
-      <nav className="sticky top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/*Logo*/}
-            <div className="flex items-center gap-2 cursor-default">
-              <div className='w-7 h-fit'>
-                <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M267.997 60.793L265.006 319H169.662V6.34766L267.997 60.793Z" fill="#B0B0B0" stroke="#B0B0B0" />
-                  <path d="M70 60.869V151.869V321.869H267V60.869L168.5 4L70 60.869Z" stroke="#B0B0B0" stroke-width="8" stroke-linejoin="round" />
-                  <path d="M168.5 4.36902V320.869" stroke="#B0B0B0" stroke-width="8" stroke-linejoin="round" />
-                  <path d="M135 22.869L135 320.869" stroke="#B0B0B0" stroke-width="8" stroke-linejoin="round" />
-                  <path d="M105 39.869L105 320.869" stroke="#B0B0B0" stroke-width="8" stroke-linejoin="round" />
-                  <rect x="210" y="58.869" width="17" height="27" rx="3" fill="#2C2C2C" />
-                  <rect x="210" y="112.869" width="17" height="27" rx="3" fill="#2C2C2C" />
-                  <rect x="210" y="166.869" width="17" height="27" rx="3" fill="#2C2C2C" />
-                  <rect x="210" y="220.869" width="17" height="27" rx="3" fill="#2C2C2C" />
-                  <rect x="210" y="274.869" width="17" height="27" rx="3" fill="#2C2C2C" />
-                  <rect y="172" width="154" height="154" rx="20" fill="#B0B0B0" />
-                  <rect x="8" y="181" width="137" height="137" rx="11" fill="#2C2C2C" />
-                  <path d="M73.646 238.083C76.4716 238.083 79.2972 238.083 82.2085 238.083C82.2085 240.909 82.2085 243.735 82.2085 246.646C85.0341 246.646 87.8597 246.646 90.771 246.646C90.771 252.297 90.771 257.948 90.771 263.771C93.5966 263.771 96.4222 263.771 99.3335 263.771C99.3335 260.945 99.3335 258.12 99.3335 255.208C102.159 255.208 104.985 255.208 107.896 255.208C107.896 258.034 107.896 260.86 107.896 263.771C110.722 263.771 113.547 263.771 116.458 263.771C116.458 266.596 116.458 269.422 116.458 272.333C110.807 272.333 105.156 272.333 99.3335 272.333C99.3335 275.159 99.3335 277.985 99.3335 280.896C96.5079 280.896 93.6822 280.896 90.771 280.896C90.771 283.721 90.771 286.547 90.771 289.458C93.5966 289.458 96.4222 289.458 99.3335 289.458C99.3335 292.284 99.3335 295.11 99.3335 298.021C104.985 298.021 110.636 298.021 116.458 298.021C116.458 300.846 116.458 303.672 116.458 306.583C107.982 306.583 99.5047 306.583 90.771 306.583C90.771 303.758 90.771 300.932 90.771 298.021C87.9454 298.021 85.1197 298.021 82.2085 298.021C82.2085 295.195 82.2085 292.37 82.2085 289.458C79.3829 289.458 76.5572 289.458 73.646 289.458C73.646 283.807 73.646 278.156 73.646 272.333C76.4716 272.333 79.2972 272.333 82.2085 272.333C82.2085 266.682 82.2085 261.031 82.2085 255.208C79.3829 255.208 76.5572 255.208 73.646 255.208C73.646 249.557 73.646 243.906 73.646 238.083Z" fill="#B0B0B0" />
-                  <path d="M22.271 263.771C36.3991 263.771 50.5272 263.771 65.0835 263.771C65.0835 277.899 65.0835 292.027 65.0835 306.583C50.9554 306.583 36.8272 306.583 22.271 306.583C22.271 292.455 22.271 278.327 22.271 263.771ZM30.8335 272.333C30.8335 280.81 30.8335 289.287 30.8335 298.021C39.3104 298.021 47.7872 298.021 56.521 298.021C56.521 289.544 56.521 281.067 56.521 272.333C48.0441 272.333 39.5672 272.333 30.8335 272.333Z" fill="#B0B0B0" />
-                  <path d="M90.771 195.271C104.899 195.271 119.027 195.271 133.583 195.271C133.583 209.399 133.583 223.527 133.583 238.083C119.455 238.083 105.327 238.083 90.771 238.083C90.771 223.955 90.771 209.827 90.771 195.271ZM99.3335 203.833C99.3335 212.31 99.3335 220.787 99.3335 229.521C107.81 229.521 116.287 229.521 125.021 229.521C125.021 221.044 125.021 212.567 125.021 203.833C116.544 203.833 108.067 203.833 99.3335 203.833Z" fill="#B0B0B0" />
-                  <path d="M22.271 195.271C36.3991 195.271 50.5272 195.271 65.0835 195.271C65.0835 209.399 65.0835 223.527 65.0835 238.083C50.9554 238.083 36.8272 238.083 22.271 238.083C22.271 223.955 22.271 209.827 22.271 195.271ZM30.8335 203.833C30.8335 212.31 30.8335 220.787 30.8335 229.521C39.3104 229.521 47.7872 229.521 56.521 229.521C56.521 221.044 56.521 212.567 56.521 203.833C48.0441 203.833 39.5672 203.833 30.8335 203.833Z" fill="#B0B0B0" />
-                  <path d="M107.896 246.646C116.373 246.646 124.85 246.646 133.583 246.646C133.583 249.471 133.583 252.297 133.583 255.208C130.758 255.208 127.932 255.208 125.021 255.208C125.021 258.034 125.021 260.86 125.021 263.771C122.195 263.771 119.37 263.771 116.458 263.771C116.458 260.945 116.458 258.12 116.458 255.208C113.633 255.208 110.807 255.208 107.896 255.208C107.896 252.383 107.896 249.557 107.896 246.646Z" fill="#B0B0B0" />
-                  <path d="M22.271 246.646C30.7479 246.646 39.2247 246.646 47.9585 246.646C47.9585 249.471 47.9585 252.297 47.9585 255.208C39.4816 255.208 31.0047 255.208 22.271 255.208C22.271 252.383 22.271 249.557 22.271 246.646Z" fill="#B0B0B0" />
-                  <path d="M36.5415 278.042C41.2509 278.042 45.9603 278.042 50.8123 278.042C50.8123 282.751 50.8123 287.46 50.8123 292.312C46.103 292.312 41.3936 292.312 36.5415 292.312C36.5415 287.603 36.5415 282.894 36.5415 278.042Z" fill="#B0B0B0" />
-                  <path d="M105.042 209.542C109.751 209.542 114.46 209.542 119.312 209.542C119.312 214.251 119.312 218.96 119.312 223.812C114.603 223.812 109.894 223.812 105.042 223.812C105.042 219.103 105.042 214.394 105.042 209.542Z" fill="#B0B0B0" />
-                  <path d="M36.5415 209.542C41.2509 209.542 45.9603 209.542 50.8123 209.542C50.8123 214.251 50.8123 218.96 50.8123 223.812C46.103 223.812 41.3936 223.812 36.5415 223.812C36.5415 219.103 36.5415 214.394 36.5415 209.542Z" fill="#B0B0B0" />
-                  <path d="M73.646 212.396C76.4716 212.396 79.2972 212.396 82.2085 212.396C82.2085 218.047 82.2085 223.698 82.2085 229.521C79.3829 229.521 76.5572 229.521 73.646 229.521C73.646 223.87 73.646 218.218 73.646 212.396Z" fill="#B0B0B0" />
-                  <path d="M125.021 298.021C127.847 298.021 130.672 298.021 133.583 298.021C133.583 300.846 133.583 303.672 133.583 306.583C130.758 306.583 127.932 306.583 125.021 306.583C125.021 303.758 125.021 300.932 125.021 298.021Z" fill="#B0B0B0" />
-                  <path d="M73.646 298.021C76.4716 298.021 79.2972 298.021 82.2085 298.021C82.2085 300.846 82.2085 303.672 82.2085 306.583C79.3829 306.583 76.5572 306.583 73.646 306.583C73.646 303.758 73.646 300.932 73.646 298.021Z" fill="#B0B0B0" />
-                  <path d="M116.458 289.458C119.284 289.458 122.11 289.458 125.021 289.458C125.021 292.284 125.021 295.11 125.021 298.021C122.195 298.021 119.37 298.021 116.458 298.021C116.458 295.195 116.458 292.37 116.458 289.458Z" fill="#B0B0B0" />
-                  <path d="M125.021 280.896C127.847 280.896 130.672 280.896 133.583 280.896C133.583 283.721 133.583 286.547 133.583 289.458C130.758 289.458 127.932 289.458 125.021 289.458C125.021 286.633 125.021 283.807 125.021 280.896Z" fill="#B0B0B0" />
-                  <path d="M107.896 280.896C110.722 280.896 113.547 280.896 116.458 280.896C116.458 283.721 116.458 286.547 116.458 289.458C113.633 289.458 110.807 289.458 107.896 289.458C107.896 286.633 107.896 283.807 107.896 280.896Z" fill="#B0B0B0" />
-                  <path d="M125.021 263.771C127.847 263.771 130.672 263.771 133.583 263.771C133.583 266.596 133.583 269.422 133.583 272.333C130.758 272.333 127.932 272.333 125.021 272.333C125.021 269.508 125.021 266.682 125.021 263.771Z" fill="#B0B0B0" />
-                  <path d="M56.521 246.646C59.3466 246.646 62.1722 246.646 65.0835 246.646C65.0835 249.471 65.0835 252.297 65.0835 255.208C62.2579 255.208 59.4322 255.208 56.521 255.208C56.521 252.383 56.521 249.557 56.521 246.646Z" fill="#B0B0B0" />
-                  <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#B0B0B0" />
-                </svg>
-                <svg className='dark:hidden block' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M267.997 60.793L265.006 319H169.662V6.34766L267.997 60.793Z" fill="#424242" stroke="#424242" />
-                  <path d="M70 60.869V151.869V321.869H267V60.869L168.5 4L70 60.869Z" stroke="#424242" stroke-width="8" stroke-linejoin="round" />
-                  <path d="M168.5 4.36902V320.869" stroke="#424242" stroke-width="8" stroke-linejoin="round" />
-                  <path d="M135 22.869L135 320.869" stroke="#424242" stroke-width="8" stroke-linejoin="round" />
-                  <path d="M105 39.869L105 320.869" stroke="#424242" stroke-width="8" stroke-linejoin="round" />
-                  <rect x="210" y="58.869" width="17" height="27" rx="3" fill="#F5F7FA" />
-                  <rect x="210" y="112.869" width="17" height="27" rx="3" fill="#F5F7FA" />
-                  <rect x="210" y="166.869" width="17" height="27" rx="3" fill="#F5F7FA" />
-                  <rect x="210" y="220.869" width="17" height="27" rx="3" fill="#F5F7FA" />
-                  <rect x="210" y="274.869" width="17" height="27" rx="3" fill="#F5F7FA" />
-                  <rect y="172" width="154" height="154" rx="20" fill="#424242" />
-                  <rect x="8" y="181" width="137" height="137" rx="11" fill="#F5F7FA" />
-                  <path d="M73.646 238.083C76.4716 238.083 79.2972 238.083 82.2085 238.083C82.2085 240.909 82.2085 243.735 82.2085 246.646C85.0341 246.646 87.8597 246.646 90.771 246.646C90.771 252.297 90.771 257.948 90.771 263.771C93.5966 263.771 96.4222 263.771 99.3335 263.771C99.3335 260.945 99.3335 258.12 99.3335 255.208C102.159 255.208 104.985 255.208 107.896 255.208C107.896 258.034 107.896 260.86 107.896 263.771C110.722 263.771 113.547 263.771 116.458 263.771C116.458 266.596 116.458 269.422 116.458 272.333C110.807 272.333 105.156 272.333 99.3335 272.333C99.3335 275.159 99.3335 277.985 99.3335 280.896C96.5079 280.896 93.6822 280.896 90.771 280.896C90.771 283.721 90.771 286.547 90.771 289.458C93.5966 289.458 96.4222 289.458 99.3335 289.458C99.3335 292.284 99.3335 295.11 99.3335 298.021C104.985 298.021 110.636 298.021 116.458 298.021C116.458 300.846 116.458 303.672 116.458 306.583C107.982 306.583 99.5047 306.583 90.771 306.583C90.771 303.758 90.771 300.932 90.771 298.021C87.9454 298.021 85.1197 298.021 82.2085 298.021C82.2085 295.195 82.2085 292.37 82.2085 289.458C79.3829 289.458 76.5572 289.458 73.646 289.458C73.646 283.807 73.646 278.156 73.646 272.333C76.4716 272.333 79.2972 272.333 82.2085 272.333C82.2085 266.682 82.2085 261.031 82.2085 255.208C79.3829 255.208 76.5572 255.208 73.646 255.208C73.646 249.557 73.646 243.906 73.646 238.083Z" fill="#424242" />
-                  <path d="M22.271 263.771C36.3991 263.771 50.5272 263.771 65.0835 263.771C65.0835 277.899 65.0835 292.027 65.0835 306.583C50.9554 306.583 36.8272 306.583 22.271 306.583C22.271 292.455 22.271 278.327 22.271 263.771ZM30.8335 272.333C30.8335 280.81 30.8335 289.287 30.8335 298.021C39.3104 298.021 47.7872 298.021 56.521 298.021C56.521 289.544 56.521 281.067 56.521 272.333C48.0441 272.333 39.5672 272.333 30.8335 272.333Z" fill="#424242" />
-                  <path d="M90.771 195.271C104.899 195.271 119.027 195.271 133.583 195.271C133.583 209.399 133.583 223.527 133.583 238.083C119.455 238.083 105.327 238.083 90.771 238.083C90.771 223.955 90.771 209.827 90.771 195.271ZM99.3335 203.833C99.3335 212.31 99.3335 220.787 99.3335 229.521C107.81 229.521 116.287 229.521 125.021 229.521C125.021 221.044 125.021 212.567 125.021 203.833C116.544 203.833 108.067 203.833 99.3335 203.833Z" fill="#424242" />
-                  <path d="M22.271 195.271C36.3991 195.271 50.5272 195.271 65.0835 195.271C65.0835 209.399 65.0835 223.527 65.0835 238.083C50.9554 238.083 36.8272 238.083 22.271 238.083C22.271 223.955 22.271 209.827 22.271 195.271ZM30.8335 203.833C30.8335 212.31 30.8335 220.787 30.8335 229.521C39.3104 229.521 47.7872 229.521 56.521 229.521C56.521 221.044 56.521 212.567 56.521 203.833C48.0441 203.833 39.5672 203.833 30.8335 203.833Z" fill="#424242" />
-                  <path d="M107.896 246.646C116.373 246.646 124.85 246.646 133.583 246.646C133.583 249.471 133.583 252.297 133.583 255.208C130.758 255.208 127.932 255.208 125.021 255.208C125.021 258.034 125.021 260.86 125.021 263.771C122.195 263.771 119.37 263.771 116.458 263.771C116.458 260.945 116.458 258.12 116.458 255.208C113.633 255.208 110.807 255.208 107.896 255.208C107.896 252.383 107.896 249.557 107.896 246.646Z" fill="#424242" />
-                  <path d="M22.271 246.646C30.7479 246.646 39.2247 246.646 47.9585 246.646C47.9585 249.471 47.9585 252.297 47.9585 255.208C39.4816 255.208 31.0047 255.208 22.271 255.208C22.271 252.383 22.271 249.557 22.271 246.646Z" fill="#424242" />
-                  <path d="M36.5415 278.042C41.2509 278.042 45.9603 278.042 50.8123 278.042C50.8123 282.751 50.8123 287.46 50.8123 292.312C46.103 292.312 41.3936 292.312 36.5415 292.312C36.5415 287.603 36.5415 282.894 36.5415 278.042Z" fill="#424242" />
-                  <path d="M105.042 209.542C109.751 209.542 114.46 209.542 119.312 209.542C119.312 214.251 119.312 218.96 119.312 223.812C114.603 223.812 109.894 223.812 105.042 223.812C105.042 219.103 105.042 214.394 105.042 209.542Z" fill="#424242" />
-                  <path d="M36.5415 209.542C41.2509 209.542 45.9603 209.542 50.8123 209.542C50.8123 214.251 50.8123 218.96 50.8123 223.812C46.103 223.812 41.3936 223.812 36.5415 223.812C36.5415 219.103 36.5415 214.394 36.5415 209.542Z" fill="#424242" />
-                  <path d="M73.646 212.396C76.4716 212.396 79.2972 212.396 82.2085 212.396C82.2085 218.047 82.2085 223.698 82.2085 229.521C79.3829 229.521 76.5572 229.521 73.646 229.521C73.646 223.87 73.646 218.218 73.646 212.396Z" fill="#424242" />
-                  <path d="M125.021 298.021C127.847 298.021 130.672 298.021 133.583 298.021C133.583 300.846 133.583 303.672 133.583 306.583C130.758 306.583 127.932 306.583 125.021 306.583C125.021 303.758 125.021 300.932 125.021 298.021Z" fill="#424242" />
-                  <path d="M73.646 298.021C76.4716 298.021 79.2972 298.021 82.2085 298.021C82.2085 300.846 82.2085 303.672 82.2085 306.583C79.3829 306.583 76.5572 306.583 73.646 306.583C73.646 303.758 73.646 300.932 73.646 298.021Z" fill="#424242" />
-                  <path d="M116.458 289.458C119.284 289.458 122.11 289.458 125.021 289.458C125.021 292.284 125.021 295.11 125.021 298.021C122.195 298.021 119.37 298.021 116.458 298.021C116.458 295.195 116.458 292.37 116.458 289.458Z" fill="#424242" />
-                  <path d="M125.021 280.896C127.847 280.896 130.672 280.896 133.583 280.896C133.583 283.721 133.583 286.547 133.583 289.458C130.758 289.458 127.932 289.458 125.021 289.458C125.021 286.633 125.021 283.807 125.021 280.896Z" fill="#424242" />
-                  <path d="M107.896 280.896C110.722 280.896 113.547 280.896 116.458 280.896C116.458 283.721 116.458 286.547 116.458 289.458C113.633 289.458 110.807 289.458 107.896 289.458C107.896 286.633 107.896 283.807 107.896 280.896Z" fill="#424242" />
-                  <path d="M125.021 263.771C127.847 263.771 130.672 263.771 133.583 263.771C133.583 266.596 133.583 269.422 133.583 272.333C130.758 272.333 127.932 272.333 125.021 272.333C125.021 269.508 125.021 266.682 125.021 263.771Z" fill="#424242" />
-                  <path d="M56.521 246.646C59.3466 246.646 62.1722 246.646 65.0835 246.646C65.0835 249.471 65.0835 252.297 65.0835 255.208C62.2579 255.208 59.4322 255.208 56.521 255.208C56.521 252.383 56.521 249.557 56.521 246.646Z" fill="#424242" />
-                  <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#424242" />
-                </svg>
-              </div>
-              <span className="sm:text-xl text-sm font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Hello, <span>{user.name}👋</span></span>
-            </div>
-
-            {/*PFP and Logout Button*/}
-            <div className="hidden md:flex items-center gap-3">
-              <button onClick={() => {
-                localStorage.removeItem("authToken");
-                localStorage.removeItem("userId");
-                navigate("/login");
-              }} className="border-2 dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">
-                Logout</button>
-              <div onClick={() => navigate(`/profile/${ownerId}`)} className="w-10 h-10 rounded-full bg-subtitle-dark dark:bg-subtitle-light overflow-hidden cursor-pointer hover:border-2 dark:border-subtitle-dark border-subtitle-light">
-                <img className="object-cover" src={user.image} alt="" srcset="" />
-              </div>
-            </div>
-
-            {/* Mobile Burger Menu Button */}
-            <div className="md:hidden flex items-center">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="dark:text-subtitle-dark dark:hover:text-subtitle-dark/50 text-subtitle-light hover:text-subtitle-light/50 focus:outline-none focus:text-subtitle-dark"
-              >
-                <svg
-                  className="h-6 w-6"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  {isOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={`${isOpen ? 'block' : 'hidden'} md:hidden border-t-1 dark:border-subtitle-dark/30 border-subtitle-light/30`}
-        >
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a
-              href={`/profile/${ownerId}`}
-              className="block px-3 py-2 rounded-md text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20"
-              onClick={() => setIsOpen(false)} // Close menu on link click
-            >
-              Profile
-            </a>
-            <button onClick={() => {
-              localStorage.removeItem("authToken");
-              localStorage.removeItem("userId");
-              navigate("/login");
-            }} className="w-full text-left dark:bg-description-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 rounded-md text-base font-medium transition-colors mt-2">
-              Logout</button>
-          </div>
-        </div>
-      </nav>
-
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8"> {/* Increased overall padding */}
         {/* "All Units" Title - Slightly larger and more defined */}
-        <h2 className="text-4xl font-bold sm:mb-5 mt-5 mb-8 dark:text-title-dark text-title-light">All Units</h2>
+        <h2 className="text-4xl font-bold sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">All Units</h2>
         <div className="flex justify-between mb-5"> {/* Spaced out buttons */}
           {/* QR Code Button - PRESERVED ORIGINAL STYLING */}
           <button onClick={() => setSeeQrCode(true)} className="border-2 dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">QR Code</button>
@@ -369,16 +121,12 @@ const Dashboard = () => {
             {ads.map((ad) => {
               const currentIndex = currentIndices[ad._id] || 0;
               return (
-                <motion.div
-                  key={ad._id}
-                  initial={{ opacity: 0, y: 20 }} // Animation for card entry
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                  // Card Styling - softer shadow, more rounded
+                <div
                   className="dark:bg-card-dark bg-card-light rounded-3xl overflow-hidden shadow-xl"
                 >
                   {/* Banner Section */}
                   <div className="relative">
+
                     <div
                       ref={el => bannerRefs.current[ad._id] = el}
                       onScroll={() => handleScroll(ad._id)}
@@ -409,10 +157,23 @@ const Dashboard = () => {
                       ))}
                     </div>
 
+                    {/* Price */}
+                    <div
+                      className=" absolute top-4 right-4 text-white w-15 h-15 flex justify-center items-center rounded-full font-bold sm:text-xs text-sm"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 53 53'><path d='M26.5 0L30.6682 4.20224L36.0729 1.78949L38.4416 7.21367L44.3529 6.91626L44.6022 12.8298L50.2218 14.6879L48.3181 20.2922L52.887 24.0549L49.0872 28.593L51.9884 33.7521L46.8059 36.6111L47.6475 42.4698L41.7821 43.2637L40.4505 49.0308L34.6944 47.6522L31.3694 52.5488L26.5 49.184L21.6306 52.5488L18.3056 47.6522L12.5495 49.0308L11.2179 43.2637L5.35254 42.4698L6.19412 36.6111L1.01162 33.7521L3.91277 28.593L0.113045 24.0549L4.68195 20.2922L2.77817 14.6879L8.39778 12.8298L8.64707 6.91626L14.5584 7.21367L16.9271 1.78949L22.3318 4.20224L26.5 0Z' fill='%23F34141'/></svg>")`,
+                        backgroundSize: "cover",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center",
+                      }}
+                    >
+                      <p>৳ {ad.price}</p>
+                    </div>
+
                   </div>
 
                   {/* Thumbnails */}
-                  <div className="flex items-center gap-2 px-4 pt-2">
+                  <div className="flex items-center gap-2 px-4 pt-3">
                     {ad.images.slice(0, ad.images.length).map((img, index) => (
                       <motion.div
                         key={index}
@@ -471,7 +232,7 @@ const Dashboard = () => {
                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )
             })}
           </div>

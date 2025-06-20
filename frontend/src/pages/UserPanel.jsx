@@ -1,142 +1,80 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
+import { Outlet, useParams, useNavigate, NavLink, useLocation } from "react-router-dom";
 import axios from "axios";
-import { motion } from "framer-motion";
-import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight } from "react-feather";
+import { AnimatePresence, motion } from 'framer-motion';
+import Add from '../components/Add';
+import { ToastContainer, toast } from 'react-toastify';
 
-const ViewAds = () => {
+const UserPanel = () => {
   const { id: ownerId } = useParams();
-  const backendURL = import.meta.env.VITE_BACKEND_URL;
-  const [ads, setAds] = useState([]);
-  const [user, setUser] = useState({});
-  const [visibleAds, setVisibleAds] = useState({});
-  const [currentIndices, setCurrentIndices] = useState({});
   const navigate = useNavigate();
-  const bannerRefs = useRef({});
-  const scrollTimeouts = useRef({});
-  const currentIndicesRef = useRef({});
+  const backendURL = import.meta.env.VITE_BACKEND_URL;
+  const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [ads, setAds] = useState([]);
+  const [qrCode, setQrCode] = useState("");
+  const [refreshAds, setRefreshAds] = useState(false);
 
-  const [phoneNumber, setPhoneNumber] = useState("+8801882681449")
-  const handleCall = () => {
-    // Check if the phoneNumber is available
-    if (phoneNumber) {
-      window.location.href = `tel:${phoneNumber}`;
+  const [selectedAd, setSelectedAd] = useState(null);
+  const [addUnit, setAddUnit] = useState(false);
+
+  const [pageState, setPageState] = useState("Dashboard")
+  const location = useLocation(); // Add this line
+
+  // Update the pageState based on the current route
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes('/dashboard')) {
+      setPageState("AllUnits");
+    } else if (path.includes('/profile')) {
+      setPageState("Profile");
     } else {
-      console.warn("Phone number not provided.");
-      // Optionally, show a user-friendly message
-      alert("Phone number is not available to call.");
+      setPageState("Dashboard");
     }
-  };
+  }, [location.pathname]);
 
-  const fetchUser = async () => {
+  useEffect(() => {
+    const authToken = localStorage.getItem("authToken");
+    if (!authToken) {
+      navigate("/login");
+      return;
+    }
+    const userId = localStorage.getItem("userId");
+    if (userId !== ownerId) {
+      navigate("/login");
+      return;
+    }
+
+    fetchAllData();
+  }, [ownerId, refreshAds]);
+
+  const fetchAllData = async () => {
     try {
-      const res = await axios.get(backendURL + `/api/user/${ownerId}`);
-      setUser(res.data);
+      const userRes = await axios.get(`${backendURL}/api/user/${ownerId}`);
+      setUser(userRes.data);
+
+      const adsRes = await axios.get(`${backendURL}/api/ads/${ownerId}`);
+      setAds(adsRes.data);
+
+      const qrRes = await axios.get(`${backendURL}/api/qrcode/${ownerId}`);
+      setQrCode(qrRes.data.qr);
     } catch (error) {
-      console.error("Error fetching user:", error);
+      console.error("Data fetch error:", error);
     }
   };
 
-  useEffect(() => {
-    axios.get(backendURL + `/api/ads/${ownerId}`).then((res) => {
-      setAds(res.data);
-      // Initialize current indices to 0 for each ad
-      const initialIndices = {};
-      res.data.forEach(ad => {
-        initialIndices[ad._id] = 0;
-      });
-      setCurrentIndices(initialIndices);
-      currentIndicesRef.current = initialIndices;
-    });
-    fetchUser();
-  }, [ownerId]);
-
-  // Keep ref in sync with state
-  useEffect(() => {
-    currentIndicesRef.current = currentIndices;
-  }, [currentIndices]);
-
-  // Clean up timeouts on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(scrollTimeouts.current).forEach(timeout => {
-        clearTimeout(timeout);
-      });
-    };
-  }, []);
-
-  const toggleVisibility = (adId) => {
-    setVisibleAds((prev) => ({ ...prev, [adId]: !prev[adId] }));
+  const toggleRefreshAds = () => {
+    setRefreshAds((prev) => !prev);
   };
 
-  // Scroll to image in banner section
-  const scrollToImage = (adId, index) => {
-    const element = document.getElementById(`banner-${adId}-${index}`);
-    if (element) {
-      // Get the parent container
-      const container = bannerRefs.current[adId];
-      if (container) {
-        // Calculate the scrollLeft position
-        const scrollLeft = index * container.clientWidth;
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: 'smooth'
-        });
-      }
-    }
-    // Update current index immediately
-    setCurrentIndices(prev => ({ ...prev, [adId]: index }));
-  };
-
-  // Handle scroll events with debounce
-  const handleScroll = (adId) => {
-    // Clear any existing timeout for this ad
-    if (scrollTimeouts.current[adId]) {
-      clearTimeout(scrollTimeouts.current[adId]);
-    }
-
-    // Set a new timeout to update index after scrolling stops
-    scrollTimeouts.current[adId] = setTimeout(() => {
-      const container = bannerRefs.current[adId];
-      if (container) {
-        const scrollPosition = container.scrollLeft;
-        const containerWidth = container.clientWidth;
-        const currentIndex = Math.round(scrollPosition / containerWidth);
-
-        // Only update if index changed
-        if (currentIndicesRef.current[adId] !== currentIndex) {
-          setCurrentIndices(prev => ({ ...prev, [adId]: currentIndex }));
-        }
-      }
-    }, 150); // 150ms delay after scrolling stops
-  };
-
-  // Fixed prev and next functions
-  const goToPrevImage = (adId, totalImages) => {
-    setCurrentIndices(prev => {
-      const newIndex = (prev[adId] === 0) ? totalImages - 1 : prev[adId] - 1;
-      scrollToImage(adId, newIndex); // Scroll to the new image
-      return { ...prev, [adId]: newIndex };
-    });
-  };
-
-  const goToNextImage = (adId, totalImages) => {
-    setCurrentIndices(prev => {
-      const newIndex = (prev[adId] === totalImages - 1) ? 0 : prev[adId] + 1;
-      scrollToImage(adId, newIndex); // Scroll to the new image
-      return { ...prev, [adId]: newIndex };
-    });
-  };
-
-  return (
-    <div className="min-h-screen dark:bg-bg-dark bg-bg-light relative">          
+  return user && (
+    <div className="min-h-screen dark:bg-bg-dark bg-bg-light">
       {/* Nav Section */}
-      <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">
+      <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div onClick={() => { navigate("/") }} className="flex items-center gap-2 cursor-pointer">
-              {/*SVG*/}
+            {/*Logo*/}
+            <div className="flex items-center gap-2 cursor-default">
               <div className='w-7 h-fit'>
                 <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M267.997 60.793L265.006 319H169.662V6.34766L267.997 60.793Z" fill="#B0B0B0" stroke="#B0B0B0" />
@@ -203,152 +141,202 @@ const ViewAds = () => {
                   <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#424242" />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-subtitle-light dark:text-subtitle-dark">Basha Bhara Hobe</span>
+              <span className="sm:text-xl text-sm font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Hello, <span>{user.name}👋</span></span>
+            </div>
+
+            {/*PFP and Logout Button*/}
+            <div className="hidden md:flex items-center gap-5">
+              <NavLink
+                to={`/user/${ownerId}`}
+                className={`p-1.5 ${pageState === "Dashboard" ? 'border-b-1 dark:border-b-subtitle-dark border-b-subtitle-light' : ''} dark:text-subtitle-dark text-subtitle-light px-0.5`}
+              >
+                Dashboard
+              </NavLink>
+              <NavLink
+                to={`/user/${ownerId}/dashboard`}
+                className={`p-1.5 ${pageState === "AllUnits" ? 'border-b-1 dark:border-b-subtitle-dark border-b-subtitle-light' : ''} dark:text-subtitle-dark text-subtitle-light px-0.5`}
+              >
+                All Units
+              </NavLink>
+              <NavLink
+                to={`/user/${ownerId}/profile`}
+                className={`p-1.5 ${pageState === "Profile" ? 'border-b-1 dark:border-b-subtitle-dark border-b-subtitle-light' : ''} dark:text-subtitle-dark text-subtitle-light px-0.5`}
+              >
+                Profile
+              </NavLink>
+              <button onClick={() => {
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userId");
+                navigate("/login");
+              }} className="dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light dark:hover:bg-title-dark hover:bg-title-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-xl px-3 cursor-pointer">
+                Logout
+              </button>
+            </div>
+
+            {/* Mobile Burger Menu Button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="dark:text-subtitle-dark dark:hover:text-subtitle-dark/50 text-subtitle-light hover:text-subtitle-light/50 focus:outline-none focus:text-subtitle-dark"
+              >
+                <svg
+                  className="h-6 w-6"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  {isOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        <div
+          className={`${isOpen ? 'block' : 'hidden'} md:hidden border-t-1 dark:border-subtitle-dark/30 border-subtitle-light/30`}
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <NavLink
+              to={`/user/${ownerId}`}
+              className={`${pageState === "Dashboard" ? "dark:bg-subtitle-dark/10 bg-subtitle-light/10 border-l-2" : ""} block px-3 py-2 text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20`}
+              onClick={() => setIsOpen(false)}
+            >
+              Dashboard
+            </NavLink>
+
+            <NavLink
+              to={`/user/${ownerId}/dashboard`}
+              className={`${pageState === "AllUnits" ? "dark:bg-subtitle-dark/10 bg-subtitle-light/10 border-l-2" : ""} block px-3 py-2 text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20`}
+              onClick={() => setIsOpen(false)}
+            >
+              All Units
+            </NavLink>
+
+            <NavLink
+              to={`/user/${ownerId}/profile`}
+              className={`${pageState === "Profile" ? "dark:bg-subtitle-dark/10 bg-subtitle-light/10 border-l-2" : ""} block px-3 py-2 text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20`}
+              onClick={() => setIsOpen(false)}
+            >
+              Profile
+            </NavLink>
+            <button onClick={() => {
+              localStorage.removeItem("authToken");
+              localStorage.removeItem("userId");
+              navigate("/login");
+            }} className="w-full text-center dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light dark:hover:bg-title-dark hover:bg-title-light dark:hover:text-title-light hover:text-title-dark px-3 py-2 text-base font-medium  mt-2">
+              Logout</button>
+          </div>
+        </div>
       </nav>
-      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8 space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-bold dark:text-title-dark text-title-light mt-18 mb-8">Available Units <span className="font-light capitalize"> / {user.name}</span></h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {ads.map((ad) => {
-            const isVisible = visibleAds[ad._id] || false;
-            const currentIndex = currentIndices[ad._id] || 0;
-            return (
-              ad.availability && (
-                <div key={ad._id} className="dark:bg-card-dark bg-card-light h-fit rounded-3xl overflow-hidden shadow-xl relative transition-all duration-300">
-                  {/* Banner Section */}
-                  <div className="relative">
-                    <div
-                      ref={el => bannerRefs.current[ad._id] = el}
-                      onScroll={() => handleScroll(ad._id)}
-                      className="flex overflow-x-scroll no-scrollbar sm:h-55 h-70 snap-x snap-mandatory" // Changed overflow-x-hidden to overflow-x-scroll and added snap properties
-                    >
-                      {ad.images.map((image, index) => (
-                        <img
-                          key={index}
-                          id={`banner-${ad._id}-${index}`}
-                          src={image}
-                          alt={`Ad image ${index + 1}`}
-                          className="h-full w-full object-cover flex-shrink-0 snap-center" // Added snap-center
-                        />
-                      ))}
-                    </div>
+      <ToastContainer />
 
-                    {/* Dots with active tracking and transition */}
-                    <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-1">
-                      {ad.images.map((_, index) => (
-                        <span
-                          key={index}
-                          className={`
-                            w-3 h-3 rounded-full
-                            transition-all bg-white
-                            ${currentIndex === index ? "p-2" : "bg-white/50"}
-                            `}
-                        />
-                      ))}
-                    </div>
+      <AnimatePresence>
+        {addUnit && (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex items-center justify-center p-4">
+            <Add toggleRefreshAds={toggleRefreshAds} setAddUnit={(value) => { setAddUnit(value); if (!value) setSelectedAd(null); }} ad={selectedAd} toast={toast} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-                    {/* Next and Previous button */}
-                    <div className=" absolute inset-0 flex items-center justify-between p-4">
-                      <button onClick={() => goToPrevImage(ad._id, ad.images.length)} className="p-1 rounded-full shadow bg-white/50 text-gray-800 hover:bg-white">
-                        <ChevronLeft size={30} />
-                      </button>
-                      <button onClick={() => goToNextImage(ad._id, ad.images.length)} className="p-1 rounded-full shadow bg-white/50 text-gray-800 hover:bg-white">
-                        <ChevronRight size={30} />
-                      </button>
-                    </div>
+      {
+        pageState === "Dashboard" && (
+          <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8">
+            <h2 className="text-4xl font-bold sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">Dashboard</h2>
+
+            <div class="grid grid-cols-2 md:grid-cols-2 grid-rows-[1fr_4fr] md:grid-rows-[1fr_3fr] gap-2 md:gap-4">
+              {/*Numbers*/}
+              <div class="col-start-1 row-start-1 col-span-2 md:col-start-1 md:row-start-1 md:col-span-1 md:row-span-1 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl p-4">
+                <div className="grid grid-cols-[3fr_5fr] gap-4 h-full">
+                  <div className="w-full rounded-2xl flex flex-col justify-center gap-1 dark:bg-bg-dark bg-bg-light shadow-xs p-4">
+                    <h3 className="dark:text-title-dark text-title-light text-4xl sm:text-6xl font-semibold">
+                      {
+                        ads.filter(ad => ad.availability).length
+                      }
+                    </h3>
+                    <p className="text-sm sm:text-lg flex items-center gap-2 dark:text-subtitle-dark text-subtitle-light"><span className="sm:w-4 w-3 h-3 sm:h-4 rounded-full bg-green-400"></span>Active Units</p>
                   </div>
-
-                  {/* Thumbnails */}
-                  {isVisible && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="flex items-center gap-2 px-3 pt-3"
-                    >
-                      {ad.images.slice(0, ad.images.length).map((img, index) => (
-                        <motion.div
-                          key={index}
-                          className={`w-12 h-12 rounded-xl overflow-hidden cursor-pointer ${index === currentIndex ? 'border-2 dark:border-white border-black' : 'border border-transparent'
-                            }`}
-                          whileHover={{ scale: 1.05 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            scrollToImage(ad._id, index);
-                          }}
-                        >
-                          <img src={img} alt={`thumb-${index}`} className="w-full h-full object-cover" />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-
-                  {/* Ad Details */}
-                  <div className="p-4 pb-0 transition-all duration-300 ease-in">
-                    <div className="flex items-center justify-between">
-                      <h2 className="sm:text-3xl text-2xl font-bold dark:text-subtitle-dark text-subtitle-light">{ad.title}</h2>
-                      <div
-                        className="text-white w-15 h-15 flex justify-center items-center rounded-full font-bold sm:text-xs text-sm"
-                        style={{
-                          backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 53 53'><path d='M26.5 0L30.6682 4.20224L36.0729 1.78949L38.4416 7.21367L44.3529 6.91626L44.6022 12.8298L50.2218 14.6879L48.3181 20.2922L52.887 24.0549L49.0872 28.593L51.9884 33.7521L46.8059 36.6111L47.6475 42.4698L41.7821 43.2637L40.4505 49.0308L34.6944 47.6522L31.3694 52.5488L26.5 49.184L21.6306 52.5488L18.3056 47.6522L12.5495 49.0308L11.2179 43.2637L5.35254 42.4698L6.19412 36.6111L1.01162 33.7521L3.91277 28.593L0.113045 24.0549L4.68195 20.2922L2.77817 14.6879L8.39778 12.8298L8.64707 6.91626L14.5584 7.21367L16.9271 1.78949L22.3318 4.20224L26.5 0Z' fill='%23F34141'/></svg>")`,
-                          backgroundSize: "cover",
-                          backgroundRepeat: "no-repeat",
-                          backgroundPosition: "center",
-                        }}
-                      >
-                        <p>৳ {ad.price}</p>
-                      </div>
-                    </div>
-
-                    <p className={`dark:text-subtitle-dark mb-1 text-sm mt-1 ${!isVisible ? "truncate" : ""}`}>
-                      {ad.description}
-                    </p>
-
-                    {isVisible && (
-                      <>
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.25 }}
-                          className="dark:text-subtitle-dark text-subtitle-light"
-                        >
-                          Move-in: <span className="font-semibold underline">{new Date(ad.moveInDate).toDateString()}</span>
-                        </motion.p>
-                        <motion.button
-                          onClick={handleCall} 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.25 }}
-                          className="dark:text-black text-white font-semibold dark:bg-subtitle-dark bg-subtitle-light w-full mt-3 py-2 rounded-3xl dark:hover:bg-subtitle-dark/80 hover:bg-subtitle-light/80  transition"
-                        >
-                          Contact
-                        </motion.button>
-                      </>
-                    )}
-                    <div className="w-full text-center my-1">
-                      <button onClick={() => toggleVisibility(ad._id)} className={`${isVisible ? "rotate-x-180" : ""} transition-transform duration-300 ease-in w-full flex justify-center items-center py-2 rounded-full cursor-pointer`}>
-                        <svg className="dark:block hidden" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.8335 7.3999L18 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
-                          <path d="M9.8335 7.3999L1.66701 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
-                        </svg>
-                        <svg className="dark:hidden block" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.8335 7.3999L18 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
-                          <path d="M9.8335 7.3999L1.66701 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
-                        </svg>
-                      </button>
-                    </div>
+                  <div className="w-full rounded-2xl flex flex-col justify-center gap-1 dark:bg-bg-dark bg-bg-light shadow-xs p-4">
+                    <h3 className="dark:text-title-dark text-title-light text-4xl sm:text-6xl font-semibold">{ads.length}</h3>
+                    <p className="text-sm sm:text-lg dark:text-subtitle-dark text-subtitle-light">Total Number of Units</p>
                   </div>
                 </div>
-              )
-            );
-          })}
-        </div>
-      </div>
+              </div>
+
+              {/*Active Units*/}
+              <div class="flex flex-col justify-between items-center gap-2 col-start-1 row-start-2 col-span-2 row-span-2 md:col-start-2 md:row-start-1 md:col-span-1 md:row-span-4 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl p-4">
+                <div className="w-full">
+                  <h3 className="mb-4 sm:text-6xl text-4xl font-semibold dark:text-title-dark text-title-light">Active Units</h3>
+                  <div className="flex flex-col gap-2">
+                    {ads
+                      .filter((ad) => ad.availability) // First, filter the ads that are available
+                      .map((ad) => (
+                        // Then, map over the filtered ads to render their titles
+                        <div className="w-full dark:bg-bg-dark bg-bg-light shadow-xs p-2 rounded-xl flex justify-between items-center gap-4" key={ad.id || ad.title}>
+                          <div className="flex gap-4">
+                            <div className="rounded-lg overflow-hidden">
+                              <img className="w-20 h-20 object-cover" src={ad.images[0]} alt="" srcset="" />
+                            </div>
+                            <div className="flex flex-col justify-between">
+                              <p className="text-xl font-semibold dark:text-subtitle-dark text-subtitle-light line-clamp-1">{ad.title}</p>
+                              <p className="text-sm dark:text-description-dark text-description-light">৳{ad.price}</p>
+                              <p className={`text-sm ${ad.availability ? "text-green-400" : "text-red-400"} flex items-center gap-1.5`}><span className={`w-3 h-3 rounded-full ${ad.availability ? "bg-green-400" : "bg-red-400"}`}></span> {ad.availability ? "Active" : "Inactive"}</p>
+                            </div>
+                          </div>
+                          <div>
+                            <button
+                              onClick={() => {
+                                setSelectedAd(ad);
+                                setAddUnit(true);
+                              }}
+                              className="w-12 h-12 bg-green-500 hover:bg-green-400 rounded-full flex justify-center items-center">
+                              <svg className="w-5" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16.6432 0.106781L3.03644 13.7136L0.118958 22.881L9.28644 19.9636L22.8932 6.35678C22.8932 6.35678 22.789 4.16824 20.8099 2.19012C18.8307 0.210948 16.6432 0.106781 16.6432 0.106781ZM17.0338 1.79949C18.1505 2.01199 19.0395 2.48502 19.7255 3.18905C20.4114 3.89308 20.8943 4.82814 21.2005 5.96616L19.3125 7.85418L15.1458 3.68751L16.6432 2.19012L17.0338 1.79949ZM4.18594 14.7573C4.19825 14.7604 5.43848 15.0739 6.68227 16.3177C8.03644 17.5677 8.24477 18.7144 8.24477 18.7144L8.28953 18.7673L4.59283 19.9575L3.03441 18.399L4.18594 14.7573Z" fill="white" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+                <button
+                  className=" mt-2 dark:text-title-dark text-title-light p-1.5 px-5 rounded-full dark:bg-bg-dark bg-bg-light border dark:border-subtitle-dark/60 border-subtitle-light/60 hover:dark:border-subtitle-dark/90 hover:border-subtitle-light cursor-pointer w-fit">
+                  <NavLink
+                    onClick={() => setPageState("AllUnits")}
+                    to={`/user/${ownerId}/dashboard`}>
+                    more
+                  </NavLink>
+                </button>
+              </div>
+
+              {/*New Features*/}
+              <div class="col-start-1 row-start-4 col-span-2 md:col-start-1 md:row-start-2 md:col-span-1 md:row-span-3 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl p-4">
+                <div>
+                  
+                </div>
+              </div>
+            </div>
+          </main>
+        )
+      }
+
+      <Outlet context={{ user, setUser, ads, qrCode, backendURL, toggleRefreshAds, toast }} />
     </div>
   );
 };
 
-export default ViewAds;
+export default UserPanel;

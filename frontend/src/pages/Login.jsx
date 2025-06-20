@@ -20,7 +20,7 @@ function Login() {
                 if (result.data.success) {
                     localStorage.setItem('authToken', result.data.token);
                     localStorage.setItem('userId', result.data.id);
-                    navigate(`/dashboard/${result.data.id}`)
+                    navigate(`/user/${result.data.id}`)
                     setIsLoading(false)
                 } else {
                     toast.error("Incorrect Password!")

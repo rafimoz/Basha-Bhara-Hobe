@@ -1,23 +1,30 @@
-import { Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import ViewAds from "./pages/ViewAds";
-import Signup from "./pages/Signup";
-import Login from "./pages/Login";
-import HomePage from "./pages/Home";
-import Profile from "./pages/Profile";
-
-
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Register from './pages/Signup';
+import Login from './pages/Login';
+import ViewAds from './pages/ViewAds';
+import UserPanel from './pages/UserPanel';
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
 
 function App() {
   return (
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/profile/:id" element={<Profile />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Signup />} />
-        <Route path="/dashboard/:id" element={<Dashboard />} />
-        <Route path="/rents/:ownerId" element={<ViewAds />} />
-      </Routes>
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Home />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/rents/:id" element={<ViewAds />} />
+
+      {/* Protected Nested User Panel */}
+      <Route path="/user/:id" element={<UserPanel />}>
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="profile" element={<Profile />} />
+      </Route>
+
+      {/* Fallback (Optional) */}
+      <Route path="*" element={<div>404 - Page Not Found</div>} />
+    </Routes>
   );
 }
 
