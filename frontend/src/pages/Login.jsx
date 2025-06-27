@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
+import { Helmet } from 'react-helmet-async'
+
 
 function Login() {
     const [email, setEmail] = useState('') // Initialize with empty string
@@ -34,6 +36,10 @@ function Login() {
 
     return (
         <div className='flex justify-center items-center h-screen dark:bg-bg-dark bg-bg-light'>
+            <Helmet>
+                <title>Basha Bhara Hobe - Login</title>
+                <meta name='description' content="Login page for - Basha Bhara Hobe." />
+            </Helmet>
             <ToastContainer />
             {/* Nav Section */}
             <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+import { HelmetProvider } from 'react-helmet-async'
 import Home from './pages/Home';
 import Register from './pages/Signup';
 import Login from './pages/Login';
@@ -10,6 +11,7 @@ import Profile from './pages/Profile';
 
 function App() {
   return (
+    <HelmetProvider>
     <>
       <Analytics />
       <Routes>
@@ -29,6 +31,7 @@ function App() {
         <Route path="*" element={<div>404 - Page Not Found</div>} />
       </Routes>
     </>
+    </HelmetProvider>
   );
 }
 

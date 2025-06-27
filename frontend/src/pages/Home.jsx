@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
-import img from '../assets/images.png'
+import { Helmet } from 'react-helmet-async'
 
 import {
     QrCode,
@@ -76,6 +76,12 @@ const HomePage = () => {
 
     return (
         <div className="min-h-screen dark:bg-bg-dark bg-bg-light">
+            <Helmet>
+                <title>Basha Bhara Hobe - Home</title>
+                <meta name='description' content="Landing page for - Basha Bhara Hobe." />
+            </Helmet>
+
+
             {/* Nav Section */}
             <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -617,8 +623,8 @@ const HomePage = () => {
                             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
                             <div className="space-y-2">
                                 <a href="#about" className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">About</a>
-                                <a className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">Privacy Policy</a>
-                                <a className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">Terms of Service</a>
+                                <a href="#" className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">Privacy Policy</a>
+                                <a href="#" className="block dark:text-subtitle-dark text-subtitle-light dark:hover:text-white hover:text-black/50 transition-colors">Terms of Service</a>
                             </div>
                         </div>
                         <div>
