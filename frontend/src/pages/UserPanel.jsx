@@ -3,6 +3,7 @@ import { Outlet, useParams, useNavigate, NavLink, useLocation } from "react-rout
 import axios from "axios";
 import { AnimatePresence, motion } from 'framer-motion';
 import Add from '../components/Add';
+import QrCode from '../components/QrCode';
 import { ToastContainer, toast } from 'react-toastify';
 
 const UserPanel = () => {
@@ -17,6 +18,8 @@ const UserPanel = () => {
 
   const [selectedAd, setSelectedAd] = useState(null);
   const [addUnit, setAddUnit] = useState(false);
+  const [seeQrCode, setSeeQrCode] = useState(false);
+
 
   const [pageState, setPageState] = useState("Dashboard")
   const location = useLocation(); // Add this line
@@ -141,7 +144,7 @@ const UserPanel = () => {
                   <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#424242" />
                 </svg>
               </div>
-              <span className="sm:text-xl text-sm font-bold text-subtitle-light dark:text-subtitle-dark uppercase">Hello, <span>{user.name}👋</span></span>
+              <span className="sm:text-2xl text-xl font-neueplak-black line-clamp-1 text-subtitle-light dark:text-subtitle-dark uppercase">Hello, <span>{user.name}👋</span></span>
             </div>
 
             {/*PFP and Logout Button*/}
@@ -246,6 +249,14 @@ const UserPanel = () => {
       <ToastContainer />
 
       <AnimatePresence>
+        {seeQrCode && (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex items-center justify-center p-4">
+            <QrCode qrImage={qrCode} seeQrCode={setSeeQrCode} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {addUnit && (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex items-center justify-center p-4">
             <Add toggleRefreshAds={toggleRefreshAds} setAddUnit={(value) => { setAddUnit(value); if (!value) setSelectedAd(null); }} ad={selectedAd} toast={toast} />
@@ -256,14 +267,13 @@ const UserPanel = () => {
       {
         pageState === "Dashboard" && (
           <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8">
-            <h2 className="text-4xl font-bold sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">Dashboard</h2>
-
-            <div class="grid grid-cols-2 md:grid-cols-2 grid-rows-[1fr_4fr] md:grid-rows-[1fr_3fr] gap-2 md:gap-4">
+            <h2 className="text-4xl sm:text-5xl font-neueplak-black sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">Dashboard</h2>
+            <div class="grid grid-cols-2 md:grid-cols-2 grid-rows-[1fr_4fr] md:grid-rows-[1fr_3fr] gap-2 sm:gap-4">
               {/*Numbers*/}
-              <div class="col-start-1 row-start-1 col-span-2 md:col-start-1 md:row-start-1 md:col-span-1 md:row-span-1 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl p-4">
-                <div className="grid grid-cols-[3fr_5fr] gap-4 h-full">
+              <div class="col-start-1 row-start-1 col-span-2 md:col-start-1 md:row-start-1 md:col-span-1 md:row-span-1 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2">
+                <div className="grid grid-cols-2 gap-2 sm:gap-4 h-full">
                   <div className="w-full rounded-2xl flex flex-col justify-center gap-1 dark:bg-bg-dark bg-bg-light shadow-xs p-4">
-                    <h3 className="dark:text-title-dark text-title-light text-4xl sm:text-6xl font-semibold">
+                    <h3 className="dark:text-title-dark text-title-light text-4xl sm:text-5xl font-semibold">
                       {
                         ads.filter(ad => ad.availability).length
                       }
@@ -271,29 +281,34 @@ const UserPanel = () => {
                     <p className="text-sm sm:text-lg flex items-center gap-2 dark:text-subtitle-dark text-subtitle-light"><span className="sm:w-4 w-3 h-3 sm:h-4 rounded-full bg-green-400"></span>Active Units</p>
                   </div>
                   <div className="w-full rounded-2xl flex flex-col justify-center gap-1 dark:bg-bg-dark bg-bg-light shadow-xs p-4">
-                    <h3 className="dark:text-title-dark text-title-light text-4xl sm:text-6xl font-semibold">{ads.length}</h3>
+                    <h3 className="dark:text-title-dark text-title-light text-4xl sm:text-5xl font-semibold">{ads.length}</h3>
                     <p className="text-sm sm:text-lg dark:text-subtitle-dark text-subtitle-light">Total Number of Units</p>
                   </div>
                 </div>
               </div>
 
               {/*Active Units*/}
-              <div class="flex flex-col justify-between items-center gap-2 col-start-1 row-start-2 col-span-2 row-span-2 md:col-start-2 md:row-start-1 md:col-span-1 md:row-span-4 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl p-4">
+              <div class="flex flex-col justify-between items-center gap-2 col-start-1 row-start-2 col-span-2 row-span-2 md:col-start-2 md:row-start-1 md:col-span-1 md:row-span-4 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2">
                 <div className="w-full">
-                  <h3 className="mb-4 sm:text-6xl text-4xl font-semibold dark:text-title-dark text-title-light">Active Units</h3>
-                  <div className="flex flex-col gap-2">
+                  <h3 className="mb-4 sm:text-4xl text-3xl font-neueplak-regular dark:text-title-dark text-title-light">Active Units</h3>
+                  <div className="flex flex-col gap-2 sm:gap-4">
                     {ads
                       .filter((ad) => ad.availability) // First, filter the ads that are available
                       .map((ad) => (
                         // Then, map over the filtered ads to render their titles
-                        <div className="w-full dark:bg-bg-dark bg-bg-light shadow-xs p-2 rounded-xl flex justify-between items-center gap-4" key={ad.id || ad.title}>
-                          <div className="flex gap-4">
+                        <div className="w-full dark:bg-bg-dark bg-bg-light shadow-xs p-2 rounded-xl flex justify-between items-center" key={ad.id || ad.title}>
+                          <div className="flex gap-2">
                             <div className="rounded-lg overflow-hidden">
                               <img className="w-20 h-20 object-cover" src={ad.images[0]} alt="" srcset="" />
                             </div>
                             <div className="flex flex-col justify-between">
                               <p className="text-xl font-semibold dark:text-subtitle-dark text-subtitle-light line-clamp-1">{ad.title}</p>
-                              <p className="text-sm dark:text-description-dark text-description-light">৳{ad.price}</p>
+                              <p className="text-sm dark:text-description-dark text-description-light flex items-center justify-start">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 7.5.415-.207a.75.75 0 0 1 1.085.67V10.5m0 0h6m-6 0h-1.5m1.5 0v5.438c0 .354.161.697.473.865a3.751 3.751 0 0 0 5.452-2.553c.083-.409-.263-.75-.68-.75h-.745M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                {ad.price}
+                              </p>
                               <p className={`text-sm ${ad.availability ? "text-green-400" : "text-red-400"} flex items-center gap-1.5`}><span className={`w-3 h-3 rounded-full ${ad.availability ? "bg-green-400" : "bg-red-400"}`}></span> {ad.availability ? "Active" : "Inactive"}</p>
                             </div>
                           </div>
@@ -303,7 +318,7 @@ const UserPanel = () => {
                                 setSelectedAd(ad);
                                 setAddUnit(true);
                               }}
-                              className="w-12 h-12 bg-green-500 hover:bg-green-400 rounded-full flex justify-center items-center">
+                              className="w-12 h-20 bg-green-500 hover:bg-green-400 rounded-lg flex justify-center items-center">
                               <svg className="w-5" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M16.6432 0.106781L3.03644 13.7136L0.118958 22.881L9.28644 19.9636L22.8932 6.35678C22.8932 6.35678 22.789 4.16824 20.8099 2.19012C18.8307 0.210948 16.6432 0.106781 16.6432 0.106781ZM17.0338 1.79949C18.1505 2.01199 19.0395 2.48502 19.7255 3.18905C20.4114 3.89308 20.8943 4.82814 21.2005 5.96616L19.3125 7.85418L15.1458 3.68751L16.6432 2.19012L17.0338 1.79949ZM4.18594 14.7573C4.19825 14.7604 5.43848 15.0739 6.68227 16.3177C8.03644 17.5677 8.24477 18.7144 8.24477 18.7144L8.28953 18.7673L4.59283 19.9575L3.03441 18.399L4.18594 14.7573Z" fill="white" />
                               </svg>
@@ -324,9 +339,36 @@ const UserPanel = () => {
               </div>
 
               {/*New Features*/}
-              <div class="col-start-1 row-start-4 col-span-2 md:col-start-1 md:row-start-2 md:col-span-1 md:row-span-3 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl p-4">
-                <div>
-                  
+              <div class="col-start-1 row-start-4 col-span-2 md:col-start-1 md:row-start-2 md:col-span-1 md:row-span-3 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2 flex flex-col">
+                <h3 className="mb-4 sm:text-4xl text-3xl font-neueplak-regular dark:text-title-dark text-title-light">Quick Access</h3>
+                <div className="w-full grid grid-cols-2 grid-rows-2 gap-2 sm:gap-4 flex-grow">
+                  <div onClick={() => { setAddUnit(true) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-blue-400/20 to-blue-600/20 dark:from-blue-600/20 dark:to-blue-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <h4 className="text-lg font-semibold">Add Unit</h4>
+                  </div>
+
+                  <div onClick={() => { setSeeQrCode(true) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-teal-400/20 to-green-600/20 dark:from-teal-600/20 dark:to-green-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    <h4 className="text-lg font-semibold">QR Code</h4>
+                  </div>
+
+                  <div onClick={() => { navigate(`/user/${ownerId}/dashboard`) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-teal-400/20 to-green-600/20 dark:from-teal-600/20 dark:to-green-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                    <h4 className="text-lg font-semibold">All Units</h4>
+                  </div>
+
+                  <div onClick={() => { navigate(`/user/${ownerId}/profile`) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-purple-400/20 to-indigo-600/20 dark:from-purple-600/20 dark:to-indigo-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                    <h4 className="text-lg font-semibold">Profile</h4>
+                  </div>
                 </div>
               </div>
             </div>

@@ -19,6 +19,7 @@
 * {
   scroll-behavior: smooth;
 }
+
 /* @custom-variant dark (&:where(.dark, .dark *));
 
 @layer theme {
@@ -26,6 +27,24 @@
    
   }
 } */
+
+@font-face{
+  font-family: "black";
+  src: url("./fonts/NeuePlakBlack.ttf");
+}
+@font-face{
+  font-family: "regular";
+  src: url("./fonts/NeuePlakRegular.ttf");
+}
+@font-face{
+  font-family: "light";
+  src: url("./fonts/NeuePlakLight.ttf");
+}
+@font-face{
+  font-family: "thin";
+  src: url("./fonts/NeuePlakThin.ttf");
+}
+
 @theme {
   --color-bg-light: #F5F7FA;
   --color-card-light: #FFFF;
@@ -44,5 +63,10 @@
     --color-cta-dark: #00BFA5;
     --color-price-dark: #8BC34A;
     --color-nav-dark: #2C2C2C;  
+
+  --font-neueplak-black: "black";
+  --font-neueplak-regular: "regular";
+  --font-neueplak-light: "light";
+  --font-neueplak-thin: "thin";
 
 }

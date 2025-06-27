@@ -112,7 +112,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen dark:bg-bg-dark bg-bg-light font-sans">
       <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8">
-        <h2 className="text-4xl font-bold sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">Profile</h2>
+        <h2 className="text-4xl sm:text-5xl font-neueplak-black sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">Profile</h2>
         <div className='relative grid sm:grid-cols-[1fr_2fr] grid-cols-1 items-center gap-4 p-4 dark:bg-card-dark/20 bg-card-light/20 rounded-4xl shadow-xl overflow-hidden'>
           <div className='w-full flex justify-center'>
             {isEdit ? (

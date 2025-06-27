@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, mix, motion } from 'framer-motion';
 import Add from '../components/Add';
 import QrCode from '../components/QrCode';
 
@@ -40,7 +40,7 @@ const Dashboard = () => {
   }, [seeQrCode, addUnit]);
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this Ad?")) {
+    if (window.confirm("Are you sure you want to delete this Unit?")) {
       try {
         await fetch(`${backendURL}/api/ads/${id}`, { method: 'DELETE' });
         toggleRefreshAds();
@@ -97,7 +97,7 @@ const Dashboard = () => {
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8"> {/* Increased overall padding */}
         {/* "All Units" Title - Slightly larger and more defined */}
-        <h2 className="text-4xl font-bold sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">All Units</h2>
+        <h2 className="text-4xl sm:text-5xl font-neueplak-black sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">All Units</h2>
         <div className="flex justify-between mb-5"> {/* Spaced out buttons */}
           {/* QR Code Button - PRESERVED ORIGINAL STYLING */}
           <button onClick={() => setSeeQrCode(true)} className="border-2 dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light dark:hover:bg-subtitle-dark hover:bg-subtitle-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-full px-3 cursor-pointer">QR Code</button>
@@ -159,7 +159,7 @@ const Dashboard = () => {
 
                     {/* Price */}
                     <div
-                      className=" absolute top-4 right-4 text-white w-15 h-15 flex justify-center items-center rounded-full font-bold sm:text-xs text-sm"
+                      className="absolute top-4 right-4 text-white opacity-90 w-17 h-17 flex justify-center items-center rounded-full sm:text-xs text-sm"
                       style={{
                         backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 53 53'><path d='M26.5 0L30.6682 4.20224L36.0729 1.78949L38.4416 7.21367L44.3529 6.91626L44.6022 12.8298L50.2218 14.6879L48.3181 20.2922L52.887 24.0549L49.0872 28.593L51.9884 33.7521L46.8059 36.6111L47.6475 42.4698L41.7821 43.2637L40.4505 49.0308L34.6944 47.6522L31.3694 52.5488L26.5 49.184L21.6306 52.5488L18.3056 47.6522L12.5495 49.0308L11.2179 43.2637L5.35254 42.4698L6.19412 36.6111L1.01162 33.7521L3.91277 28.593L0.113045 24.0549L4.68195 20.2922L2.77817 14.6879L8.39778 12.8298L8.64707 6.91626L14.5584 7.21367L16.9271 1.78949L22.3318 4.20224L26.5 0Z' fill='%23F34141'/></svg>")`,
                         backgroundSize: "cover",
@@ -167,7 +167,12 @@ const Dashboard = () => {
                         backgroundPosition: "center",
                       }}
                     >
-                      <p>৳ {ad.price}</p>
+                      <p className='relative flex justify-center'>
+                        {ad.price}
+                        <svg className='absolute w-2 right-[-8px]' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 7.5.415-.207a.75.75 0 0 1 1.085.67V10.5m0 0h6m-6 0h-1.5m1.5 0v5.438c0 .354.161.697.473.865a3.751 3.751 0 0 0 5.452-2.553c.083-.409-.263-.75-.68-.75h-.745M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                      </p>
                     </div>
 
                   </div>
