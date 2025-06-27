@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Home from './pages/Home';
 import Register from './pages/Signup';
 import Login from './pages/Login';
@@ -9,22 +10,25 @@ import Profile from './pages/Profile';
 
 function App() {
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<Home />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/rents/:id" element={<ViewAds />} />
+    <>
+      <Analytics />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/rents/:id" element={<ViewAds />} />
 
-      {/* Protected Nested User Panel */}
-      <Route path="/user/:id" element={<UserPanel />}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="profile" element={<Profile />} />
-      </Route>
+        {/* Protected Nested User Panel */}
+        <Route path="/user/:id" element={<UserPanel />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="profile" element={<Profile />} />
+        </Route>
 
-      {/* Fallback (Optional) */}
-      <Route path="*" element={<div>404 - Page Not Found</div>} />
-    </Routes>
+        {/* Fallback (Optional) */}
+        <Route path="*" element={<div>404 - Page Not Found</div>} />
+      </Routes>
+    </>
   );
 }
 
