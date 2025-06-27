@@ -282,7 +282,7 @@ const UserPanel = () => {
                   </div>
                   <div className="w-full rounded-2xl flex flex-col justify-center gap-1 dark:bg-bg-dark bg-bg-light shadow-xs p-4">
                     <h3 className="dark:text-title-dark text-title-light text-4xl sm:text-5xl font-semibold">{ads.length}</h3>
-                    <p className="text-sm sm:text-lg dark:text-subtitle-dark text-subtitle-light">Total Number of Units</p>
+                    <p className="text-sm sm:text-lg dark:text-subtitle-dark text-subtitle-light">Total Units</p>
                   </div>
                 </div>
               </div>
