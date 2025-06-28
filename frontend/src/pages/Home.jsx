@@ -208,26 +208,26 @@ const HomePage = () => {
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                         <a
                             href="#how-it-works"
-                            className="block px-3 py-2 rounded-md text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20"
+                            className="block px-3 py-2 text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20"
                             onClick={() => setIsOpen(false)} // Close menu on link click
                         >
                             How It Works
                         </a>
                         <a
                             href="#features"
-                            className="block px-3 py-2 rounded-md text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20"
+                            className="block px-3 py-2 text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20"
                             onClick={() => setIsOpen(false)}
                         >
                             Features
                         </a>
                         <a
                             href="#about"
-                            className="block px-3 py-2 rounded-md text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20"
+                            className="block px-3 py-2 text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20"
                             onClick={() => setIsOpen(false)}
                         >
                             About
                         </a>
-                        <button onClick={() => navigate("/login")} className="w-full text-left dark:bg-subtitle-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 rounded-md text-base font-medium transition-colors mt-2">
+                        <button onClick={() => navigate("/login")} className="w-full text-left dark:bg-subtitle-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 text-base font-medium transition-colors mt-2">
                             Get Started
                         </button>
                     </div>
