@@ -56,7 +56,7 @@ function Signup() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div onClick={() => { navigate("/") }} className="flex items-center gap-2 cursor-pointer">
-                            <div className='w-7 h-fit'>
+                            <div className='sm:w-7 w-5 h-fit'>
                                 <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M267.997 60.793L265.006 319H169.662V6.34766L267.997 60.793Z" fill="#B0B0B0" stroke="#B0B0B0" />
                                     <path d="M70 60.869V151.869V321.869H267V60.869L168.5 4L70 60.869Z" stroke="#B0B0B0" stroke-width="8" stroke-linejoin="round" />
@@ -122,13 +122,13 @@ function Signup() {
                                     <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#424242" />
                                 </svg>
                             </div>
-                            <span className="text-xl font-bold text-subtitle-light dark:text-subtitle-dark">Basha Bhara Hobe</span>
+                            <span className="sm:text-2xl text-lg font-neueplak-black text-subtitle-light dark:text-subtitle-dark">Basha Bhara Hobe</span>
                         </div>
                     </div>
                 </div>
             </nav>
             <div className='p-8 rounded-lg w-96'>
-                <h2 className='text-4xl font-bold text-center mb-5 dark:text-title-dark text-title-light'>Register</h2>
+                <h2 className='text-4xl font-neueplak-black text-center mb-5 dark:text-title-dark text-title-light'>Register</h2>
                 <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
                     <div className='w-full flex justify-center'>
                         <label className="w-35 h-35 border-2 hover:border-4 transition-all dark:border-description-dark border-description-light dark:text-subtitle-dark text-subtitle-light rounded-full flex items-center justify-center cursor-pointer overflow-hidden">

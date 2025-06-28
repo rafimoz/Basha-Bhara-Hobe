@@ -109,7 +109,7 @@ const Profile = () => {
     }
   };
 
-  return (
+  return user && (
     <div className="min-h-screen dark:bg-bg-dark bg-bg-light font-sans">
       <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8">
         <h2 className="text-4xl sm:text-5xl font-neueplak-black sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">Profile</h2>

@@ -78,7 +78,7 @@ const UserPanel = () => {
           <div className="flex justify-between items-center h-16">
             {/*Logo*/}
             <div className="flex items-center gap-2 cursor-default">
-              <div className='w-7 h-fit'>
+              <div className='w-5 sm:w-7 h-fit'>
                 <svg className='dark:block hidden' viewBox="0 0 271 326" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M267.997 60.793L265.006 319H169.662V6.34766L267.997 60.793Z" fill="#B0B0B0" stroke="#B0B0B0" />
                   <path d="M70 60.869V151.869V321.869H267V60.869L168.5 4L70 60.869Z" stroke="#B0B0B0" stroke-width="8" stroke-linejoin="round" />
@@ -144,7 +144,7 @@ const UserPanel = () => {
                   <path d="M73.646 195.271C76.4716 195.271 79.2972 195.271 82.2085 195.271C82.2085 198.096 82.2085 200.922 82.2085 203.833C79.3829 203.833 76.5572 203.833 73.646 203.833C73.646 201.008 73.646 198.182 73.646 195.271Z" fill="#424242" />
                 </svg>
               </div>
-              <span className="sm:text-2xl text-xl font-neueplak-black line-clamp-1 text-subtitle-light dark:text-subtitle-dark uppercase">Hello, <span>{user.name}👋</span></span>
+              <span className="sm:text-2xl text-lg font-neueplak-black line-clamp-1 text-subtitle-light dark:text-subtitle-dark uppercase">Hello, <span>{user.name}👋</span></span>
             </div>
 
             {/*PFP and Logout Button*/}
@@ -282,7 +282,7 @@ const UserPanel = () => {
                   </div>
                   <div className="w-full rounded-2xl flex flex-col justify-center gap-1 dark:bg-bg-dark bg-bg-light shadow-xs p-4">
                     <h3 className="dark:text-title-dark text-title-light text-4xl sm:text-5xl font-semibold">{ads.length}</h3>
-                    <p className="text-sm sm:text-lg dark:text-subtitle-dark text-subtitle-light">Total Number of Units</p>
+                    <p className="text-sm sm:text-lg dark:text-subtitle-dark text-subtitle-light">Total Units</p>
                   </div>
                 </div>
               </div>
@@ -291,34 +291,39 @@ const UserPanel = () => {
               <div class="flex flex-col justify-between items-center gap-2 col-start-1 row-start-2 col-span-2 row-span-2 md:col-start-2 md:row-start-1 md:col-span-1 md:row-span-4 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2">
                 <div className="w-full">
                   <h3 className="mb-4 sm:text-4xl text-3xl font-neueplak-regular dark:text-title-dark text-title-light">Active Units</h3>
-                  <div className="flex flex-col gap-2 sm:gap-4">
+                  <div className="flex flex-col gap-2">
                     {ads
                       .filter((ad) => ad.availability) // First, filter the ads that are available
                       .map((ad) => (
                         // Then, map over the filtered ads to render their titles
-                        <div className="w-full dark:bg-bg-dark bg-bg-light shadow-xs p-2 rounded-xl flex justify-between items-center" key={ad.id || ad.title}>
-                          <div className="flex gap-2">
-                            <div className="rounded-lg overflow-hidden">
-                              <img className="w-20 h-20 object-cover" src={ad.images[0]} alt="" srcset="" />
-                            </div>
-                            <div className="flex flex-col justify-between">
-                              <p className="text-xl font-semibold dark:text-subtitle-dark text-subtitle-light line-clamp-1">{ad.title}</p>
-                              <p className="text-sm dark:text-description-dark text-description-light flex items-center justify-start">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 7.5.415-.207a.75.75 0 0 1 1.085.67V10.5m0 0h6m-6 0h-1.5m1.5 0v5.438c0 .354.161.697.473.865a3.751 3.751 0 0 0 5.452-2.553c.083-.409-.263-.75-.68-.75h-.745M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                </svg>
-                                {ad.price}
-                              </p>
-                              <p className={`text-sm ${ad.availability ? "text-green-400" : "text-red-400"} flex items-center gap-1.5`}><span className={`w-3 h-3 rounded-full ${ad.availability ? "bg-green-400" : "bg-red-400"}`}></span> {ad.availability ? "Active" : "Inactive"}</p>
+                        <div className="w-full dark:bg-bg-dark bg-bg-light shadow-xs p-2 rounded-xl grid sm:grid-cols-[4fr_16fr_2fr] grid-cols-[4fr_10fr_2fr] gap-2 justify-between items-center" key={ad.id || ad.title}>
+                          {/* First Column - Image Container */}
+                          <div className="w-full"> {/* Added w-full here */}
+                            <div className="rounded-lg overflow-hidden w-full"> {/* Added w-full here for the inner div */}
+                              <img className="h-20 object-cover w-full" src={ad.images[0]} alt="" srcset="" /> {/* Added w-full to the image */}
                             </div>
                           </div>
-                          <div>
+
+                          {/* Second Column - Text Content */}
+                          <div className="flex flex-col justify-between w-full"> {/* Added w-full here */}
+                            <p className="text-xl font-semibold dark:text-subtitle-dark text-subtitle-light line-clamp-1">{ad.title}</p>
+                            <p className="text-sm dark:text-description-dark text-description-light flex items-center justify-start">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 7.5.415-.207a.75.75 0 0 1 1.085.67V10.5m0 0h6m-6 0h-1.5m1.5 0v5.438c0 .354.161.697.473.865a3.751 3.751 0 0 0 5.452-2.553c.083-.409-.263-.75-.68-.75h-.745M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                              </svg>
+                              {ad.price}
+                            </p>
+                            <p className={`text-sm ${ad.availability ? "text-green-400" : "text-red-400"} flex items-center gap-1.5`}><span className={`w-3 h-3 rounded-full ${ad.availability ? "bg-green-400" : "bg-red-400"}`}></span> {ad.availability ? "Active" : "Inactive"}</p>
+                          </div>
+
+                          {/* Third Column - Button */}
+                          <div> {/* This parent div implicitly takes full width of its grid column */}
                             <button
                               onClick={() => {
                                 setSelectedAd(ad);
                                 setAddUnit(true);
                               }}
-                              className="w-12 h-20 bg-green-500 hover:bg-green-400 rounded-lg flex justify-center items-center">
+                              className="w-full h-20 bg-green-500 hover:bg-green-400 rounded-lg flex justify-center items-center">
                               <svg className="w-5" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M16.6432 0.106781L3.03644 13.7136L0.118958 22.881L9.28644 19.9636L22.8932 6.35678C22.8932 6.35678 22.789 4.16824 20.8099 2.19012C18.8307 0.210948 16.6432 0.106781 16.6432 0.106781ZM17.0338 1.79949C18.1505 2.01199 19.0395 2.48502 19.7255 3.18905C20.4114 3.89308 20.8943 4.82814 21.2005 5.96616L19.3125 7.85418L15.1458 3.68751L16.6432 2.19012L17.0338 1.79949ZM4.18594 14.7573C4.19825 14.7604 5.43848 15.0739 6.68227 16.3177C8.03644 17.5677 8.24477 18.7144 8.24477 18.7144L8.28953 18.7673L4.59283 19.9575L3.03441 18.399L4.18594 14.7573Z" fill="white" />
                               </svg>
