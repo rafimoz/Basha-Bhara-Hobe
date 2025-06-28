@@ -77,7 +77,7 @@ const HomePage = () => {
     return (
         <div className="min-h-screen dark:bg-bg-dark bg-bg-light">
             <Helmet>
-                <title>Basha Bhara Hobe - Home</title>
+                <title>Basha Bhara Hobe</title>
                 <meta name='description' content="Landing page for - Basha Bhara Hobe." />
             </Helmet>
 

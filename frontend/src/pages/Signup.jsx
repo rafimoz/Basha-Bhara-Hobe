@@ -46,7 +46,7 @@ function Signup() {
     return (
         <div className='flex justify-center items-center h-screen dark:bg-bg-dark bg-bg-light'>
             <Helmet>
-                <title>Basha Bhara Hobe - Register</title>
+                <title>Register</title>
                 <meta name='description' content="Register page for - Basha Bhara Hobe." />
             </Helmet>
 

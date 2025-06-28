@@ -23,7 +23,7 @@ function App() {
 
         {/* Protected Nested User Panel */}
         <Route path="/user/:id" element={<UserPanel />}>
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="allunits" element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
         </Route>
 

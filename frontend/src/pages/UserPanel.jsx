@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Add from '../components/Add';
 import QrCode from '../components/QrCode';
 import { ToastContainer, toast } from 'react-toastify';
+import { Helmet } from 'react-helmet-async'
 
 const UserPanel = () => {
   const { id: ownerId } = useParams();
@@ -27,7 +28,7 @@ const UserPanel = () => {
   // Update the pageState based on the current route
   useEffect(() => {
     const path = location.pathname;
-    if (path.includes('/dashboard')) {
+    if (path.includes('/allunits')) {
       setPageState("AllUnits");
     } else if (path.includes('/profile')) {
       setPageState("Profile");
@@ -72,6 +73,11 @@ const UserPanel = () => {
 
   return user && (
     <div className="min-h-screen dark:bg-bg-dark bg-bg-light">
+      <Helmet>
+        <title>Dashboard</title>
+        <meta name='description' content="Dashboard page for - Basha Bhara Hobe." />
+      </Helmet>
+
       {/* Nav Section */}
       <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,7 +162,7 @@ const UserPanel = () => {
                 Dashboard
               </NavLink>
               <NavLink
-                to={`/user/${ownerId}/dashboard`}
+                to={`/user/${ownerId}/allunits`}
                 className={`p-1.5 ${pageState === "AllUnits" ? 'border-b-1 dark:border-b-subtitle-dark border-b-subtitle-light' : ''} dark:text-subtitle-dark text-subtitle-light px-0.5`}
               >
                 All Units
@@ -223,7 +229,7 @@ const UserPanel = () => {
             </NavLink>
 
             <NavLink
-              to={`/user/${ownerId}/dashboard`}
+              to={`/user/${ownerId}/allunits`}
               className={`${pageState === "AllUnits" ? "dark:bg-subtitle-dark/10 bg-subtitle-light/10 border-l-2" : ""} block px-3 py-2 text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20`}
               onClick={() => setIsOpen(false)}
             >
@@ -343,7 +349,7 @@ const UserPanel = () => {
                 </button>
               </div>
 
-              {/*New Features*/}
+              {/*Quick Access*/}
               <div class="col-start-1 row-start-4 col-span-2 md:col-start-1 md:row-start-2 md:col-span-1 md:row-span-3 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2 flex flex-col">
                 <h3 className="mb-4 sm:text-4xl text-3xl font-neueplak-regular dark:text-title-dark text-title-light">Quick Access</h3>
                 <div className="w-full grid grid-cols-2 grid-rows-2 gap-2 sm:gap-4 flex-grow">
@@ -361,7 +367,7 @@ const UserPanel = () => {
                     <h4 className="text-lg font-semibold">QR Code</h4>
                   </div>
 
-                  <div onClick={() => { navigate(`/user/${ownerId}/dashboard`) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-teal-400/20 to-green-600/20 dark:from-teal-600/20 dark:to-green-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                  <div onClick={() => { navigate(`/user/${ownerId}/allunits`) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-teal-400/20 to-green-600/20 dark:from-teal-600/20 dark:to-green-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
                     <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
                     </svg>

@@ -37,7 +37,7 @@ function Login() {
     return (
         <div className='flex justify-center items-center h-screen dark:bg-bg-dark bg-bg-light'>
             <Helmet>
-                <title>Basha Bhara Hobe - Login</title>
+                <title>Login</title>
                 <meta name='description' content="Login page for - Basha Bhara Hobe." />
             </Helmet>
             <ToastContainer />
