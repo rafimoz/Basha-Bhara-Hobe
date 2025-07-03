@@ -274,7 +274,7 @@ const UserPanel = () => {
         pageState === "Dashboard" && (
           <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8">
             <h2 className="text-4xl sm:text-5xl font-neueplak-black sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">Dashboard</h2>
-            <div class="grid grid-cols-2 md:grid-cols-2 grid-rows-[1fr_4fr] md:grid-rows-[1fr_3fr] gap-2 sm:gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-2 grid-rows-[0fr_2fr] md:grid-rows-[1fr_3fr] gap-2 sm:gap-4">
               {/*Numbers*/}
               <div class="col-start-1 row-start-1 col-span-2 md:col-start-1 md:row-start-1 md:col-span-1 md:row-span-1 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2">
                 <div className="grid grid-cols-2 gap-2 sm:gap-4 h-full">
@@ -293,8 +293,42 @@ const UserPanel = () => {
                 </div>
               </div>
 
+              {/*Quick Access*/}
+              <div class="col-start-1 row-start-2 col-span-2 md:col-start-1 md:row-start-2 md:col-span-1 md:row-span-3 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2 flex flex-col">
+                <h3 className="mb-4 sm:text-4xl text-3xl font-neueplak-regular dark:text-title-dark text-title-light">Quick Access</h3>
+                <div className="w-full grid grid-cols-2 grid-rows-2 gap-2 sm:gap-4 flex-grow">
+                  <div onClick={() => { setAddUnit(true) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-blue-400/20 to-blue-600/20 dark:from-blue-600/20 dark:to-blue-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <h4 className="text-lg font-semibold">Add Unit</h4>
+                  </div>
+
+                  <div onClick={() => { setSeeQrCode(true) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-teal-400/20 to-green-600/20 dark:from-teal-600/20 dark:to-green-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    <h4 className="text-lg font-semibold">QR Code</h4>
+                  </div>
+
+                  <div onClick={() => { navigate(`/user/${ownerId}/allunits`) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-teal-400/20 to-green-600/20 dark:from-teal-600/20 dark:to-green-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                    <h4 className="text-lg font-semibold">All Units</h4>
+                  </div>
+
+                  <a href={`/rents/${ownerId}`} target="_blank" rel="noopener noreferrer" className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-purple-400/20 to-indigo-600/20 dark:from-purple-600/20 dark:to-indigo-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                    <svg className="w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 0 1-1.161.886l-.143.048a1.107 1.107 0 0 0-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 0 1-1.652.928l-.679-.906a1.125 1.125 0 0 0-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 0 0-8.862 12.872M12.75 3.031a9 9 0 0 1 6.69 14.036m0 0-.177-.529A2.25 2.25 0 0 0 17.128 15H16.5l-.324-.324a1.453 1.453 0 0 0-2.328.377l-.036.073a1.586 1.586 0 0 1-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 0 1-5.276 3.67m0 0a9 9 0 0 1-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25" />
+                    </svg>
+                    <h4 className="text-lg font-semibold">Public Page</h4>
+                  </a>
+                </div>
+              </div>
+
               {/*Active Units*/}
-              <div class="flex flex-col justify-between items-center gap-2 col-start-1 row-start-2 col-span-2 row-span-2 md:col-start-2 md:row-start-1 md:col-span-1 md:row-span-4 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2">
+              <div class="flex flex-col justify-between items-center gap-2 col-start-1 row-start-3 col-span-2 row-span-2 md:col-start-2 md:row-start-1 md:col-span-1 md:row-span-4 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2">
                 <div className="w-full">
                   <h3 className="mb-4 sm:text-4xl text-3xl font-neueplak-regular dark:text-title-dark text-title-light">Active Units</h3>
                   <div className="flex flex-col gap-2">
@@ -343,44 +377,10 @@ const UserPanel = () => {
                   className=" mt-2 dark:text-title-dark text-title-light p-1.5 px-5 rounded-full dark:bg-bg-dark bg-bg-light border dark:border-subtitle-dark/60 border-subtitle-light/60 hover:dark:border-subtitle-dark/90 hover:border-subtitle-light cursor-pointer w-fit">
                   <NavLink
                     onClick={() => setPageState("AllUnits")}
-                    to={`/user/${ownerId}/dashboard`}>
+                    to={`/user/${ownerId}/allunits`}>
                     more
                   </NavLink>
                 </button>
-              </div>
-
-              {/*Quick Access*/}
-              <div class="col-start-1 row-start-4 col-span-2 md:col-start-1 md:row-start-2 md:col-span-1 md:row-span-3 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2 flex flex-col">
-                <h3 className="mb-4 sm:text-4xl text-3xl font-neueplak-regular dark:text-title-dark text-title-light">Quick Access</h3>
-                <div className="w-full grid grid-cols-2 grid-rows-2 gap-2 sm:gap-4 flex-grow">
-                  <div onClick={() => { setAddUnit(true) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-blue-400/20 to-blue-600/20 dark:from-blue-600/20 dark:to-blue-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
-                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                    <h4 className="text-lg font-semibold">Add Unit</h4>
-                  </div>
-
-                  <div onClick={() => { setSeeQrCode(true) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-teal-400/20 to-green-600/20 dark:from-teal-600/20 dark:to-green-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
-                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                    </svg>
-                    <h4 className="text-lg font-semibold">QR Code</h4>
-                  </div>
-
-                  <div onClick={() => { navigate(`/user/${ownerId}/allunits`) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-teal-400/20 to-green-600/20 dark:from-teal-600/20 dark:to-green-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
-                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                    </svg>
-                    <h4 className="text-lg font-semibold">All Units</h4>
-                  </div>
-
-                  <div onClick={() => { navigate(`/user/${ownerId}/profile`) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-purple-400/20 to-indigo-600/20 dark:from-purple-600/20 dark:to-indigo-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
-                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    </svg>
-                    <h4 className="text-lg font-semibold">Profile</h4>
-                  </div>
-                </div>
               </div>
             </div>
           </main>

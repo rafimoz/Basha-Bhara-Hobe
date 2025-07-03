@@ -208,7 +208,7 @@ const ViewAds = () => {
         </div>
       </nav>
       <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg-py-8 sm:px-6 lg:px-8 space-y-3">
-        <h1 className="text-4xl sm:text-5xl font-neueplak-black font-bold dark:text-title-dark text-title-light mt-18 mb-8">Available Units <span className="font-neueplak-thin capitalize"> / {user.name}</span></h1>
+        <h1 className="text-4xl sm:text-5xl font-neueplak-black dark:text-title-dark text-title-light mt-18 mb-8">Available Units <span className="font-neueplak-regular capitalize"> / {user.name}</span></h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ads.map((ad) => {
             const isVisible = visibleAds[ad._id] || false;
@@ -299,11 +299,8 @@ const ViewAds = () => {
                             backgroundPosition: "center",
                           }}
                         >
-                          <p className='relative flex justify-center'>
-                            {ad.price}
-                            <svg className='absolute w-2 right-[-8px]' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-2">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 7.5.415-.207a.75.75 0 0 1 1.085.67V10.5m0 0h6m-6 0h-1.5m1.5 0v5.438c0 .354.161.697.473.865a3.751 3.751 0 0 0 5.452-2.553c.083-.409-.263-.75-.68-.75h-.745M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
+                          <p className='flex justify-center'>
+                            &#x09F3;{ad.price}
                           </p>
                         </div>
                       </div>
