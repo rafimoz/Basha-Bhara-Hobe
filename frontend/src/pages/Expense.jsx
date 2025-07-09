@@ -310,17 +310,17 @@ const Expense = () => {
                                 <div className='flex gap-2'>
                                     <button
                                         onClick={() => setSlip(true)}
-                                        className='p-2 dark:bg-blue-700 bg-blue-500 dark:text-white text-white rounded-lg font-semibold sm:text-lg text-sm hover:opacity-80 cursor-pointer'
+                                        className='p-2 px-3 dark:bg-blue-700 bg-blue-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-xs hover:opacity-80 cursor-pointer'
                                         disabled={!currUnit} // Disable if no unit selected
                                     >
                                         Payment Slip
                                     </button>
                                     <button
                                         onClick={saveMonthlyExpenses} // New Save button
-                                        className='p-2 dark:bg-green-700 bg-green-500 dark:text-white text-white rounded-lg font-semibold sm:text-lg text-sm hover:opacity-80 cursor-pointer'
+                                        className='p-2 px-3 dark:bg-green-700 bg-green-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-xs hover:opacity-80 cursor-pointer'
                                         disabled={!currUnit} // Disable if no unit selected
                                     >
-                                        Save Expenses
+                                        Save
                                     </button>
                                 </div>
                                 <p className='font-bold'>Total: {totalExpense} TK</p>
@@ -341,7 +341,7 @@ const Expense = () => {
 
                                 {selectedAdForDisplay && selectedAdForDisplay.monthlyExpenses && selectedAdForDisplay.monthlyExpenses.length > 0 ? (
                                     <div className='flex flex-col gap-1 overflow-y-auto max-h-96'> {/* Added overflow-y-auto for scrollable list */}
-                                        <div className='font-semibold py-1 grid grid-cols-[2fr_2fr_2fr_2fr_2fr_2fr_2fr_2fr] sm:text-sm text-xs'>
+                                        <div className='font-semibold py-1 grid grid-cols-[2.5fr_2fr_2fr_2fr_2.5fr_2fr_2fr_2fr] sm:text-sm text-xs'>
                                             <p>Month</p>
                                             <p>Unit</p>
                                             <p>Water</p>
@@ -352,7 +352,7 @@ const Expense = () => {
                                             <p>Total</p>
                                         </div>
                                         {selectedAdForDisplay.monthlyExpenses.map((expense) => (
-                                            <div key={expense._id || expense.month} className='bg-subtitle-dark/10 py-1 grid grid-cols-[2fr_2fr_2fr_2fr_2fr_2fr_2fr_2fr] sm:text-sm text-xs'>
+                                            <div key={expense._id || expense.month} className='bg-subtitle-dark/10 py-1 grid grid-cols-[2.5fr_2fr_2fr_2fr_2.5fr_2fr_2fr_2fr] sm:text-sm text-xs'>
                                                 <p>{expense.month}</p>
                                                 <p>{selectedAdForDisplay.price}</p> {/* Unit bill is from ad.price */}
                                                 <p>{expense.waterBill}</p>
@@ -375,7 +375,7 @@ const Expense = () => {
                                         <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
                                             <button
                                                 onClick={() => toast.info("Download functionality coming soon!")}
-                                                className='p-2 dark:bg-blue-700 bg-blue-500 dark:text-white text-white rounded-lg font-semibold sm:text-lg text-sm hover:opacity-80 cursor-pointer'>
+                                                className='p-2 px-3 dark:bg-blue-700 bg-blue-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-xs hover:opacity-80 cursor-pointer'>
                                                 Download
                                             </button>
                                         </div>
