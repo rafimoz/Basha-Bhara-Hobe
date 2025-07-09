@@ -32,6 +32,8 @@ const UserPanel = () => {
       setPageState("AllUnits");
     } else if (path.includes('/profile')) {
       setPageState("Profile");
+    } else if (path.includes('/expense')) {
+      setPageState("Expense");
     } else {
       setPageState("Dashboard");
     }
@@ -59,6 +61,8 @@ const UserPanel = () => {
 
       const adsRes = await axios.get(`${backendURL}/api/ads/${ownerId}`);
       setAds(adsRes.data);
+      console.log("Ads fetched:", adsRes.data);
+
 
       const qrRes = await axios.get(`${backendURL}/api/qrcode/${ownerId}`);
       setQrCode(qrRes.data.qr);
@@ -161,23 +165,33 @@ const UserPanel = () => {
               >
                 Dashboard
               </NavLink>
+
               <NavLink
                 to={`/user/${ownerId}/allunits`}
                 className={`p-1.5 ${pageState === "AllUnits" ? 'border-b-1 dark:border-b-subtitle-dark border-b-subtitle-light' : ''} dark:text-subtitle-dark text-subtitle-light px-0.5`}
               >
                 All Units
               </NavLink>
+
+              <NavLink
+                to={`/user/${ownerId}/expense`}
+                className={`p-1.5 ${pageState === "Expense" ? 'border-b-1 dark:border-b-subtitle-dark border-b-subtitle-light' : ''} dark:text-subtitle-dark text-subtitle-light px-0.5`}
+              >
+                Expenses
+              </NavLink>
+
               <NavLink
                 to={`/user/${ownerId}/profile`}
                 className={`p-1.5 ${pageState === "Profile" ? 'border-b-1 dark:border-b-subtitle-dark border-b-subtitle-light' : ''} dark:text-subtitle-dark text-subtitle-light px-0.5`}
               >
                 Profile
               </NavLink>
+
               <button onClick={() => {
                 localStorage.removeItem("authToken");
                 localStorage.removeItem("userId");
                 navigate("/login");
-              }} className="dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light dark:hover:bg-title-dark hover:bg-title-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded-xl px-3 cursor-pointer">
+              }} className="dark:bg-subtitle-dark bg-subtitle-light dark:text-bg-dark text-bg-light dark:hover:bg-title-dark hover:bg-title-light dark:hover:text-title-light hover:text-title-dark p-1.5 rounded px-3 cursor-pointer">
                 Logout
               </button>
             </div>
@@ -234,6 +248,14 @@ const UserPanel = () => {
               onClick={() => setIsOpen(false)}
             >
               All Units
+            </NavLink>
+
+            <NavLink
+              to={`/user/${ownerId}/expense`}
+              className={`${pageState === "Expense" ? "dark:bg-subtitle-dark/10 bg-subtitle-light/10 border-l-2" : ""} block px-3 py-2 text-base font-medium dark:text-subtitle-dark dark:hover:text-subtitle-light dark:hover:bg-subtitle-dark text-subtitle-light hover:bg-subtitle-light/20`}
+              onClick={() => setIsOpen(false)}
+            >
+              Expenses
             </NavLink>
 
             <NavLink
@@ -297,11 +319,11 @@ const UserPanel = () => {
               <div class="col-start-1 row-start-2 col-span-2 md:col-start-1 md:row-start-2 md:col-span-1 md:row-span-3 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2 flex flex-col">
                 <h3 className="mb-4 sm:text-4xl text-3xl font-neueplak-regular dark:text-title-dark text-title-light">Quick Access</h3>
                 <div className="w-full grid grid-cols-2 grid-rows-2 gap-2 sm:gap-4 flex-grow">
-                  <div onClick={() => { setAddUnit(true) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-blue-400/20 to-blue-600/20 dark:from-blue-600/20 dark:to-blue-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
-                    <svg className="w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  <div onClick={() => { navigate(`/user/${ownerId}/expense`) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-blue-400/20 to-blue-600/20 dark:from-blue-600/20 dark:to-blue-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 7.5.415-.207a.75.75 0 0 1 1.085.67V10.5m0 0h6m-6 0h-1.5m1.5 0v5.438c0 .354.161.697.473.865a3.751 3.751 0 0 0 5.452-2.553c.083-.409-.263-.75-.68-.75h-.745M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                     </svg>
-                    <h4 className="text-lg font-semibold">Add Unit</h4>
+                    <h4 className="text-lg font-semibold">Expenses</h4>
                   </div>
 
                   <div onClick={() => { setSeeQrCode(true) }} className="w-full h-full flex justify-center items-center gap-1 py-10 bg-gradient-to-br hover:bg-gradient-to-b from-teal-400/20 to-green-600/20 dark:from-teal-600/20 dark:to-green-800/20 dark:text-subtitle-dark text-subtitle-light rounded-2xl shadow-sm cursor-pointer">

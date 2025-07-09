@@ -63,6 +63,8 @@ function Add({ toggleRefreshAds, setAddUnit, ad, toast }) {
     const [form, setForm] = useState(ad ? {
         title: ad.title,
         description: ad.description,
+        unitId: ad.unitId,
+        renter: ad.renter || "", // Ensure renter is initialized
         price: ad.price,
         availability: ad.availability,
         moveInDate: ad.moveInDate,
@@ -71,6 +73,8 @@ function Add({ toggleRefreshAds, setAddUnit, ad, toast }) {
         title: "",
         description: "",
         price: 0,
+        unitId: "",
+        renter: "", // Initialize renter field
         availability: true,
         moveInDate: "",
         images: [],
@@ -82,6 +86,8 @@ function Add({ toggleRefreshAds, setAddUnit, ad, toast }) {
                 title: ad.title,
                 description: ad.description,
                 price: ad.price,
+                unitId: ad.unitId,
+                renter: ad.renter || "", // Ensure renter is set
                 availability: ad.availability,
                 moveInDate: ad.moveInDate,
                 images: ad.images,
@@ -129,6 +135,8 @@ function Add({ toggleRefreshAds, setAddUnit, ad, toast }) {
                 title: "",
                 description: "",
                 price: 0,
+                unitId: "",
+                renter: "", // Reset renter field
                 availability: true,
                 moveInDate: "",
                 images: [],
@@ -209,8 +217,8 @@ function Add({ toggleRefreshAds, setAddUnit, ad, toast }) {
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     className="w-full h-fit border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
                 />
-                <div className='flex sm:flex-row flex-col justify-between gap-2 mt-0 w-full'>
-                    <div className="flex items-center gap-2">
+                <div className='flex sm:flex-row flex-col justify-between gap-4 mt-0 w-full'>
+                    <div className="flex items-center gap-2 w-full">
                         <h2>Date</h2>
                         <input
                             type="date"
@@ -219,7 +227,7 @@ function Add({ toggleRefreshAds, setAddUnit, ad, toast }) {
                             className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
                         />
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full">
                         <h2>Price</h2>
                         <input
                             type="number"
@@ -230,18 +238,40 @@ function Add({ toggleRefreshAds, setAddUnit, ad, toast }) {
                         />
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <h2>Status</h2>
-                    <select
-                        value={form.availability ? "available" : "unavailable"}
-                        onChange={(e) =>
-                            setForm({ ...form, availability: e.target.value === "available" })
-                        }
+                <div className="flex items-center justify-between gap-4">
+                    <div className='flex items-center gap-2 w-full'>
+                        <h2>Status</h2>
+                        <select
+                            value={form.availability ? "available" : "unavailable"}
+                            onChange={(e) =>
+                                setForm({ ...form, availability: e.target.value === "available" })
+                            }
+                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
+                        >
+                            <option value="available">Available</option>
+                            <option value="unavailable">Unavailable</option>
+                        </select>
+                    </div>
+                    <div className="flex items-center gap-2 w-full">
+                        <h2>UnitID</h2>
+                        <input
+                            type="text"
+                            placeholder="example: B1"
+                            value={form.unitId}
+                            onChange={(e) => setForm({ ...form, unitId: e.target.value })}
+                            className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
+                        />
+                    </div>
+                </div>
+                <div className="flex items-center gap-2 w-full">
+                    <h2>Renter</h2>
+                    <input
+                        type="text"
+                        placeholder="Renter's Name"
+                        value={form.renter}
+                        onChange={(e) => setForm({ ...form, renter: e.target.value })}
                         className="w-full border dark:border-subtitle-dark border-subtitle-light dark:text-subtitle-dark text-subtitle-light rounded-xl text-sm sm:p-2 p-1 px-2"
-                    >
-                        <option value="available">Available</option>
-                        <option value="unavailable">Unavailable</option>
-                    </select>
+                    />
                 </div>
                 <button
                     onClick={handleSubmit}

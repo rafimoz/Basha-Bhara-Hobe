@@ -8,6 +8,7 @@ import ViewAds from './pages/ViewAds';
 import UserPanel from './pages/UserPanel';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import Expense from './pages/Expense';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/user/:id" element={<UserPanel />}>
           <Route path="allunits" element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="expense" element={<Expense />} />
         </Route>
 
         {/* Fallback (Optional) */}

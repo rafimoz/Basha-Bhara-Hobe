@@ -20,6 +20,7 @@
   scroll-behavior: smooth;
 }
 
+
 /* @custom-variant dark (&:where(.dark, .dark *));
 
 @layer theme {
@@ -69,4 +70,12 @@
   --font-neueplak-light: "light";
   --font-neueplak-thin: "thin";
 
+}
+
+@layer base {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }

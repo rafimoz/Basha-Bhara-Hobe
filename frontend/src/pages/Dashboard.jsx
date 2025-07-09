@@ -196,7 +196,7 @@ const Dashboard = () => {
                   <div className="p-4 pt-2">
                     <div>
                       {/* Title */}
-                      <h3 className="text-2xl font-bold mb-1 dark:text-subtitle-dark text-subtitle-light">{ad.title}</h3>
+                      <h3 className="text-2xl font-bold mb-1 dark:text-subtitle-dark text-subtitle-light">{ad.title} ({ad.unitId})</h3>
                       {/* Description - Added line-clamp for consistency if plugin is used */}
                       <p className="dark:text-description-dark text-description-light text-base mb-1 line-clamp-3">{ad.description}</p>
                       {/* Move-in Date */}

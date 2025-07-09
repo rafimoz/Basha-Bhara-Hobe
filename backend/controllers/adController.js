@@ -12,6 +12,8 @@ export const createAd = async (req, res) => {
     ownerId,
     title,
     description,
+    unitId,
+    renter,
     price,
     availability,
     moveInDate,
@@ -56,6 +58,8 @@ export const createAd = async (req, res) => {
     ownerId,
     title,
     description,
+    unitId,
+    renter,
     price: parsedPrice,
     availability,
     moveInDate,
@@ -75,7 +79,16 @@ export const createAd = async (req, res) => {
 
 export const updateAd = async (req, res) => {
   const { id } = req.params;
-  const { title, description, price, availability, moveInDate, images } = req.body;
+  const {
+    title,
+    description,
+    price,
+    unitId,
+    renter,
+    availability,
+    moveInDate,
+    images,
+  } = req.body;
 
   try {
     const ad = await Ad.findById(id);
@@ -84,7 +97,9 @@ export const updateAd = async (req, res) => {
     }
 
     // Identify images to delete
-    const imagesToDelete = ad.images.filter(existingImage => !images.includes(existingImage));
+    const imagesToDelete = ad.images.filter(
+      (existingImage) => !images.includes(existingImage)
+    );
 
     // Delete removed images from Cloudinary
     for (const imgUrl of imagesToDelete) {
@@ -100,7 +115,7 @@ export const updateAd = async (req, res) => {
     const finalImages = await Promise.all(
       images.map(async (img) => {
         // If it's already a Cloudinary URL, keep it
-        if (img.startsWith('http')) return img;
+        if (img.startsWith("http")) return img;
 
         // Else upload base64 image
         try {
@@ -119,12 +134,14 @@ export const updateAd = async (req, res) => {
     );
 
     // Filter out failed uploads (nulls)
-    const cleanedImages = finalImages.filter(img => img !== null);
+    const cleanedImages = finalImages.filter((img) => img !== null);
 
     // Update the ad
     ad.title = title;
     ad.description = description;
     ad.price = price;
+    ad.unitId = unitId;
+    ad.renter = renter;
     ad.availability = availability;
     ad.moveInDate = moveInDate;
     ad.images = cleanedImages;
@@ -133,7 +150,49 @@ export const updateAd = async (req, res) => {
     res.json(ad);
   } catch (error) {
     console.error("Error updating ad:", error);
-    res.status(500).json({ message: "Failed to update ad", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to update ad", error: error.message });
+  }
+};
+
+export const addMonthlyExpense = async (req, res) => {
+  try {
+    const { adId } = req.params;
+    const newMonthlyExpense = req.body; // This should contain month, waterBill, gasBill, etc.
+
+    // Basic validation (optional, Mongoose schema handles much of this)
+    if (!newMonthlyExpense.month) {
+      return res.status(400).json({ message: "Month is required." });
+    }
+
+    const ad = await Ad.findById(adId);
+
+    if (!ad) {
+      return res.status(404).json({ message: "Ad not found." });
+    }
+
+    // Add the new expense to the monthlyExpenses array
+    ad.monthlyExpenses.push(newMonthlyExpense);
+
+    // Save the updated Ad document
+    await ad.save();
+
+    res
+      .status(201)
+      .json({
+        message: "Monthly expense added successfully!",
+        newExpense: newMonthlyExpense,
+      });
+  } catch (error) {
+    console.error("Error saving monthly expense:", error); // <-- Look for this in your server console!
+    // More specific error handling could be done here based on error.name (e.g., ValidationError)
+    res
+      .status(500)
+      .json({
+        message: "Failed to save monthly expenses.",
+        error: error.message,
+      });
   }
 };
 
@@ -176,6 +235,8 @@ export const deleteAd = async (req, res) => {
     res.sendStatus(204);
   } catch (error) {
     console.error("Error deleting ad:", error);
-    res.status(500).json({ message: "Failed to delete ad", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to delete ad", error: error.message });
   }
 };
