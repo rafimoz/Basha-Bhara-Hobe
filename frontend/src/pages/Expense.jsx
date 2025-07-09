@@ -124,9 +124,6 @@ const Expense = () => {
             totalBill: totalExpense
         };
 
-        console.log("Monthly Expense Data being sent:", monthlyExpenseData); // <-- Add this line
-        console.log("Target Ad ID:", currUnit); // <-- Add this line as well
-
         // Frontend validation for required fields before sending to backend
         if (
             !monthlyExpenseData.waterBill &&
@@ -150,7 +147,6 @@ const Expense = () => {
                 await toggleRefreshAds();
             }
         } catch (error) {
-            console.error("Error saving monthly expenses:", error);
             toast.error("Failed to save monthly expenses. Please try again.");
         }
     };
