@@ -11,6 +11,7 @@ const adSchema = new mongoose.Schema({
   gasBill: { type: Number, default: 1080 },
   trashBill: { type: Number, default: 100 },
   garageBill: { type: Number, default: 400 },
+  electricityBill: { type: Number, default: 9 },
   availability: Boolean,
   moveInDate: Date,
   images: [String],

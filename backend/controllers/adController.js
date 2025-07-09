@@ -178,21 +178,46 @@ export const addMonthlyExpense = async (req, res) => {
     // Save the updated Ad document
     await ad.save();
 
-    res
-      .status(201)
-      .json({
-        message: "Monthly expense added successfully!",
-        newExpense: newMonthlyExpense,
-      });
+    res.status(201).json({
+      message: "Monthly expense added successfully!",
+      newExpense: newMonthlyExpense,
+    });
   } catch (error) {
     console.error("Error saving monthly expense:", error); // <-- Look for this in your server console!
     // More specific error handling could be done here based on error.name (e.g., ValidationError)
+    res.status(500).json({
+      message: "Failed to save monthly expenses.",
+      error: error.message,
+    });
+  }
+};
+
+export const updateMonthlyExpense = async (req, res) => {
+  const { adId } = req.params; // Get both adId and expenseId
+  const { waterBill, gasBill, trashBill, garageBill, electricityBill, price } =
+    req.body;
+
+  try {
+    const ad = await Ad.findById(adId);
+    if (!ad) {
+      return res.status(404).json({ message: "Ad not found" });
+    }
+
+    // Update the ad
+    ad.price = price;
+    ad.waterBill = waterBill;
+    ad.gasBill = gasBill;
+    ad.trashBill = trashBill;
+    ad.electricityBill = electricityBill;
+    ad.garageBill = garageBill;
+
+    await ad.save();
+    res.json(ad);
+  } catch (error) {
+    console.error("Error updating ad:", error);
     res
       .status(500)
-      .json({
-        message: "Failed to save monthly expenses.",
-        error: error.message,
-      });
+      .json({ message: "Failed to update ad", error: error.message });
   }
 };
 

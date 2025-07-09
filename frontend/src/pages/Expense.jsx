@@ -7,10 +7,19 @@ import axios from "axios";
 const Expense = () => {
     const backendURL = import.meta.env.VITE_BACKEND_URL;
     const [currUnit, setCurrUnit] = useState("");
+    const [options, setOptions] = useState(false);
     const [currTitle, setCurrTitle] = useState("");
     const [expenses, setExpenses] = useState({}); // State to manage checkbox and quantity for current month's calculation
     const [totalExpense, setTotalExpense] = useState(0); // State for total calculated expense
     const [slip, setSlip] = useState(false); // State to control the modal visibility
+    const [defaultBills, setDefaultBills] = useState({
+        waterBill: 0,
+        gasBill: 0,
+        trashBill: 0,
+        garageBill: 0,
+        electricityBill: 0,
+        price: 0, // Assuming unit price is also a default bill
+    });
 
     const {
         ads,
@@ -48,7 +57,7 @@ const Expense = () => {
             }
             // Check if Electricity is selected and calculate with quantity
             if (expenses.electricity?.isChecked && expenses.electricity?.quantity) {
-                currentTotal += (expenses.electricity.quantity * 9); // Assuming 9TK per unit
+                currentTotal += (expenses.electricity.quantity * selectedAd.electricityBill); // Assuming 9TK per unit
             }
         }
         setTotalExpense(currentTotal);
@@ -71,14 +80,54 @@ const Expense = () => {
                 gas: { isChecked: true },
                 electricity: { isChecked: true, quantity: 0 }
             });
+            // Set the default bills state from the selected ad
+            setDefaultBills({
+                waterBill: selectedAd.waterBill || 0,
+                gasBill: selectedAd.gasBill || 0,
+                trashBill: selectedAd.trashBill || 0,
+                garageBill: selectedAd.garageBill || 0,
+                electricityBill: selectedAd.electricityBill || 0,
+                price: selectedAd.price || 0, // Load initial unit price
+            });
         } else {
             setCurrTitle("");
             setExpenses({}); // Clear expenses if "Default" is selected
+            setDefaultBills({ waterBill: 0, gasBill: 0, trashBill: 0, garageBill: 0, price: 0 }); // Reset
         }
     }, [currUnit, ads]);
 
     const onChangeUnit = (e) => {
         setCurrUnit(e.target.value);
+    };
+
+    // Handle change for default bill inputs
+    const handleDefaultBillChange = (billType, value) => {
+        setDefaultBills(prev => ({
+            ...prev,
+            [billType]: parseFloat(value) || 0 // Parse to float for numbers
+        }));
+    };
+
+    const saveDefaultBills = async () => {
+        if (!currUnit) {
+            toast.error("Please select a unit before saving!");
+            return;
+        }
+
+        try {
+            const response = await axios.put(
+                backendURL + `/api/ads/updateexpenses/${currUnit}`, // Use your existing updateAd route
+                defaultBills // Send the state directly, as its keys match model fields
+            );
+            // ✅ Refresh ads after saving
+            if (toggleRefreshAds) {
+                await toggleRefreshAds();
+            }
+            toast.success("Updated successfully!");
+            setOptions(false); // Close the options after saving
+        } catch (error) {
+            toast.error("Failed. Please try again.");
+        }
     };
 
     const handleCheckboxChange = (expenseType, isChecked) => {
@@ -120,7 +169,7 @@ const Expense = () => {
             gasBill: expenses.gas?.isChecked ? (selectedAd.gasBill || 0) : 0,
             trashBill: expenses.garbage?.isChecked ? (selectedAd.trashBill || 0) : 0,
             garageBill: expenses.garage?.isChecked ? (selectedAd.garageBill || 0) : 0,
-            electricityBill: expenses.electricity?.isChecked ? (expenses.electricity.quantity * 9) : 0,
+            electricityBill: expenses.electricity?.isChecked ? (expenses.electricity.quantity * selectedAd.electricityBill) : 0,
             totalBill: totalExpense
         };
 
@@ -133,7 +182,7 @@ const Expense = () => {
             !monthlyExpenseData.electricityBill &&
             !expenses.unit?.isChecked // Check if unit (rent) is also selected
         ) {
-            toast.warn("No expenses selected to save for this month.");
+            toast.warn("No expenses selected to save.");
             return;
         }
 
@@ -159,9 +208,9 @@ const Expense = () => {
                 <h2 className="text-4xl sm:text-5xl font-neueplak-black sm:mb-5 mt-18 mb-8 dark:text-title-dark text-title-light">Expenses Tracker</h2>
                 <div className="grid grid-cols-2 md:grid-cols-2 grid-rows-[0fr_2fr] md:grid-rows-[1fr_3fr] gap-2 sm:gap-4">
                     {/*Calculate Expenses*/}
-                    <div className="col-start-1 row-start-2 col-span-2 md:col-start-1 md:row-start-1 md:col-span-1 md:row-span-3 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2 flex flex-col">
-                        <h3 className="mb-2 sm:text-3xl text-2xl font-neueplak-regular dark:text-subtitle-dark text-subtitle-light">Select unit</h3>
-                        <div className='mb-5 relative'>
+                    <div className="col-start-1 gap-2 row-start-2 col-span-2 md:col-start-1 md:row-start-1 md:col-span-1 md:row-span-3 dark:bg-card-dark bg-card-light shadow-sm border-1 border-subtitle-dark/20 rounded-2xl sm:p-4 p-2 flex flex-col">
+                        <h3 className="sm:text-3xl text-2xl font-neueplak-regular dark:text-subtitle-dark text-subtitle-light">Select unit</h3>
+                        <div className='mb-3 relative'>
                             <select
                                 className='w-full p-3 py-2 sm:text-2xl text-xl rounded-xl dark:bg-bg-dark bg-bg-light dark:text-subtitle-dark text-subtitle-light appearance-none'
                                 onChange={onChangeUnit}
@@ -195,12 +244,141 @@ const Expense = () => {
                                 </svg>
                             </div>
                         </div>
-                        <h3 className="mb-2 sm:text-3xl text-2xl font-neueplak-regular dark:text-subtitle-dark text-subtitle-light">Expenses</h3>
-                        <div className="w-full sm:p-4 p-2 flex flex-col gap-2 dark:bg-bg-dark bg-bg-light dark:text-subtitle-dark text-subtitle-light rounded-xl" >
+
+                        <div className='w-full flex justify-between'>
+                            <h3 className="sm:text-3xl text-2xl font-neueplak-regular dark:text-subtitle-dark text-subtitle-light">Expenses</h3>
+                            <div onClick={() => setOptions(prevOptions => !prevOptions)} className='flex justify-center items-center dark:text-subtitle-dark text-subtitle-light'>
+                                <button disabled={!currUnit}>
+                                    {options ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-9">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-9 rotate-90">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        {
+                            options && (
+                                <div className='w-full sm:p-4 p-2 bg-bg-dark border-1 border-subtitle-dark/20 rounded-xl dark:text-subtitle-dark text-subtitle-light'>
+                                    <div>
+                                        <h3 className='sm:text-xl text-lg font-medium dark:text-title-dark text-title-light'>Default Bill Settings</h3>
+                                        <div className='w-full h-[1px] my-2 dark:bg-subtitle-dark/60 bg-subtitle-light/60' />
+                                        <div className='flex flex-col gap-1 h-full text-subtitle-light dark:text-subtitle-dark'>
+                                            <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
+                                                <p>Unit Fee</p>
+                                                <div className='flex items-center justify-between gap-1'>
+                                                    <input
+                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        type="number"
+                                                        min="0" // Prevent negative quantities
+                                                        value={defaultBills.price || ''}
+                                                        onChange={(e) => handleDefaultBillChange('price', e.target.value)}
+                                                        disabled={!options} // Disable if not checked
+                                                    />
+                                                    <span>TK</span>
+                                                </div>
+                                            </div>
+
+                                            <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
+                                                <p>Water Fee</p>
+                                                <div className='flex items-center justify-between gap-1'>
+                                                    <input
+                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        type="number"
+                                                        min="0" // Prevent negative quantities
+                                                        value={defaultBills.waterBill || ''}
+                                                        onChange={(e) => handleDefaultBillChange('waterBill', e.target.value)}
+                                                        disabled={!options} // Disable if not checked
+                                                    />
+                                                    <span>TK</span>
+                                                </div>
+                                            </div>
+
+                                            <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
+                                                <p>Gas Fee</p>
+                                                <div className='flex items-center justify-between gap-1'>
+                                                    <input
+                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        type="number"
+                                                        min="0" // Prevent negative quantities
+                                                        value={defaultBills.gasBill  || ''}
+                                                        onChange={(e) => handleDefaultBillChange('gasBill', e.target.value)}
+                                                        disabled={!options} // Disable if not checked
+                                                    />
+                                                    <span>TK</span>
+                                                </div>
+                                            </div>
+
+                                            <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
+                                                <p>Trash Fee</p>
+                                                <div className='flex items-center justify-between gap-1'>
+                                                    <input
+                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        type="number"
+                                                        min="0" // Prevent negative quantities
+                                                        value={defaultBills.trashBill  || ''}
+                                                        onChange={(e) => handleDefaultBillChange('trashBill', e.target.value)}
+                                                        disabled={!options} // Disable if not checked
+                                                    />
+                                                    <span>TK</span>
+                                                </div>
+                                            </div>
+
+                                            <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
+                                                <p>Garage Fee</p>
+                                                <div className='flex items-center justify-between gap-1'>
+                                                    <input
+                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        type="number"
+                                                        min="0" // Prevent negative quantities
+                                                        value={defaultBills.garageBill || ''}
+                                                        onChange={(e) => handleDefaultBillChange('garageBill', e.target.value)}
+                                                        disabled={!options} // Disable if not checked
+                                                    />
+                                                    <span>TK</span>
+                                                </div>
+                                            </div>
+
+                                            <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
+                                                <p>Electricity Fee</p>
+                                                <div className='flex items-center justify-between gap-1'>
+                                                    <input
+                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        type="number"
+                                                        min="0" // Prevent negative quantities
+                                                        value={defaultBills.electricityBill || ''}
+                                                        onChange={(e) => handleDefaultBillChange('electricityBill', e.target.value)}
+                                                        disabled={!options} // Disable if not checked
+                                                    />
+                                                    <span>TK</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className='w-full h-[1px] my-2 dark:bg-subtitle-dark/60 bg-subtitle-light/60' />
+                                        <div className='flex justify-start mt-2 items-center'>
+                                            <button
+                                            onClick={saveDefaultBills}
+                                            className='p-2 px-3 dark:bg-indigo-700 bg-indigo-500 dark:text-white text-white rounded-md font-semibold sm:text-sm text-xs hover:opacity-80 cursor-pointer'
+                                            disabled={!currUnit}
+                                        >
+                                            update
+                                        </button>
+                                        </div>              
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        <div className="relative w-full sm:p-4 p-2 flex flex-col gap-2 dark:bg-bg-dark bg-bg-light dark:text-subtitle-dark text-subtitle-light rounded-xl overflow-hidden" >
                             <h3 className="sm:text-xl text-lg font-medium">
                                 {currTitle ? `${currTitle} (${currentMonthYear})` : "Select a unit to calculate expenses."}
                             </h3>
-                            <span className='my-2 w-full h-[1px] bg-subtitle-dark/60'></span>
+                            <span className='my-2 w-full h-[1px] dark:bg-subtitle-dark/60 bg-subtitle-light/60'></span>
                             {/*Container*/}
                             {selectedAdForDisplay && (
                                 <div className='flex flex-col gap-2'>
@@ -300,12 +478,12 @@ const Expense = () => {
                                                 disabled={!expenses.electricity?.isChecked} // Disable if not checked
                                             />
                                             <span>x</span>
-                                            <p>9 TK</p>
+                                            <p>{selectedAdForDisplay.electricityBill} TK</p>
                                         </div>
                                     </div>
                                 </div>
                             )}
-                            <span className='my-2 w-full h-[1px] bg-subtitle-dark/60'></span>
+                            <span className='my-2 w-full h-[1px] dark:bg-subtitle-dark/60 bg-subtitle-light/60'></span>
                             <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
                                 <div className='flex gap-2'>
                                     <button
@@ -404,7 +582,7 @@ const Expense = () => {
                                 if (expenses.garage?.isChecked) items.push({ name: 'গ্যারেজ বিল', price: selectedAdForDisplay.garageBill || 0 }); // Changed to garageBill
                                 if (expenses.gas?.isChecked) items.push({ name: 'গ্যাস বিল', price: selectedAdForDisplay.gasBill || 0 }); // Changed to gasBill
                                 if (expenses.electricity?.isChecked && expenses.electricity.quantity)
-                                    items.push({ name: 'বিদ্যুৎ বিল', price: expenses.electricity.quantity * 9, unit: `(${expenses.electricity.quantity} units)` });
+                                    items.push({ name: 'বিদ্যুৎ বিল', price: expenses.electricity.quantity * 9, unit: `(${selectedAdForDisplay.electricityBill} units)` });
 
                                 return items;
                             })()}
