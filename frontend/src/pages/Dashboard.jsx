@@ -122,8 +122,14 @@ const Dashboard = () => {
               const currentIndex = currentIndices[ad._id] || 0;
               return (
                 <div
-                  className="dark:bg-card-dark bg-card-light rounded-3xl overflow-hidden shadow-xl"
+                  className=" relative dark:bg-card-dark bg-card-light rounded-xl overflow-hidden shadow-xl"
                 >
+                  {/* Availability Badge - Modernized subtle style */}
+                  <div className={`absolute z-10 top-2 left-2 flex items-center gap-1 px-2 py-1 cursor-default text-xs font-medium rounded-full text-white`}>
+                    <div className={`w-4 h-4 rounded-full ${ad.availability ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    {ad.availability ? "Active" : "Inactive"}
+                  </div>
+
                   {/* Banner Section */}
                   <div className="relative">
 
@@ -151,7 +157,7 @@ const Dashboard = () => {
                           className={`
                             w-3 h-3 rounded-full
                             transition-all bg-white
-                            ${currentIndex === index ? "p-2" : "bg-white/50"}
+                            ${currentIndex === index ? "" : "bg-white/50"}
                             `}
                         />
                       ))}
@@ -159,7 +165,7 @@ const Dashboard = () => {
 
                     {/* Price */}
                     <div
-                      className="absolute top-4 right-4 text-white opacity-90 w-17 h-17 flex justify-center items-center rounded-full sm:text-xs text-sm"
+                      className="absolute top-2 right-2 text-white opacity-90 w-17 h-17 flex justify-center items-center rounded-full sm:text-xs text-sm"
                       style={{
                         backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 53 53'><path d='M26.5 0L30.6682 4.20224L36.0729 1.78949L38.4416 7.21367L44.3529 6.91626L44.6022 12.8298L50.2218 14.6879L48.3181 20.2922L52.887 24.0549L49.0872 28.593L51.9884 33.7521L46.8059 36.6111L47.6475 42.4698L41.7821 43.2637L40.4505 49.0308L34.6944 47.6522L31.3694 52.5488L26.5 49.184L21.6306 52.5488L18.3056 47.6522L12.5495 49.0308L11.2179 43.2637L5.35254 42.4698L6.19412 36.6111L1.01162 33.7521L3.91277 28.593L0.113045 24.0549L4.68195 20.2922L2.77817 14.6879L8.39778 12.8298L8.64707 6.91626L14.5584 7.21367L16.9271 1.78949L22.3318 4.20224L26.5 0Z' fill='%23F34141'/></svg>")`,
                         backgroundSize: "cover",
@@ -179,7 +185,7 @@ const Dashboard = () => {
                     {ad.images.slice(0, ad.images.length).map((img, index) => (
                       <motion.div
                         key={index}
-                        className={`w-12 h-12 rounded-xl overflow-hidden cursor-pointer ${index === currentIndex ? 'border-2 dark:border-white border-black' : 'border border-transparent'
+                        className={`w-12 h-12 rounded-md overflow-hidden cursor-pointer ${index === currentIndex ? 'border-2 dark:border-white border-black' : 'border border-transparent'
                           }`}
                         whileHover={{ scale: 1.05 }}
                         onClick={(e) => {
@@ -193,7 +199,7 @@ const Dashboard = () => {
                   </div>
 
                   {/* Details and CTA */}
-                  <div className="p-4 pt-2">
+                  <div className="p-4 pt-4">
                     <div>
                       {/* Title */}
                       <h3 className="text-2xl font-bold mb-1 dark:text-subtitle-dark text-subtitle-light">{ad.title} ({ad.unitId})</h3>
@@ -204,10 +210,6 @@ const Dashboard = () => {
                         {/* <div className="w-2 h-2 bg-green-400 rounded-full"></div> */}
                         Move-in: <span className="font-semibold underline">{new Date(ad.moveInDate).toLocaleDateString()}</span>
                       </p>
-                      {/* Availability Badge - Modernized subtle style */}
-                      <div className={`inline-block px-2 py-1 mt-1 cursor-default text-xs font-medium rounded-full text-white ${ad.availability ? 'bg-green-500' : 'bg-red-500'}`}>
-                        {ad.availability ? "Available" : "Unavailable"}
-                      </div>
                     </div>
 
                     <div className="flex flex-row justify-center mt-4 gap-2"> {/* Increased gap for buttons */}
@@ -217,7 +219,7 @@ const Dashboard = () => {
                           setSelectedAd(ad);
                           setAddUnit(true);
                         }}
-                        className="bg-green-500 w-full h-10 p-3 rounded-xl hover:bg-green-600 hover:text-white transition"
+                        className="bg-green-500 w-full h-10 p-3 rounded-md hover:bg-green-600 hover:text-white transition"
                       >
                         <svg width="full" height="full" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M16.6432 0.106781L3.03644 13.7136L0.118958 22.881L9.28644 19.9636L22.8932 6.35678C22.8932 6.35678 22.789 4.16824 20.8099 2.19012C18.8307 0.210948 16.6432 0.106781 16.6432 0.106781ZM17.0338 1.79949C18.1505 2.01199 19.0395 2.48502 19.7255 3.18905C20.4114 3.89308 20.8943 4.82814 21.2005 5.96616L19.3125 7.85418L15.1458 3.68751L16.6432 2.19012L17.0338 1.79949ZM4.18594 14.7573C4.19825 14.7604 5.43848 15.0739 6.68227 16.3177C8.03644 17.5677 8.24477 18.7144 8.24477 18.7144L8.28953 18.7673L4.59283 19.9575L3.03441 18.399L4.18594 14.7573Z" fill="white" />
@@ -226,7 +228,7 @@ const Dashboard = () => {
                       {/* Delete Button - PRESERVED ORIGINAL STYLING */}
                       <button
                         onClick={() => handleDelete(ad._id)}
-                        className="bg-red-500 text-white w-full h-10 p-3 rounded-xl hover:bg-red-600 hover:text-white transition"
+                        className="bg-red-500 text-white w-full h-10 p-3 rounded-md hover:bg-red-600 hover:text-white transition"
                       >
                         <svg width="full" height="full" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M9.48594 0.237689C8.98957 0.245447 8.5932 0.653615 8.6 1.14999V1.59999H3.65C3.40919 1.59672 3.17712 1.6901 3.00567 1.85924C2.83422 2.02837 2.7377 2.25916 2.7377 2.49999H1.40001C1.07543 2.4954 0.773533 2.66593 0.609904 2.94627C0.446275 3.22662 0.446275 3.57336 0.609904 3.8537C0.773533 4.13405 1.07543 4.30457 1.40001 4.29998H17.6C17.9246 4.30457 18.2265 4.13404 18.3901 3.8537C18.5537 3.57335 18.5537 3.22662 18.3901 2.94627C18.2265 2.66592 17.9246 2.4954 17.6 2.49999H16.2623C16.2623 2.25916 16.1658 2.02836 15.9943 1.85924C15.8229 1.6901 15.5908 1.59672 15.35 1.59999H10.4V1.14999C10.4033 0.906722 10.308 0.672461 10.1358 0.500597C9.96365 0.328724 9.72921 0.233891 9.48594 0.237689ZM1.4 6.09999L3.01367 19.8109C3.11987 20.7172 3.887 21.4 4.79961 21.4H14.2004C15.113 21.4 15.8792 20.7172 15.9863 19.8109L17.6 6.10001L1.4 6.09999Z" fill="white" />

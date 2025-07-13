@@ -215,7 +215,7 @@ const ViewAds = () => {
             const currentIndex = currentIndices[ad._id] || 0;
             return (
               ad.availability && (
-                <div key={ad._id} className="dark:bg-card-dark bg-card-light h-fit rounded-3xl overflow-hidden shadow-xl relative transition-all duration-300">
+                <div key={ad._id} className="dark:bg-card-dark bg-card-light h-fit rounded-xl overflow-hidden shadow-xl relative transition-all duration-300">
                   {/* Banner Section */}
                   <div className="relative">
                     <div
@@ -242,18 +242,18 @@ const ViewAds = () => {
                           className={`
                             w-3 h-3 rounded-full
                             transition-all bg-white
-                            ${currentIndex === index ? "p-2" : "bg-white/50"}
+                            ${currentIndex === index ? "" : "bg-white/50"}
                             `}
                         />
                       ))}
                     </div>
 
                     {/* Next and Previous button */}
-                    <div className=" absolute inset-0 flex items-center justify-between p-4">
-                      <button onClick={() => goToPrevImage(ad._id, ad.images.length)} className="p-1 rounded-full shadow bg-white/50 text-gray-800 hover:bg-white">
+                    <div className="absolute inset-0 flex items-center justify-between px-1">
+                      <button onClick={() => goToPrevImage(ad._id, ad.images.length)} className="h-full text-white/80 hover:text-white">
                         <ChevronLeft size={30} />
                       </button>
-                      <button onClick={() => goToNextImage(ad._id, ad.images.length)} className="p-1 rounded-full shadow bg-white/50 text-gray-800 hover:bg-white">
+                      <button onClick={() => goToNextImage(ad._id, ad.images.length)} className="h-full text-white/70 hover:text-white">
                         <ChevronRight size={30} />
                       </button>
                     </div>
@@ -266,12 +266,12 @@ const ViewAds = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="flex items-center gap-2 px-3 pt-3"
+                      className="flex items-center gap-2 px-4 pt-4"
                     >
                       {ad.images.slice(0, ad.images.length).map((img, index) => (
                         <motion.div
                           key={index}
-                          className={`w-12 h-12 rounded-xl overflow-hidden cursor-pointer ${index === currentIndex ? 'border-2 dark:border-white border-black' : 'border border-transparent'
+                          className={`w-12 h-12 rounded-md overflow-hidden cursor-pointer ${index === currentIndex ? 'border-2 dark:border-white border-black' : 'border border-transparent'
                             }`}
                           whileHover={{ scale: 1.05 }}
                           onClick={(e) => {
@@ -325,21 +325,21 @@ const ViewAds = () => {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.25 }}
-                          className="dark:text-black text-white font-semibold dark:bg-subtitle-dark bg-subtitle-light w-full mt-3 py-2 rounded-3xl dark:hover:bg-subtitle-dark/80 hover:bg-subtitle-light/80  transition"
+                          className="dark:text-black text-white font-semibold dark:bg-subtitle-dark bg-subtitle-light w-full mt-3 py-2 rounded-lg dark:hover:bg-subtitle-dark/80 hover:bg-subtitle-light/80  transition"
                         >
                           Contact
                         </motion.button>
                       </>
                     )}
-                    <div className="w-full text-center my-1">
-                      <button onClick={() => toggleVisibility(ad._id)} className={`${isVisible ? "rotate-x-180" : ""} transition-transform duration-300 ease-in w-full flex justify-center items-center py-2 rounded-full cursor-pointer`}>
-                        <svg className="dark:block hidden" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.8335 7.3999L18 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
-                          <path d="M9.8335 7.3999L1.66701 1" stroke="#B0B0B0" stroke-width="1.5" stroke-linecap="round" />
+                    <div className="w-full text-center my-2">
+                      <button onClick={() => toggleVisibility(ad._id)} className={`${isVisible ? "rotate-x-180" : ""} transition-transform duration-300 ease-in w-full flex justify-center items-center py-2 cursor-pointer`}>                       
+                        <svg className="dark:hidden block" width="32" height="7" viewBox="0 0 32 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 1.5H31" stroke="#424242" stroke-width="2" stroke-linecap="round" />
+                          <path d="M6 5.5H26" stroke="#424242" stroke-width="2" stroke-linecap="round" />
                         </svg>
-                        <svg className="dark:hidden block" width="21" height="11" viewBox="0 0 19 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.8335 7.3999L18 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
-                          <path d="M9.8335 7.3999L1.66701 1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" />
+                        <svg className="dark:block hidden" width="32" height="7" viewBox="0 0 32 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 1.5H31" stroke="#B0B0B0" stroke-width="2" stroke-linecap="round" />
+                          <path d="M6 5.5H26" stroke="#B0B0B0" stroke-width="2" stroke-linecap="round" />
                         </svg>
                       </button>
                     </div>
