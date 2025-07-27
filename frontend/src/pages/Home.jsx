@@ -16,9 +16,6 @@ import {
     ChevronRight,
     Play,
     Mail,
-    Phone,
-    MapPin,
-    ArrowRight
 } from 'lucide-react';
 
 const HomePage = () => {
@@ -83,7 +80,7 @@ const HomePage = () => {
             </Helmet>
 
             {/* Nav Section */}
-            <nav className="fixed top-0 w-full bg-nav-light/70 dark:bg-nav-dark/70 backdrop-blur-sm z-50">
+            <nav className="sticky top-0 w-full bg-nav-light/60 dark:bg-nav-dark/60 backdrop-blur-sm z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <a href="#">
@@ -198,7 +195,7 @@ const HomePage = () => {
             </nav>
 
             {/* Hero Section */}
-            <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
+            <section className="relative w-full flex items-center justify-center overflow-hidden">
                 <div
                     className="absolute inset-0 bg-cover bg-center"
                     style={{
@@ -210,31 +207,33 @@ const HomePage = () => {
                 </div>
 
                 {/* Content Container */}
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 text-white w-full">
-                    <div className="space-y-6 sm:text-start text-center md:space-y-8">
+                <div className="relative max-w-7xl py-40 sm:py-25 mx-auto px-4 sm:px-6 lg:px-8 z-10 text-white w-full">
+                    <div className="space-y-4 sm:space-y-6 sm:text-start text-center">
                         {/* Main Headline */}
-                        <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-tight tracking-tight drop-shadow-lg animate-fade-in-up">
+                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight drop-shadow-lg animate-fade-in-up">
                             Rent Smarter <br />
                             <span className="font-light text-blue-200">Just Scan</span>
                         </h1>
 
                         {/* Sub-headline / Description */}
-                        <p className="text-lg sm:text-xl lg:text-2xl font-light leading-relaxed max-w-3xl drop-shadow-md animate-fade-in-up delay-200">
+                        <p className="text-md sm:text-lg lg:text-xl font-light leading-relaxed max-w-3xl drop-shadow-md animate-fade-in-up delay-200">
                             Basha Bhara Hobe lets you find or list apartments instantly through a simple QR code.
                             No agents, no hassle, just smart rental solutions.
                         </p>
                     </div>
 
                     {/* Call-to-Action Buttons */}
-                    <div className="mt-10 flex flex-col sm:flex-row sm:justify-start justify-center gap-4 animate-fade-in-up delay-400">
+                    <div className="mt-5 flex flex-col sm:flex-row sm:justify-start justify-center gap-4 animate-fade-in-up delay-400">
                         <button
                             onClick={() => navigate("/register")}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full sm:text-lg text-md font-semibold shadow-lg
-                                   transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-center
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 uppercase py-3 rounded-full sm:text-lg text-md font-semibold shadow-lg
+                                   transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-center gap-2
                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
                         >
                             Post Your Property
-                            <ArrowRight className="ml-2 h-5 w-5" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -243,28 +242,28 @@ const HomePage = () => {
             <section className='w-full flex justify-between dark:text-subtitle-dark text-description-light'>
                 <div className='sm:text-5xl dark:bg-nav-dark bg-nav-light text-2xl font-neueplak-black flex flex-col items-center w-full justify-center gap-2 py-10'>
                     <p>
-                        <CountUp start={0} end={20} duration={4} delay={0} />
-                        
+                        <CountUp start={0} end={12} duration={4} delay={0} />+
+
                     </p>
                     <p className='sm:text-2xl text-sm font-neueplak-regular'>Total Clients</p>
                 </div>
 
                 <div className='sm:text-5xl dark:bg-subtitle-light bg-subtitle-dark/10 text-2xl font-neueplak-black flex flex-col items-center w-full justify-center gap-2 py-10'>
                     <p>
-                        <CountUp start={0} end={150} duration={4} delay={0} />
-                        
+                        <CountUp start={0} end={110} duration={4} delay={0} />+
+
                     </p>
                     <p className='sm:text-2xl text-sm font-neueplak-regular'>Active Units</p>
                 </div>
 
                 <div className='sm:text-5xl dark:bg-nav-dark bg-nav-light text-2xl font-neueplak-black flex flex-col items-center w-full justify-center gap-2 py-10'>
                     <p>
-                        <CountUp start={0} end={1200} duration={4} delay={0} />
-                        
+                        <CountUp start={0} end={800} duration={4} delay={0} />+
+
                     </p>
                     <p className='sm:text-2xl text-sm font-neueplak-regular'>QR Scanned</p>
                 </div>
-            </section>    
+            </section>
 
             {/* How It Works */}
             <section id="how-it-works" className="py-20">
@@ -361,7 +360,7 @@ const HomePage = () => {
                         ].map((feature, index) => (
                             <div
                                 key={index}
-                                className="dark:bg-card-dark bg-card-light p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border dark:border-title-dark/30 border-title-light/20"
+                                className="dark:bg-card-dark bg-card-light p-8 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border dark:border-title-dark/30 border-title-light/20"
                             >
                                 <div className="w-14 h-14 dark:bg-title-dark bg-title-light/70 rounded-xl flex items-center justify-center mb-6">
                                     <feature.icon className="h-7 w-7 dark:text-bg-dark text-bg-light" />
@@ -480,9 +479,9 @@ const HomePage = () => {
                         <button onClick={() => navigate("/register")} className="dark:bg-cta-dark bg-subtitle-light text-white px-8 py-4 rounded-lg text-lg font-semibold dark:hover:bg-cta-dark/50 hover:bg-subtitle-light/80 transition-colors">
                             Create Account
                         </button>
-                        <button className="border-2 dark:border-cta-dark hover:bg-subtitle-light/5 border-subtitle-light dark:text-cta-dark text-subtitle-light/80 px-8 py-4 rounded-lg text-lg font-semibold dark:hover:text-white hover:text-subtitle-light transition-colors">
+                        {/* <button className="border-2 dark:border-cta-dark hover:bg-subtitle-light/5 border-subtitle-light dark:text-cta-dark text-subtitle-light/80 px-8 py-4 rounded-lg text-lg font-semibold dark:hover:text-white hover:text-subtitle-light transition-colors">
                             Explore Listings
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </section>
