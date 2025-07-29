@@ -123,7 +123,7 @@ const HomePage = () => {
                             <a href="#how-it-works" className="dark:text-subtitle-dark text-subtitle-light hover:dark:text-subtitle-dark/60 hover:text-subtitle-light/60 transition-colors">How It Works</a>
                             <a href="#features" className="dark:text-subtitle-dark text-subtitle-light hover:dark:text-subtitle-dark/60 hover:text-subtitle-light/60 transition-colors">Features</a>
                             <a href="#about" className="dark:text-subtitle-dark text-subtitle-light hover:dark:text-subtitle-dark/60 hover:text-subtitle-light/60 transition-colors">About</a>
-                            <button onClick={() => navigate("/login")} className="dark:bg-subtitle-dark bg-subtitle-light text-white px-6 py-2 rounded-lg hover:dark:bg-subtitle-dark/60 hover:bg-subtitle-light/60 transition-colors">
+                            <button onClick={() => navigate("/getstarted")} className="dark:bg-subtitle-dark bg-subtitle-light text-white px-6 py-2 rounded-lg hover:dark:bg-subtitle-dark/60 hover:bg-subtitle-light/60 transition-colors">
                                 Get Started
                             </button>
                         </div>
@@ -187,7 +187,7 @@ const HomePage = () => {
                         >
                             About
                         </a>
-                        <button onClick={() => navigate("/login")} className="w-full text-left rounded-lg dark:bg-subtitle-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 text-base font-medium transition-colors mt-2">
+                        <button onClick={() => navigate("/getstarted")} className="w-full text-left rounded-lg dark:bg-subtitle-dark dark:text-white dark:hover:bg-subtitle-dark/60 bg-subtitle-light/70 text-white hover:bg-subtitle-light px-3 py-2 text-base font-medium transition-colors mt-2">
                             Get Started
                         </button>
                     </div>
@@ -207,7 +207,7 @@ const HomePage = () => {
                 </div>
 
                 {/* Content Container */}
-                <div className="relative max-w-7xl py-40 sm:py-25 mx-auto px-4 sm:px-6 lg:px-8 z-10 text-white w-full">
+                <div className="relative max-w-7xl py-30 sm:py-25 mx-auto px-4 sm:px-6 lg:px-8 z-10 text-white w-full">
                     <div className="space-y-4 sm:space-y-6 sm:text-start text-center">
                         {/* Main Headline */}
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight drop-shadow-lg animate-fade-in-up">
@@ -476,7 +476,7 @@ const HomePage = () => {
                         Join thousands of property owners who have already modernized their rental process
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button onClick={() => navigate("/register")} className="dark:bg-cta-dark bg-subtitle-light text-white px-8 py-4 rounded-lg text-lg font-semibold dark:hover:bg-cta-dark/50 hover:bg-subtitle-light/80 transition-colors">
+                        <button onClick={() => navigate("/getstarted")} className="dark:bg-cta-dark bg-subtitle-light text-white px-8 py-4 rounded-lg text-lg font-semibold dark:hover:bg-cta-dark/50 hover:bg-subtitle-light/80 transition-colors">
                             Create Account
                         </button>
                         {/* <button className="border-2 dark:border-cta-dark hover:bg-subtitle-light/5 border-subtitle-light dark:text-cta-dark text-subtitle-light/80 px-8 py-4 rounded-lg text-lg font-semibold dark:hover:text-white hover:text-subtitle-light transition-colors">

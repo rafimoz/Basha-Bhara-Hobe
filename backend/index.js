@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -10,11 +13,11 @@ import { fileURLToPath } from "url";
 import connectCloudinary from "./config/cloudinary.js";
 import cloudinary from "cloudinary";
 import UserModel from "./models/User.js";
+import passport from "passport";
+import session from "express-session";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-dotenv.config({ path: path.resolve(__dirname, "./.env") });
 
 const app = express();
 app.use(cors());
@@ -35,6 +38,14 @@ mongoose
     });
   })
   .catch((err) => console.log(err));
+
+import "./config/passport.js";
+
+app.use(
+  session({ secret: "your_secret", resave: false, saveUninitialized: true })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.post("/login", async (req, res) => {
   try {
@@ -105,9 +116,9 @@ const getUser = async (req, res) => {
 };
 
 const getPublicIdFromUrl = (url) => {
-  const parts = url.split('/');
+  const parts = url.split("/");
   const fileName = parts[parts.length - 1];
-  const publicId = fileName.split('.')[0];
+  const publicId = fileName.split(".")[0];
   return publicId; // assuming folder name
 };
 
@@ -124,7 +135,7 @@ app.put("/api/user/update/:id", async (req, res) => {
       if (user.image) {
         const publicId = getPublicIdFromUrl(user.image);
         console.log(publicId);
-    
+
         try {
           await cloudinary.uploader.destroy(publicId);
         } catch (err) {
@@ -141,13 +152,10 @@ app.put("/api/user/update/:id", async (req, res) => {
 
     await UserModel.findByIdAndUpdate(id, updateData);
     res.json({ success: true, message: "Profile updated successfully" });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
-
 
 app.get("/api/user/:id", getUser);

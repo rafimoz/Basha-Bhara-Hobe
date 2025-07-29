@@ -9,6 +9,8 @@ import UserPanel from './pages/UserPanel';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Expense from './pages/Expense';
+import Getstarted from './pages/Getstarted';
+import RenterPublic from './pages/RenterPublic';
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
+        <Route path="/getstarted" element={<Getstarted />} />
+        <Route path="/renter" element={<RenterPublic />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/rents/:id" element={<ViewAds />} />
