@@ -4,8 +4,6 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import { Helmet } from 'react-helmet-async'
-import { useGoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 
 function Login() {
     const [email, setEmail] = useState('') // Initialize with empty string
@@ -13,24 +11,6 @@ function Login() {
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
     const backendURL = import.meta.env.VITE_BACKEND_URL;
-
-    const googleLogin = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                // Send token to backend for verification & user handling
-                const res = await axios.post(`${backendURL}/api/users/google-login`, {
-                    token: tokenResponse.access_token,
-                });
-                localStorage.setItem("token", res.data.token);
-                alert("Google login successful!");
-            } catch (error) {
-                console.error("Google login error:", error.response?.data || error.message);
-            }
-        },
-        onError: (error) => {
-            console.error("Google login failed:", error);
-        },
-    });
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -99,8 +79,8 @@ function Login() {
 
                     <div className='flex flex-col items-center'>
                         <div className='text-center text-title-dark mb-10'>
-                            <h2 className='text-4xl playfair-display-500'>Welcome Back!</h2>
-                            <p>Enter your email and password to access your account</p>
+                            <h2 className='md:text-4xl text-3xl dark:text-title-dark text-title-light playfair-display-500'>Welcome Back!</h2>
+                            <p className='md:text-md text-sm dark:text-subtitle-dark text-subtitle-light'>Enter your email and password to access your account</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className='flex flex-col gap-4 md:w-[70%] w-full'> {/* Form container */}
@@ -108,7 +88,7 @@ function Login() {
                                 <label htmlFor="email" className='dark:text-subtitle-dark text-subtitle-light'>Email</label>
                                 <input
                                     type="email"
-                                    placeholder='Enter you email'
+                                    placeholder='Enter your email'
                                     autoComplete='off'
                                     name='email'
                                     className='w-full mt-1 px-3 py-2 dark:bg-card-dark bg-card-light dark:text-subtitle-dark text-subtitle-light rounded-xl focus:outline-none focus:ring-2 dark:focus:ring-subtitle-dark focus:ring-subtitle-light'
@@ -119,7 +99,7 @@ function Login() {
                                 <label htmlFor="password" className='dark:text-subtitle-dark text-subtitle-light'>Password</label>
                                 <input
                                     type="password"
-                                    placeholder='Enter you password'
+                                    placeholder='Enter your password'
                                     name='password'
                                     className='w-full mt-1 px-3 py-2 dark:bg-card-dark bg-card-light dark:text-subtitle-dark text-subtitle-light rounded-xl focus:outline-none focus:ring-2 dark:focus:ring-subtitle-dark focus:ring-subtitle-light'
                                     onChange={(e) => setPassword(e.target.value)}
@@ -128,7 +108,7 @@ function Login() {
                                     <a href="">Forgot Password</a>
                                 </div>
                             </div>
-                            <div className='flex flex-col gap-4'>
+                            <div className='flex flex-col gap-2'>
                                 <button type='submit' disabled={isLoading}
                                     className={`w-full cursor-pointer dark:bg-title-dark dark:text-bg-dark bg-subtitle-light mt-5 text-bg-light py-3 rounded-xl transition-colors duration-200 flex justify-center items-center 
                             ${isLoading
@@ -144,17 +124,21 @@ function Login() {
                                     ) : 'Sign In'}
                                 </button>
 
-                                <button type='button'
-                                    onClick={() => googleLogin()}
-                                    className={`w-full cursor-pointer border-2 dark:border-bg-light border-bg-dark text-bg-light py-3 rounded-xl transition-colors duration-200 flex justify-center gap-2 items-center`}>
+                                <p className='w-full text-center dark:text-title-dark text-title-light'>- or -</p>
+
+                                <a
+                                    href={backendURL+"/api/auth/google"}
+                                    className={`w-full cursor-pointer border-2 dark:border-title-dark border-title-light dark:text-title-dark text-title-light py-3 rounded-xl transition-colors duration-200 flex justify-center gap-2 items-center`}
+                                >
                                     <svg className='w-6' viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M22.7142 10.4598H21.8752V10.4166H12.5002V14.5833H18.3871C17.5283 17.0088 15.2205 18.7499 12.5002 18.7499C9.0486 18.7499 6.25016 15.9515 6.25016 12.4999C6.25016 9.04836 9.0486 6.24992 12.5002 6.24992C14.0934 6.24992 15.5429 6.85096 16.6465 7.83273L19.5929 4.88638C17.7325 3.15252 15.2439 2.08325 12.5002 2.08325C6.74756 2.08325 2.0835 6.74731 2.0835 12.4999C2.0835 18.2525 6.74756 22.9166 12.5002 22.9166C18.2528 22.9166 22.9168 18.2525 22.9168 12.4999C22.9168 11.8015 22.845 11.1197 22.7142 10.4598Z" fill="#FFC107" />
                                         <path d="M3.28418 7.65148L6.70658 10.1614C7.63262 7.86867 9.87533 6.24992 12.4998 6.24992C14.093 6.24992 15.5425 6.85096 16.6462 7.83273L19.5925 4.88638C17.7321 3.15252 15.2436 2.08325 12.4998 2.08325C8.49876 2.08325 5.02897 4.34211 3.28418 7.65148Z" fill="#FF3D00" />
                                         <path d="M12.5 22.9168C15.1906 22.9168 17.6354 21.8871 19.4839 20.2126L16.2599 17.4845C15.2141 18.2767 13.9141 18.7501 12.5 18.7501C9.79062 18.7501 7.4901 17.0225 6.62344 14.6116L3.22656 17.2288C4.95052 20.6022 8.45156 22.9168 12.5 22.9168Z" fill="#4CAF50" />
                                         <path d="M22.7141 10.46H21.875V10.4167H12.5V14.5834H18.387C17.9745 15.7485 17.225 16.7532 16.2583 17.485L16.2599 17.4839L19.4839 20.2121C19.2557 20.4194 22.9167 17.7084 22.9167 12.5001C22.9167 11.8016 22.8448 11.1199 22.7141 10.46Z" fill="#1976D2" />
                                     </svg>
-                                    Sign In with Google
-                                </button>
+                                    Continue with Google
+                                </a>
+
                             </div>
                         </form>
                     </div>

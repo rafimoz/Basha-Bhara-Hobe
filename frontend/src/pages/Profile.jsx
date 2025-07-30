@@ -119,7 +119,7 @@ const Profile = () => {
               <label htmlFor='image' className='rounded-full cursor-pointer'>
                 <div className='relative sm:w-70 sm:h-70 w-40 h-40 rounded-full overflow-hidden'>
                   <img
-                    className='object-cover opacity-50'
+                    className='object-cover w-full h-full opacity-50'
                     src={form.image}
                     alt="edit"
                   />
@@ -132,7 +132,7 @@ const Profile = () => {
             ) : (
               <div className='sm:w-70 sm:h-70 w-40 h-40 rounded-full overflow-hidden'>
                 <img
-                  className='object-cover'
+                  className='object-cover w-full h-full'
                   src={form.image}
                   alt="profile"
                 />

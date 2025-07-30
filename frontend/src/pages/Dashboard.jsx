@@ -125,7 +125,7 @@ const Dashboard = () => {
                   className=" relative dark:bg-card-dark bg-card-light rounded-xl overflow-hidden shadow-xl"
                 >
                   {/* Availability Badge - Modernized subtle style */}
-                  <div className={`absolute z-10 top-2 left-2 flex items-center gap-1 px-2 py-1 cursor-default text-xs font-medium rounded-full text-white`}>
+                  <div className={`absolute z-1 top-2 left-2 flex items-center gap-1 px-2 py-1 cursor-default text-xs font-medium rounded-full text-white`}>
                     <div className={`w-4 h-4 rounded-full ${ad.availability ? 'bg-green-500' : 'bg-red-500'}`}></div>
                     {ad.availability ? "Active" : "Inactive"}
                   </div>

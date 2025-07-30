@@ -8,6 +8,7 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import adRoutes from "./routes/adRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import connectCloudinary from "./config/cloudinary.js";
@@ -15,19 +16,26 @@ import cloudinary from "cloudinary";
 import UserModel from "./models/User.js";
 import passport from "passport";
 import session from "express-session";
+import "./config/passport.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors());
+
+// Middleware
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json({ limit: "20mb" }));
 
-app.use("/api", adRoutes);
+// Required for Passport session
+app.use(session({ secret: 'secret', resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
+app.use("/api", adRoutes);
+app.use("/api/auth", userRoutes);
+
+app.get("/", (req, res) => res.send("API is working"));
 
 connectCloudinary();
 mongoose
@@ -38,14 +46,6 @@ mongoose
     });
   })
   .catch((err) => console.log(err));
-
-import "./config/passport.js";
-
-app.use(
-  session({ secret: "your_secret", resave: false, saveUninitialized: true })
-);
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.post("/login", async (req, res) => {
   try {

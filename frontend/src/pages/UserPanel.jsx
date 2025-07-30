@@ -40,7 +40,7 @@ const UserPanel = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    const authToken = localStorage.getItem("authToken");
+    const authToken = localStorage.getItem("token");
     if (!authToken) {
       navigate("/login");
       return;

@@ -264,7 +264,7 @@ const Expense = () => {
 
                         {
                             options && (
-                                <div className='w-full sm:p-4 p-2 bg-bg-dark border-1 border-subtitle-dark/20 rounded-xl dark:text-subtitle-dark text-subtitle-light'>
+                                <div className='w-full sm:p-4 p-2 dark:bg-bg-dark bg-bg-light border-1 border-subtitle-dark/20 rounded-xl dark:text-subtitle-dark text-subtitle-light'>
                                     <div>
                                         <h3 className='sm:text-xl text-lg font-medium dark:text-title-dark text-title-light'>Default Bill Settings</h3>
                                         <div className='w-full h-[1px] my-2 dark:bg-subtitle-dark/60 bg-subtitle-light/60' />
