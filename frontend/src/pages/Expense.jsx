@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import ExpenseSlip from '../components/ExpenseSlip';
+import PreviousExpenseSlip from '../components/PreviousExpense';
 import { AnimatePresence, motion } from 'framer-motion';
 import axios from "axios";
 
@@ -12,6 +13,10 @@ const Expense = () => {
     const [expenses, setExpenses] = useState({}); // State to manage checkbox and quantity for current month's calculation
     const [totalExpense, setTotalExpense] = useState(0); // State for total calculated expense
     const [slip, setSlip] = useState(false); // State to control the modal visibility
+    const [previousSlip, setPreviousSlip] = useState(false); // State to control the modal visibility
+    const [selectedMonth, setSelectedMonth] = useState("");
+    const [language, setLanguage] = useState('en'); // default to English
+
     const [defaultBills, setDefaultBills] = useState({
         waterBill: 0,
         gasBill: 0,
@@ -26,9 +31,6 @@ const Expense = () => {
         toast,
         toggleRefreshAds,
     } = useOutletContext();
-
-    const currentDate = new Date();
-    const currentMonthYear = currentDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
     const calculateTotal = () => {
         let currentTotal = 0;
@@ -68,6 +70,10 @@ const Expense = () => {
     }, [expenses, currUnit, ads]); // Depend on ads as well, in case they load later or update
 
     useEffect(() => {
+        const now = new Date();
+        now.setMonth(now.getMonth() - 1);
+        const formatted = now.toLocaleString("en-US", { month: "long", year: "numeric" });
+        setSelectedMonth(formatted);
         const selectedAd = ads.find(ad => ad._id === currUnit);
         if (selectedAd) {
             setCurrTitle(`${selectedAd.unitId || selectedAd.title} - ${selectedAd.renter || ''}`);
@@ -164,7 +170,7 @@ const Expense = () => {
 
         // Prepare the data to send to the backend, aligning with schema requirements
         const monthlyExpenseData = {
-            month: currentMonthYear,
+            month: selectedMonth,
             waterBill: expenses.water?.isChecked ? (selectedAd.waterBill || 0) : 0,
             gasBill: expenses.gas?.isChecked ? (selectedAd.gasBill || 0) : 0,
             trashBill: expenses.garbage?.isChecked ? (selectedAd.trashBill || 0) : 0,
@@ -200,6 +206,28 @@ const Expense = () => {
         }
     };
 
+    const deleteMonthlyExpense = async (expenseId) => {
+        if (!currUnit) {
+            toast.error("Please select a unit before deleting.");
+            return;
+        }
+
+        try {
+            const response = await axios.delete(
+                `${backendURL}/api/ads/deletemonthlyexpenses/${currUnit}?expenseId=${expenseId}`
+            );
+
+            toast.success("Deleted successfully!");
+
+            if (toggleRefreshAds) {
+                await toggleRefreshAds();
+            }
+        } catch (error) {
+            toast.error("Failed to delete!");
+        }
+    };
+
+
     const selectedAdForDisplay = ads.find(ad => ad._id === currUnit);
 
     return (
@@ -219,11 +247,14 @@ const Expense = () => {
                                 value={currUnit}
                             >
                                 <option value="">Default</option>
-                                {ads.map((ad) => (
-                                    <option key={ad._id} value={ad._id}>
-                                        {ad.unitId}
-                                    </option>
-                                ))}
+                                {ads
+                                    .slice() // create a copy to avoid mutating the original array
+                                    .sort((a, b) => a.unitId.localeCompare(b.unitId)) // sort by unitId A-Z
+                                    .map((ad) => (
+                                        <option key={ad._id} value={ad._id}>
+                                            {`${ad.unitId} - ${ad.renter || 'No Renter'}`}
+                                        </option>
+                                    ))}
                             </select>
 
                             {/* Custom Dropdown Icon */}
@@ -265,15 +296,14 @@ const Expense = () => {
                         {
                             options && (
                                 <div className='w-full sm:p-4 p-2 dark:bg-bg-dark bg-bg-light border-1 border-subtitle-dark/20 rounded-xl dark:text-subtitle-dark text-subtitle-light'>
-                                    <div>
+                                    <div className='flex flex-col gap-2'>
                                         <h3 className='sm:text-xl text-lg font-medium dark:text-title-dark text-title-light'>Default Bill Settings</h3>
-                                        <div className='w-full h-[1px] my-2 dark:bg-subtitle-dark/60 bg-subtitle-light/60' />
-                                        <div className='flex flex-col gap-1 h-full text-subtitle-light dark:text-subtitle-dark'>
+                                        <div className='flex flex-col gap-2 h-full text-subtitle-light dark:text-subtitle-dark'>
                                             <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
                                                 <p>Unit Fee</p>
                                                 <div className='flex items-center justify-between gap-1'>
                                                     <input
-                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        className='p-1 w-20 text-center rounded-md bg-card-light dark:bg-card-dark text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
                                                         type="number"
                                                         min="0" // Prevent negative quantities
                                                         value={defaultBills.price || ''}
@@ -288,7 +318,7 @@ const Expense = () => {
                                                 <p>Water Fee</p>
                                                 <div className='flex items-center justify-between gap-1'>
                                                     <input
-                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        className='p-1 w-20 text-center rounded-md bg-card-light dark:bg-card-dark text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
                                                         type="number"
                                                         min="0" // Prevent negative quantities
                                                         value={defaultBills.waterBill || ''}
@@ -303,10 +333,10 @@ const Expense = () => {
                                                 <p>Gas Fee</p>
                                                 <div className='flex items-center justify-between gap-1'>
                                                     <input
-                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        className='p-1 w-20 text-center rounded-md bg-card-light dark:bg-card-dark text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
                                                         type="number"
                                                         min="0" // Prevent negative quantities
-                                                        value={defaultBills.gasBill  || ''}
+                                                        value={defaultBills.gasBill || ''}
                                                         onChange={(e) => handleDefaultBillChange('gasBill', e.target.value)}
                                                         disabled={!options} // Disable if not checked
                                                     />
@@ -318,10 +348,10 @@ const Expense = () => {
                                                 <p>Trash Fee</p>
                                                 <div className='flex items-center justify-between gap-1'>
                                                     <input
-                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        className='p-1 w-20 text-center rounded-md bg-card-light dark:bg-card-dark text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
                                                         type="number"
                                                         min="0" // Prevent negative quantities
-                                                        value={defaultBills.trashBill  || ''}
+                                                        value={defaultBills.trashBill || ''}
                                                         onChange={(e) => handleDefaultBillChange('trashBill', e.target.value)}
                                                         disabled={!options} // Disable if not checked
                                                     />
@@ -333,7 +363,7 @@ const Expense = () => {
                                                 <p>Garage Fee</p>
                                                 <div className='flex items-center justify-between gap-1'>
                                                     <input
-                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        className='p-1 w-20 text-center rounded-md bg-card-light dark:bg-card-dark text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
                                                         type="number"
                                                         min="0" // Prevent negative quantities
                                                         value={defaultBills.garageBill || ''}
@@ -348,7 +378,7 @@ const Expense = () => {
                                                 <p>Electricity Fee</p>
                                                 <div className='flex items-center justify-between gap-1'>
                                                     <input
-                                                        className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                        className='p-1 w-20 text-center rounded-md bg-card-light dark:bg-card-dark text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
                                                         type="number"
                                                         min="0" // Prevent negative quantities
                                                         value={defaultBills.electricityBill || ''}
@@ -359,34 +389,46 @@ const Expense = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className='w-full h-[1px] my-2 dark:bg-subtitle-dark/60 bg-subtitle-light/60' />
                                         <div className='flex justify-start mt-2 items-center'>
                                             <button
-                                            onClick={saveDefaultBills}
-                                            className='p-2 px-3 dark:bg-indigo-700 bg-indigo-500 dark:text-white text-white rounded-md font-semibold sm:text-sm text-xs hover:opacity-80 cursor-pointer'
-                                            disabled={!currUnit}
-                                        >
-                                            update
-                                        </button>
-                                        </div>              
+                                                onClick={saveDefaultBills}
+                                                className='p-2 px-3 dark:bg-indigo-700 bg-indigo-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-sm hover:opacity-80 cursor-pointer'
+                                                disabled={!currUnit}
+                                            >
+                                                update
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )
                         }
 
                         <div className="relative w-full sm:p-4 p-2 flex flex-col gap-2 dark:bg-bg-dark bg-bg-light dark:text-subtitle-dark text-subtitle-light rounded-xl overflow-hidden" >
-                            <h3 className="sm:text-xl text-lg font-medium">
-                                {currTitle ? `${currTitle} (${currentMonthYear})` : "Select a unit to calculate expenses."}
-                            </h3>
-                            <span className='my-2 w-full h-[1px] dark:bg-subtitle-dark/60 bg-subtitle-light/60'></span>
+                            <div className="sm:text-xl text-lg font-medium flex items-center gap-2">
+                                <h3>{currTitle ? `${currTitle}` : "Select a unit"}</h3>
+                                {/* Select Month */}
+                                <select
+                                    className={`${currTitle ? 'block' : 'hidden'} w-fit p-1 rounded-xl border dark:border-subtitle-dark/50 border-subtitle-dark/50 dark:bg-bg-dark bg-bg-light`}
+                                    onChange={(e) => setSelectedMonth(e.target.value)}
+                                    value={selectedMonth}
+                                >
+                                    {Array.from({ length: 12 }).map((_, index) => {
+                                        const date = new Date();
+                                        date.setMonth(date.getMonth() - index);
+                                        const formatted = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                                        return <option key={index} value={formatted}>{formatted}</option>;
+                                    })}
+                                </select>
+                            </div>
+                            <span className='my-2 w-full h-[1px] dark:bg-subtitle-dark/50 bg-subtitle-light/60'></span>
                             {/*Container*/}
-                            {selectedAdForDisplay && (
+                            {selectedAdForDisplay ? (
                                 <div className='flex flex-col gap-2'>
 
                                     <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
                                         <div className='flex items-center gap-2'>
                                             <input
-                                                className='w-6 h-6 rounded-3xl appearance-none border-2 cursor-pointer checked:bg-blue-600 checked:border-white checked:border-2 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
+                                                className='w-6 h-6 rounded-3xl appearance-none border cursor-pointer checked:bg-blue-600 checked:border-white transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
                                                 type="checkbox"
                                                 checked={expenses.unit?.isChecked || false}
                                                 onChange={(e) => handleCheckboxChange('unit', e.target.checked)}
@@ -401,7 +443,7 @@ const Expense = () => {
                                     <div className=' flex justify-between items-center uppercase sm:text-lg text-sm'>
                                         <div className='flex items-center gap-2'>
                                             <input
-                                                className='w-6 h-6 rounded-3xl appearance-none border-2 cursor-pointer checked:bg-blue-600 checked:border-white checked:border-2 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
+                                                className='w-6 h-6 rounded-3xl appearance-none border cursor-pointer checked:bg-blue-600 checked:border-white transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
                                                 type="checkbox"
                                                 checked={expenses.water?.isChecked || false}
                                                 onChange={(e) => handleCheckboxChange('water', e.target.checked)}
@@ -416,7 +458,7 @@ const Expense = () => {
                                     <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
                                         <div className='flex items-center gap-2'>
                                             <input
-                                                className='w-6 h-6 rounded-3xl appearance-none border-2 cursor-pointer checked:bg-blue-600 checked:border-white checked:border-2 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
+                                                className='w-6 h-6 rounded-3xl appearance-none border cursor-pointer checked:bg-blue-600 checked:border-white transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
                                                 type="checkbox"
                                                 checked={expenses.garbage?.isChecked || false}
                                                 onChange={(e) => handleCheckboxChange('garbage', e.target.checked)}
@@ -431,7 +473,7 @@ const Expense = () => {
                                     <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
                                         <div className='flex items-center gap-2'>
                                             <input
-                                                className='w-6 h-6 rounded-3xl appearance-none border-2 cursor-pointer checked:bg-blue-600 checked:border-white checked:border-2 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
+                                                className='w-6 h-6 rounded-3xl appearance-none border cursor-pointer checked:bg-blue-600 checked:border-white transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
                                                 type="checkbox"
                                                 checked={expenses.garage?.isChecked || false}
                                                 onChange={(e) => handleCheckboxChange('garage', e.target.checked)}
@@ -446,7 +488,7 @@ const Expense = () => {
                                     <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
                                         <div className='flex items-center gap-2'>
                                             <input
-                                                className='w-6 h-6 rounded-3xl appearance-none border-2 cursor-pointer checked:bg-blue-600 checked:border-white checked:border-2 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
+                                                className='w-6 h-6 rounded-3xl appearance-none border cursor-pointer checked:bg-blue-600 checked:border-white transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
                                                 type="checkbox"
                                                 checked={expenses.gas?.isChecked || false}
                                                 onChange={(e) => handleCheckboxChange('gas', e.target.checked)}
@@ -461,7 +503,7 @@ const Expense = () => {
                                     <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
                                         <div className='flex items-center gap-2'>
                                             <input
-                                                className='w-6 h-6 rounded-3xl appearance-none border-2 cursor-pointer checked:bg-blue-600 checked:border-white checked:border-2 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
+                                                className='w-6 h-6 rounded-3xl appearance-none border cursor-pointer checked:bg-blue-600 checked:border-white transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 focus:ring-blue-400 focus:ring-opacity-75'
                                                 type="checkbox"
                                                 checked={expenses.electricity?.isChecked || false}
                                                 onChange={(e) => handleCheckboxChange('electricity', e.target.checked)}
@@ -470,7 +512,7 @@ const Expense = () => {
                                         </div>
                                         <div className='flex items-center justify-between gap-2'>
                                             <input
-                                                className='p-1 w-20 border-1 text-center rounded-lg bg-title-dark dark:bg-title-light text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
+                                                className='p-1 w-20 border text-center rounded-xl dark:border-subtitle-dark/50 border-subtitle-light/50 text-subtitle-light dark:text-subtitle-dark' // Added styles for better visibility
                                                 type="number"
                                                 min="0" // Prevent negative quantities
                                                 value={expenses.electricity?.quantity || ''}
@@ -482,27 +524,33 @@ const Expense = () => {
                                         </div>
                                     </div>
                                 </div>
+                            ) : (
+                                <p className='text-center text-red-500'>Please select a unit to view expenses.</p>
                             )}
-                            <span className='my-2 w-full h-[1px] dark:bg-subtitle-dark/60 bg-subtitle-light/60'></span>
-                            <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
-                                <div className='flex gap-2'>
-                                    <button
-                                        onClick={() => setSlip(true)}
-                                        className='p-2 px-3 dark:bg-blue-700 bg-blue-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-xs hover:opacity-80 cursor-pointer'
-                                        disabled={!currUnit} // Disable if no unit selected
-                                    >
-                                        Payment Slip
-                                    </button>
-                                    <button
-                                        onClick={saveMonthlyExpenses} // New Save button
-                                        className='p-2 px-3 dark:bg-green-700 bg-green-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-xs hover:opacity-80 cursor-pointer'
-                                        disabled={!currUnit} // Disable if no unit selected
-                                    >
-                                        Save
-                                    </button>
-                                </div>
-                                <p className='font-bold'>Total: {totalExpense} TK</p>
-                            </div>
+                            <span className='my-2 w-full h-[1px] dark:bg-subtitle-dark/50 bg-subtitle-light/60'></span>
+                            {
+                                selectedAdForDisplay && (
+                                    <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
+                                        <div className='flex gap-2'>
+                                            <button
+                                                onClick={() => setSlip(true)}
+                                                className='p-2 px-3 dark:bg-blue-700 bg-blue-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-sm hover:opacity-80 cursor-pointer'
+                                                disabled={!currUnit} // Disable if no unit selected
+                                            >
+                                                Download Slip
+                                            </button>
+                                            <button
+                                                onClick={saveMonthlyExpenses} // New Save button
+                                                className='p-2 px-3 dark:bg-green-700 bg-green-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-sm hover:opacity-80 cursor-pointer'
+                                                disabled={!currUnit} // Disable if no unit selected
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                        <p className='font-bold'>Total: {totalExpense} TK</p>
+                                    </div>
+                                )
+                            }
                         </div>
                     </div>
 
@@ -512,14 +560,14 @@ const Expense = () => {
                             <h3 className="mb-2 sm:text-3xl text-2xl font-neueplak-regular dark:text-subtitle-dark text-subtitle-light">Previous Expenses</h3>
                             <div className="w-full sm:p-4 p-2 flex flex-col gap-2 dark:bg-bg-dark bg-bg-light dark:text-subtitle-dark text-subtitle-light rounded-xl">
                                 <h3 className="sm:text-xl text-lg font-medium">
-                                    {currTitle ? `Records for ${currTitle}` : "Select a unit to view previous expenses."}
+                                    {currTitle ? `Records for ${currTitle}` : "Select a unit"}
                                 </h3>
 
-                                <span className='my-2 w-full h-[1px] bg-subtitle-dark/60'></span>
+                                <span className='my-2 w-full h-[1px] bg-subtitle-dark/50'></span>
 
                                 {selectedAdForDisplay && selectedAdForDisplay.monthlyExpenses && selectedAdForDisplay.monthlyExpenses.length > 0 ? (
                                     <div className='flex flex-col gap-1 overflow-y-auto max-h-96'> {/* Added overflow-y-auto for scrollable list */}
-                                        <div className='font-semibold py-1 grid grid-cols-[2.5fr_2fr_2fr_2fr_2.5fr_2fr_2fr_2fr] sm:text-sm text-xs'>
+                                        <div className='font-semibold py-1 grid grid-cols-[2.5fr_2fr_2fr_2fr_2.5fr_2fr_2fr_2fr_1fr] sm:text-sm text-xs'>
                                             <p>Month</p>
                                             <p>Unit</p>
                                             <p>Water</p>
@@ -530,7 +578,7 @@ const Expense = () => {
                                             <p>Total</p>
                                         </div>
                                         {selectedAdForDisplay.monthlyExpenses.map((expense) => (
-                                            <div key={expense._id || expense.month} className='bg-subtitle-dark/10 py-1 grid grid-cols-[2.5fr_2fr_2fr_2fr_2.5fr_2fr_2fr_2fr] sm:text-sm text-xs'>
+                                            <div key={expense._id || expense.month} className='bg-subtitle-dark/10 py-1 grid grid-cols-[2.5fr_2fr_2fr_2fr_2.5fr_2fr_2fr_2fr_1fr] items-center sm:text-sm text-xs'>
                                                 <p>{expense.month}</p>
                                                 <p>{selectedAdForDisplay.price}</p> {/* Unit bill is from ad.price */}
                                                 <p>{expense.waterBill}</p>
@@ -539,22 +587,32 @@ const Expense = () => {
                                                 <p>{expense.gasBill}</p> {/* Changed to gasBill */}
                                                 <p>{expense.electricityBill}</p>
                                                 <p>{expense.totalBill}</p>
+                                                <button
+                                                    onClick={() => deleteMonthlyExpense(expense._id)}
+                                                    className='text-red-500 hover:text-red-700 transition-colors duration-200'
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 p-1">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                                    </svg>
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-center dark:text-subtitle-dark/40 text-subtitle-light/40">No previous monthly expenses found.</p>
+                                    <p className="text-center text-red-500">No previous monthly expenses found.</p>
                                 )}
 
-                                <span className='my-2 w-full h-[1px] bg-subtitle-dark/60'></span>
+                                <span className='my-2 w-full h-[1px] bg-subtitle-dark/50'></span>
 
                                 {selectedAdForDisplay && selectedAdForDisplay.monthlyExpenses && selectedAdForDisplay.monthlyExpenses.length > 0 && (
                                     <>
-                                        <div className='flex justify-between items-center uppercase sm:text-lg text-sm'>
+                                        <div className='flex gap-2 items-center uppercase sm:text-lg text-sm'>
                                             <button
-                                                onClick={() => toast.info("Download functionality coming soon!")}
-                                                className='p-2 px-3 dark:bg-blue-700 bg-blue-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-xs hover:opacity-80 cursor-pointer'>
-                                                Download
+                                                onClick={() => setPreviousSlip(true)}
+                                                className='p-2 px-3 dark:bg-blue-700 bg-blue-500 dark:text-white text-white rounded-md font-semibold sm:text-lg text-sm hover:opacity-80 cursor-pointer'
+                                                disabled={!currUnit} // Disable if no unit selected
+                                            >
+                                                Download Slip
                                             </button>
                                         </div>
                                     </>
@@ -571,22 +629,66 @@ const Expense = () => {
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm flex flex-col gap-4 items-center justify-center p-4">
                         <ExpenseSlip
                             title={currTitle}
-                            month={currentMonthYear}
+                            month={selectedMonth}
                             slip={slip}
                             setSlip={setSlip}
                             items={(() => {
                                 const items = [];
-                                if (expenses.unit?.isChecked) items.push({ name: 'বাসা ভাড়া', price: selectedAdForDisplay.price || 0 });
-                                if (expenses.water?.isChecked) items.push({ name: 'পানি বিল', price: selectedAdForDisplay.waterBill || 0 }); // Changed to waterBill
-                                if (expenses.garbage?.isChecked) items.push({ name: 'ময়লা বিল', price: selectedAdForDisplay.trashBill || 0 }); // Changed to trashBill
-                                if (expenses.garage?.isChecked) items.push({ name: 'গ্যারেজ বিল', price: selectedAdForDisplay.garageBill || 0 }); // Changed to garageBill
-                                if (expenses.gas?.isChecked) items.push({ name: 'গ্যাস বিল', price: selectedAdForDisplay.gasBill || 0 }); // Changed to gasBill
+                                if (expenses.unit?.isChecked)
+                                    items.push({
+                                        name: language === 'en' ? 'House Rent' : 'বাসা ভাড়া',
+                                        price: selectedAdForDisplay.price || 0,
+                                    });
+                                if (expenses.water?.isChecked)
+                                    items.push({
+                                        name: language === 'en' ? 'Water Bill' : 'পানি বিল',
+                                        price: selectedAdForDisplay.waterBill || 0,
+                                    });
+                                if (expenses.garbage?.isChecked)
+                                    items.push({
+                                        name: language === 'en' ? 'Garbage Bill' : 'ময়লা বিল',
+                                        price: selectedAdForDisplay.trashBill || 0,
+                                    });
+                                if (expenses.garage?.isChecked)
+                                    items.push({
+                                        name: language === 'en' ? 'Garage Bill' : 'গ্যারেজ বিল',
+                                        price: selectedAdForDisplay.garageBill || 0,
+                                    });
+                                if (expenses.gas?.isChecked)
+                                    items.push({
+                                        name: language === 'en' ? 'Gas Bill' : 'গ্যাস বিল',
+                                        price: selectedAdForDisplay.gasBill || 0,
+                                    });
                                 if (expenses.electricity?.isChecked && expenses.electricity.quantity)
-                                    items.push({ name: 'বিদ্যুৎ বিল', price: expenses.electricity.quantity * 9, unit: `(${selectedAdForDisplay.electricityBill} units)` });
+                                    items.push({
+                                        name: language === 'en' ? 'Electricity Bill' : 'বিদ্যুৎ বিল',
+                                        price: expenses.electricity.quantity * 9,
+                                        unit: `(${selectedAdForDisplay.electricityBill} ${language === 'en' ? 'units' : 'ইউনিট'
+                                            })`,
+                                    });
 
                                 return items;
                             })()}
                             total={totalExpense}
+                            language={language}
+                            setLanguage={setLanguage}
+                        />
+
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Previous Expense Slip Modal */}
+            <AnimatePresence>
+                {previousSlip && selectedAdForDisplay && (
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-20 dark:bg-black/10 bg-white/10 backdrop-blur-sm overflow-scroll p-4">
+                        <PreviousExpenseSlip
+                            title={currTitle}
+                            slip={previousSlip}
+                            setSlip={setPreviousSlip}
+                            records={selectedAdForDisplay.monthlyExpenses || []}
+                            language={language}
+                            setLanguage={setLanguage}
                         />
                     </motion.div>
                 )}

@@ -33,9 +33,11 @@ function Signup() {
             .then(result => {
                 console.log(result)
                 navigate('/login')
+                
             })
             .catch(error => {
                 toast.error("Registration Unsuccessful")
+                setIsLoading(false)
             })
             .finally(() => {
                 setIsLoading(false) // Stop loading animation

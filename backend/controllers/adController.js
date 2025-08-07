@@ -1,5 +1,6 @@
 import Ad from "../models/Ad.js";
 import cloudinary from "cloudinary";
+import mongoose from "mongoose";
 
 export const getAdsByOwner = async (req, res) => {
   const { ownerId } = req.params;
@@ -220,6 +221,36 @@ export const updateMonthlyExpense = async (req, res) => {
       .json({ message: "Failed to update ad", error: error.message });
   }
 };
+
+// DELETE /ads/:adId/monthly-expenses/:expenseId
+export const deleteMonthlyExpense = async (req, res) => {
+  const { adId } = req.params;
+  const { expenseId } = req.query; // ✅ From query now
+
+  if (!mongoose.Types.ObjectId.isValid(expenseId)) {
+    return res.status(400).json({ message: "Invalid expense ID" });
+  }
+
+  try {
+    const ad = await Ad.findByIdAndUpdate(
+      adId,
+      {
+        $pull: { monthlyExpenses: { _id: new mongoose.Types.ObjectId(expenseId) } },
+      },
+      { new: true }
+    );
+
+    if (!ad) {
+      return res.status(404).json({ message: "Ad not found" });
+    }
+
+    res.status(200).json({ message: "Monthly expense deleted successfully", ad });
+  } catch (error) {
+    console.error("Error deleting monthly expense:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 const getPublicIdFromUrl = (url) => {
   const parts = url.split("/");

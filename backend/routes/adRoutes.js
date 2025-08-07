@@ -6,6 +6,7 @@ import {
   deleteAd,
   addMonthlyExpense,
   updateMonthlyExpense,
+  deleteMonthlyExpense,
 } from "../controllers/adController.js";
 import { generateQRCode } from "../controllers/qrController.js";
 
@@ -14,6 +15,7 @@ const router = express.Router();
 router.get("/ads/:ownerId", getAdsByOwner);
 router.post("/ads", createAd);
 router.post("/ads/monthlyexpenses/:adId", addMonthlyExpense);
+router.delete("/ads/deletemonthlyexpenses/:adId", deleteMonthlyExpense);
 router.put("/ads/updateexpenses/:adId", updateMonthlyExpense);
 router.put("/ads/:id", updateAd);
 router.delete("/ads/:id", deleteAd);

@@ -128,7 +128,7 @@ const ViewAds = () => {
     });
   };
 
-  return (
+  return user && (
     <div className="min-h-screen dark:bg-bg-dark bg-bg-light relative">
       {/* Nav Section */}
       <nav className="fixed top-0 w-full bg-nav-light dark:bg-nav-dark backdrop-blur-sm z-50">

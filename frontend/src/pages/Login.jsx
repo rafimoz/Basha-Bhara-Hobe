@@ -25,11 +25,13 @@ function Login() {
                     setIsLoading(false)
                 } else {
                     toast.error("Incorrect Password!")
+                    setIsLoading(false)
                 }
             })
             .catch(err => {
                 console.error("Login error:", err);
                 toast.error("Something went wrong. Try again.");
+                setIsLoading(false)
             })
     }
 
