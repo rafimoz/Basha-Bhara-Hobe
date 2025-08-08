@@ -4,7 +4,7 @@ import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import { toast } from 'react-toastify';
 
-const PreviousExpense = ({ title, records = [], setSlip, language, setLanguage }) => {
+const PreviousExpense = ({ title, records = [], electricityUnit, setSlip, language, setLanguage }) => {
     const slipRef = useRef();
 
     const handleDownloadImage = async () => {
@@ -116,7 +116,7 @@ const PreviousExpense = ({ title, records = [], setSlip, language, setLanguage }
                                         <span>{language === 'en' ? 'Garage' : 'গ্যারেজ'}</span><span>{garageBill} TK</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span>{language === 'en' ? 'Electricity' : 'বিদ্যুৎ'}</span><span>{electricityBill} TK</span>
+                                        <span>{language === 'en' ? 'Electricity' : 'বিদ্যুৎ'}</span><span>({electricityUnit} x {electricityBill/electricityUnit} {language === 'en' ? 'units' : 'ইউনিট'})  {electricityBill} TK</span>
                                     </div>
                                 </div>
                                 <div className="flex justify-between mt-1 font-semibold text-[12px] pt-1">

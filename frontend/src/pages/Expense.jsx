@@ -567,7 +567,7 @@ const Expense = () => {
 
                                 {selectedAdForDisplay && selectedAdForDisplay.monthlyExpenses && selectedAdForDisplay.monthlyExpenses.length > 0 ? (
                                     <div className='flex flex-col gap-1 overflow-y-auto max-h-96'> {/* Added overflow-y-auto for scrollable list */}
-                                        <div className='font-semibold py-1 grid grid-cols-[2.5fr_2fr_2fr_2fr_2.5fr_2fr_2fr_2fr_1fr] sm:text-sm text-xs'>
+                                        <div className='font-semibold py-1 grid grid-cols-[3.5fr_2fr_2fr_2fr_2.5fr_2fr_3fr_3fr_1.5fr] sm:text-sm text-[10px]'>
                                             <p>Month</p>
                                             <p>Unit</p>
                                             <p>Water</p>
@@ -578,7 +578,7 @@ const Expense = () => {
                                             <p>Total</p>
                                         </div>
                                         {selectedAdForDisplay.monthlyExpenses.map((expense) => (
-                                            <div key={expense._id || expense.month} className='bg-subtitle-dark/10 py-1 grid grid-cols-[2.5fr_2fr_2fr_2fr_2.5fr_2fr_2fr_2fr_1fr] items-center sm:text-sm text-xs'>
+                                            <div key={expense._id || expense.month} className='bg-subtitle-dark/10 py-1 grid grid-cols-[3.5fr_2fr_2fr_2fr_2.5fr_2fr_3fr_3fr_1.5fr] items-center sm:text-sm text-[10px]'>
                                                 <p>{expense.month}</p>
                                                 <p>{selectedAdForDisplay.price}</p> {/* Unit bill is from ad.price */}
                                                 <p>{expense.waterBill}</p>
@@ -589,7 +589,7 @@ const Expense = () => {
                                                 <p>{expense.totalBill}</p>
                                                 <button
                                                     onClick={() => deleteMonthlyExpense(expense._id)}
-                                                    className='text-red-500 hover:text-red-700 transition-colors duration-200'
+                                                    className='text-red-400 hover:text-red-600 transition-colors duration-200 flex justify-end'
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 p-1">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
@@ -662,8 +662,8 @@ const Expense = () => {
                                 if (expenses.electricity?.isChecked && expenses.electricity.quantity)
                                     items.push({
                                         name: language === 'en' ? 'Electricity Bill' : 'বিদ্যুৎ বিল',
-                                        price: expenses.electricity.quantity * 9,
-                                        unit: `(${selectedAdForDisplay.electricityBill} ${language === 'en' ? 'units' : 'ইউনিট'
+                                        price: expenses.electricity.quantity * selectedAdForDisplay.electricityBill,
+                                        unit: `(${defaultBills.electricityBill} x ${expenses.electricity.quantity } ${language === 'en' ? 'units' : 'ইউনিট'
                                             })`,
                                     });
 
@@ -689,6 +689,7 @@ const Expense = () => {
                             records={selectedAdForDisplay.monthlyExpenses || []}
                             language={language}
                             setLanguage={setLanguage}
+                            electricityUnit={defaultBills.electricityBill}
                         />
                     </motion.div>
                 )}
